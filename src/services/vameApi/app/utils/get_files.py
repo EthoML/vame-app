@@ -2,6 +2,7 @@ from pathlib import Path
 
 FILES_TO_IGNORE = [ '.DS_Store' ]
 
+
 def get_files(folder_to_search):
     folder_to_search = Path(folder_to_search)
     ignore_glob = set(FILES_TO_IGNORE)
