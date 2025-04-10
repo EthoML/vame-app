@@ -33,7 +33,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
   })
 
   const properties = Object.entries(schema.properties)
-  const readOnly = !properties.some(([_,p])=> !p.readOnly)
+  const readOnly = !properties.some(([_, p]) => !p.readOnly)
 
   // const handleSubmit = (data) => {
   //   console.log(data)
@@ -51,9 +51,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
           return (
             <InputGroup key={name}>
               <InputLabel required={required} readOnly={property.readOnly}>
-                <span>{property.title ?? header(name)}
-                </span>
-                <br />
+                <span>{property.title ?? header(name)}</span>
                 {property.description && <small>{property.description}</small>}
               </InputLabel>
               <DynamicInput name={name} property={property} required={required} readOnly={property.readOnly} />

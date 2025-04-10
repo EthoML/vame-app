@@ -31,7 +31,8 @@ export const InputGroup = styled.div`
   display: flex;
   justify-content: space-between;
   flex-direction: column;
-  gap: 10px;
+  gap: 4px; /* Reduced gap between label and input */
+  margin-bottom: 20px; /* Increased spacing between form items */
 `;
 
 interface InputLabelProps {
@@ -40,6 +41,8 @@ interface InputLabelProps {
 }
 
 export const InputLabel = styled.label<InputLabelProps>`
+  display: flex;
+  align-items: flex-start;
 
   span {
     font-weight: bold;
@@ -48,6 +51,13 @@ export const InputLabel = styled.label<InputLabelProps>`
   small {
     font-size: 12px;
     color: #666;
+    margin-left: 5px;
+    &:before {
+      content: '(';
+    }
+    &:after {
+      content: ')';
+    }
   }
 
   &[required] span:after {
@@ -61,7 +71,6 @@ export const InputLabel = styled.label<InputLabelProps>`
     color: gray;
     margin-left: 5px;
   }
-
 `;
 
 export const Button = styled.button`

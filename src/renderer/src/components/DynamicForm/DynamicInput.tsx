@@ -77,7 +77,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
         max={numberProperty?.maximum}
         min={numberProperty?.minimum}
         step={isInteger ? 1 : "any"}
-        {...register(itemKey, { required, valueAsNumber: true})}
+        {...register(itemKey, { required, valueAsNumber: true })}
         readOnly={readOnly}
       />
     );
@@ -110,9 +110,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
           {Object.entries(objectProperty.properties).map(([key, property]) => (
             <InputGroup key={`${itemKey}.${key}`}>
               <InputLabel required={required} readOnly={property.readOnly}>
-                <span>{property.title ?? key}
-                </span>
-                <br />
+                <span>{property.title ?? key}</span>
                 {property.description && <small>{property.description}</small>}
               </InputLabel>
               <DynamicInput
