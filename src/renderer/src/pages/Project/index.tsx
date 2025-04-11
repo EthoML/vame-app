@@ -174,37 +174,38 @@ const Project: React.FC = () => {
       id: 'data-organization',
       label: '2. Data Organization',
       complete: organized,
-      content: (
-        <div style={{ padding: 20, background: "#f5f5f5" }}>
-          <h3>Data Organization Content</h3>
-          <p>This is a placeholder for the Organize component.</p>
-          <p><b>Original props:</b></p>
-          <ul>
-            <li>project: {JSON.stringify(project.config?.project_name || project.config?.Project)}</li>
-            <li>blockSubmission: {String(blockSubmit)}</li>
-          </ul>
-        </div>
-      )
-      /* Original content:
-      <Organize
-        project={project}
-        blockSubmission={blockSubmit}
-        blockTooltip="Waiting VAME to be ready."
-        onFormSubmit={async (params) => submitTab(async () => {
-
-          const { pose_ref_index, advanced_options } = params as any
-
-          pose_ref_index.description = `${pose_ref_index.description}. `
-
-          await align({ project: project.config.project_path, pose_ref_index, ...advanced_options })
-
-          await createTrainset({ project: project.config.project_path, pose_ref_index })
-
-          // TODO: Allow users to inspect the quality of the trainset here
-
-        }, 'model-creation')}
-      />
-      */
+      content: (() => {
+        try {
+          return (
+            <Organize
+              project={project}
+              blockSubmission={blockSubmit}
+              blockTooltip="Waiting VAME to be ready."
+              onFormSubmit={async (params) => submitTab(async () => {
+                const { pose_ref_index, advanced_options } = params as any;
+                pose_ref_index.description = `${pose_ref_index.description}. `;
+                await align({ project: project.config.project_path, pose_ref_index, ...advanced_options });
+                await createTrainset({ project: project.config.project_path, pose_ref_index });
+                // TODO: Allow users to inspect the quality of the trainset here
+              }, 'model-creation')}
+            />
+          );
+        } catch (error) {
+          console.error("Error rendering Organize component:", error);
+          return (
+            <div style={{ padding: 20, background: "#f5f5f5" }}>
+              <h3>Data Organization Content (Fallback)</h3>
+              <p>Error rendering the Organize component.</p>
+              <p><b>Error:</b> {String(error)}</p>
+              <p><b>Original props:</b></p>
+              <ul>
+                <li>project: {JSON.stringify(project.config?.project_name || project.config?.Project)}</li>
+                <li>blockSubmission: {String(blockSubmit)}</li>
+              </ul>
+            </div>
+          );
+        }
+      })()
     },
     {
       id: 'model-creation',
