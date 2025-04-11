@@ -107,94 +107,86 @@ const Project: React.FC = () => {
     );
   }
 
-  // Defensive: handle error property if present
-  if ((project as any).error) {
-    return (
-      <MainContainer>
-        <div>
-          <b>Failed to load project:</b>
-          <br />
-          <small>{(project as any).error}</small>
-        </div>
-      </MainContainer>
-    );
-  }
+  // Minimal UI for debugging
+  console.log("Project object:", project);
+  console.log("Project states:", project.states);
 
-  // Defensive check for required state fields
-  const requiredStates = [
-    "egocentric_alignment",
-    "create_trainset",
-    "evaluate_model",
-    "train_model",
-    "segment_session",
-    "motif_videos",
-    "community",
-    "community_videos",
-    "visualize_umap",
-  ];
-  const missingState = requiredStates.find((key) => !(project.states && project.states[key]));
-  if (missingState) {
-    return (
-      <MainContainer>
-        <div>
-          <b>Project state is incomplete.</b>
-          <br />
-          <small>Missing: {missingState}</small>
-        </div>
-      </MainContainer>
-    );
-  }
-
-  const {
-    egocentric_alignment,
-    create_trainset,
-    evaluate_model,
-    train_model,
-    segment_session,
-    motif_videos,
-    community,
-    community_videos,
-    visualize_umap,
-  } = project.states;
+  // Check if states exist and have expected properties
+  const egocentric_alignment = project.states?.egocentric_alignment || {};
+  const create_trainset = project.states?.create_trainset || {};
+  const evaluate_model = project.states?.evaluate_model || {};
+  const train_model = project.states?.train_model || {};
+  const segment_session = project.states?.segment_session || {};
+  const motif_videos = project.states?.motif_videos || {};
+  const community = project.states?.community || {};
+  const community_videos = project.states?.community_videos || {};
+  const visualize_umap = project.states?.visualize_umap || {};
 
   const organized = egocentric_alignment.execution_state === "success" && create_trainset.execution_state === "success";
-
   const modeled = evaluate_model.execution_state === "success" && train_model.execution_state === "success";
-
   const segmented = segment_session.execution_state === "success";
+  const motif_videos_created = motif_videos.execution_state === "success" && project.workflow?.motif_videos_created;
+  const community_videos_created = community_videos.execution_state === "success" && project.workflow?.community_videos_created;
+  const umaps_created = visualize_umap.execution_state === "success" && project.workflow?.umaps_created;
 
-  const motif_videos_created = motif_videos.execution_state === "success" && project.workflow.motif_videos_created;
-
-  const community_videos_created = community_videos.execution_state === "success" && project.workflow.community_videos_created;
-
-  const umaps_created = visualize_umap.execution_state === "success" && project.workflow.umaps_created;
-
-
+  // Create tabs with original properties but placeholder content
   const tabs = [
     {
       id: 'project-configuration',
       label: '1. Project Configuration',
       complete: organized,
-      content: <ProjectConfiguration
-        project={project}
-        blockSubmission={blockSubmit}
-        blockTooltip="Waiting VAME to be ready."
-        onFormSubmit={async (formData) => submitTab(async () => {
-          const { advanced_options, ...mainProperties } = formData as any
+      content: (() => {
+        try {
+          return (
+            <ProjectConfiguration
+              project={project}
+              blockSubmission={blockSubmit}
+              blockTooltip="Waiting VAME to be ready."
+              onFormSubmit={async (formData) => submitTab(async () => {
+                const { advanced_options, ...mainProperties } = formData as any
 
-          await configureProject(
-            {
-              config: { ...mainProperties, ...advanced_options }, project: project.config.project_path
-            }).catch(e => alert(e))
+                await configureProject(
+                  {
+                    config: { ...mainProperties, ...advanced_options }, project: project.config.project_path
+                  }).catch(e => alert(e))
 
-        }, 'data-organization')}
-      />
+              }, 'data-organization')}
+            />
+          );
+        } catch (error) {
+          console.error("Error rendering ProjectConfiguration:", error);
+          return (
+            <div style={{ padding: 20, background: "#f5f5f5" }}>
+              <h3>Project Configuration Content (Fallback)</h3>
+              <p>Error rendering the ProjectConfiguration component.</p>
+              <p><b>Error:</b> {String(error)}</p>
+              <p><b>Original props:</b></p>
+              <ul>
+                <li>project: {JSON.stringify(project.config?.Project)}</li>
+                <li>blockSubmission: {String(blockSubmit)}</li>
+              </ul>
+            </div>
+          );
+        }
+      })()
     },
     {
       id: 'data-organization',
       label: '2. Data Organization',
       complete: organized,
-      content: <Organize
+      content: (
+        <div style={{ padding: 20, background: "#f5f5f5" }}>
+          <h3>Data Organization Content</h3>
+          <p>This is a placeholder for the Organize component.</p>
+          <p><b>Original props:</b></p>
+          <ul>
+            <li>project: {JSON.stringify(project.config?.project_name || project.config?.Project)}</li>
+            <li>blockSubmission: {String(blockSubmit)}</li>
+          </ul>
+        </div>
+      )
+      /* Original content:
+      <Organize
         project={project}
         blockSubmission={blockSubmit}
         blockTooltip="Waiting VAME to be ready."
@@ -211,7 +203,8 @@ const Project: React.FC = () => {
           // TODO: Allow users to inspect the quality of the trainset here
 
         }, 'model-creation')}
-      />,
+      />
+      */
     },
     {
       id: 'model-creation',
@@ -219,7 +212,20 @@ const Project: React.FC = () => {
       disabled: tabsLock && !organized,
       complete: modeled,
       tooltip: "Organize your project first.",
-      content: <Model
+      content: (
+        <div style={{ padding: 20, background: "#f5f5f5" }}>
+          <h3>Model Creation Content</h3>
+          <p>This is a placeholder for the Model component.</p>
+          <p><b>Original props:</b></p>
+          <ul>
+            <li>project: {JSON.stringify(project.config?.project_name || project.config?.Project)}</li>
+            <li>blockSubmission: {String(blockSubmit)}</li>
+            <li>disabled: {String(tabsLock && !organized)}</li>
+          </ul>
+        </div>
+      )
+      /* Original content:
+      <Model
         project={project}
         blockSubmission={blockSubmit}
         blockTooltip="Waiting VAME to be ready."
@@ -234,6 +240,7 @@ const Project: React.FC = () => {
           }, runAll ? 'segmentation' : 'model-creation')
         }}
       />
+      */
     },
     {
       id: 'segmentation',
@@ -241,7 +248,20 @@ const Project: React.FC = () => {
       disabled: tabsLock && !modeled,
       complete: segmented,
       tooltip: "Model your project first.",
-      content: <Segmentation
+      content: (
+        <div style={{ padding: 20, background: "#f5f5f5" }}>
+          <h3>Segmentation Content</h3>
+          <p>This is a placeholder for the Segmentation component.</p>
+          <p><b>Original props:</b></p>
+          <ul>
+            <li>project: {JSON.stringify(project.config?.project_name || project.config?.Project)}</li>
+            <li>blockSubmission: {String(blockSubmit)}</li>
+            <li>disabled: {String(tabsLock && !modeled)}</li>
+          </ul>
+        </div>
+      )
+      /* Original content:
+      <Segmentation
         project={project}
         blockSubmission={blockSubmit}
         blockTooltip="Waiting VAME to be ready."
@@ -250,6 +270,7 @@ const Project: React.FC = () => {
           await segment({ project: projectPath })
         }, 'segmentation')}
       />
+      */
     },
     {
       id: 'motifs-videos',
@@ -257,7 +278,20 @@ const Project: React.FC = () => {
       disabled: tabsLock && !segmented,
       complete: motif_videos_created,
       tooltip: "Need Pose Segmentation.",
-      content: <MotifVideos
+      content: (
+        <div style={{ padding: 20, background: "#f5f5f5" }}>
+          <h3>Motif Videos Content</h3>
+          <p>This is a placeholder for the MotifVideos component.</p>
+          <p><b>Original props:</b></p>
+          <ul>
+            <li>project: {JSON.stringify(project.config?.project_name || project.config?.Project)}</li>
+            <li>blockSubmission: {String(blockSubmit)}</li>
+            <li>disabled: {String(tabsLock && !segmented)}</li>
+          </ul>
+        </div>
+      )
+      /* Original content:
+      <MotifVideos
         project={project}
         blockSubmission={blockSubmit}
         blockTooltip="Waiting VAME to be ready."
@@ -269,6 +303,7 @@ const Project: React.FC = () => {
           })
         }, "motifs-videos")}
       />
+      */
     },
     {
       id: 'community-analysis',
@@ -276,7 +311,20 @@ const Project: React.FC = () => {
       disabled: tabsLock && !segmented,
       complete: community?.execution_state === "success",
       tooltip: "Need Pose Segmentation.",
-      content: <CommunityAnalysis
+      content: (
+        <div style={{ padding: 20, background: "#f5f5f5" }}>
+          <h3>Community Analysis Content</h3>
+          <p>This is a placeholder for the CommunityAnalysis component.</p>
+          <p><b>Original props:</b></p>
+          <ul>
+            <li>project: {JSON.stringify(project.config?.project_name || project.config?.Project)}</li>
+            <li>blockSubmission: {String(blockSubmit)}</li>
+            <li>disabled: {String(tabsLock && !segmented)}</li>
+          </ul>
+        </div>
+      )
+      /* Original content:
+      <CommunityAnalysis
         project={project}
         blockSubmission={blockSubmit}
         blockTooltip="Waiting VAME to be ready."
@@ -292,6 +340,7 @@ const Project: React.FC = () => {
           })
         }, "community-videos")}
       />
+      */
     },
     {
       id: 'community-videos',
@@ -299,7 +348,20 @@ const Project: React.FC = () => {
       disabled: tabsLock && (!!community.cohort || community?.execution_state !== "success"),
       complete: community_videos_created,
       tooltip: "Need community analysis with cohort false.",
-      content: <CommunityVideos
+      content: (
+        <div style={{ padding: 20, background: "#f5f5f5" }}>
+          <h3>Community Videos Content</h3>
+          <p>This is a placeholder for the CommunityVideos component.</p>
+          <p><b>Original props:</b></p>
+          <ul>
+            <li>project: {JSON.stringify(project.config?.project_name || project.config?.Project)}</li>
+            <li>blockSubmission: {String(blockSubmit)}</li>
+            <li>disabled: {String(tabsLock && (!!community.cohort || community?.execution_state !== "success"))}</li>
+          </ul>
+        </div>
+      )
+      /* Original content:
+      <CommunityVideos
         project={project}
         blockSubmission={blockSubmit}
         blockTooltip="Waiting VAME to be ready."
@@ -311,6 +373,7 @@ const Project: React.FC = () => {
           })
         }, "community-videos")}
       />
+      */
     },
     {
       id: 'umap-visualization',
@@ -318,7 +381,20 @@ const Project: React.FC = () => {
       complete: umaps_created,
       disabled: tabsLock && !segmented,
       tooltip: "Need segmentation.",
-      content: <UMAPVisualization
+      content: (
+        <div style={{ padding: 20, background: "#f5f5f5" }}>
+          <h3>UMAP Visualization Content</h3>
+          <p>This is a placeholder for the UMAPVisualization component.</p>
+          <p><b>Original props:</b></p>
+          <ul>
+            <li>project: {JSON.stringify(project.config?.project_name || project.config?.Project)}</li>
+            <li>blockSubmission: {String(blockSubmit)}</li>
+            <li>disabled: {String(tabsLock && !segmented)}</li>
+          </ul>
+        </div>
+      )
+      /* Original content:
+      <UMAPVisualization
         project={project}
         blockSubmission={blockSubmit}
         blockTooltip="Waiting VAME to be ready."
@@ -330,9 +406,9 @@ const Project: React.FC = () => {
           })
         }, "umap-visualization")}
       />
+      */
     },
-
-  ]
+  ];
 
   return (
     <Container>
