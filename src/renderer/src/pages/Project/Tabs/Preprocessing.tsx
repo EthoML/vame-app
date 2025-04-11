@@ -109,8 +109,6 @@ const Preprocessing = ({
     // Safely extract alignment data with fallbacks
     const alignment = project?.states?.["egocentric_alignment"] || {}
     const pose_ref_index = Array.isArray(alignment.pose_ref_index) ? alignment.pose_ref_index : undefined
-    const crop_size = Array.isArray(alignment.crop_size) ? alignment.crop_size : [300, 300]
-    const use_video = typeof alignment.use_video === "boolean" ? alignment.use_video : false
 
     // Initialize states with safe defaults
     let states: any = {
@@ -189,12 +187,12 @@ const Preprocessing = ({
 
     return (
       <PaddedTab>
-        <span>
+        <div style={{ marginBottom: '20px' }}>
           Open logs:{" "}
           <ControlButton onClick={() => setTerminal(true)}>
             <FontAwesomeIcon icon={faTerminal} />
           </ControlButton>
-        </span>
+        </div>
 
         <TerminalModal
           projectPath={project.config.project_path}
