@@ -88,7 +88,7 @@ const Project: React.FC = () => {
 
   useEffect(() => {
     if (project) {
-      const loadedTab = localStorage.getItem(`selected-tab-${project?.config.Project}`)
+      const loadedTab = localStorage.getItem(`selected-tab-${project?.config.Project || project?.config.project_path}`)
       if (loadedTab) {
         setSelectedTab(loadedTab)
       }
@@ -107,13 +107,39 @@ const Project: React.FC = () => {
     );
   }
 
-  if (project.error) {
+  // Defensive: handle error property if present
+  if ((project as any).error) {
     return (
       <MainContainer>
         <div>
           <b>Failed to load project:</b>
           <br />
-          <small>{project.error}</small>
+          <small>{(project as any).error}</small>
+        </div>
+      </MainContainer>
+    );
+  }
+
+  // Defensive check for required state fields
+  const requiredStates = [
+    "egocentric_alignment",
+    "create_trainset",
+    "evaluate_model",
+    "train_model",
+    "segment_session",
+    "motif_videos",
+    "community",
+    "community_videos",
+    "visualize_umap",
+  ];
+  const missingState = requiredStates.find((key) => !(project.states && project.states[key]));
+  if (missingState) {
+    return (
+      <MainContainer>
+        <div>
+          <b>Project state is incomplete.</b>
+          <br />
+          <small>Missing: {missingState}</small>
         </div>
       </MainContainer>
     );
@@ -124,24 +150,24 @@ const Project: React.FC = () => {
     create_trainset,
     evaluate_model,
     train_model,
-    pose_segmentation,
+    segment_session,
     motif_videos,
     community,
     community_videos,
-    visualization,
-  } = project.states
+    visualize_umap,
+  } = project.states;
 
-  const organized = egocentric_alignment.execution_state === "success" && create_trainset.execution_state === "success"
+  const organized = egocentric_alignment.execution_state === "success" && create_trainset.execution_state === "success";
 
-  const modeled = evaluate_model.execution_state === "success" && train_model.execution_state === "success"
+  const modeled = evaluate_model.execution_state === "success" && train_model.execution_state === "success";
 
-  const segmented = pose_segmentation.execution_state === "success"
+  const segmented = segment_session.execution_state === "success";
 
-  const motif_videos_created = motif_videos.execution_state === "success" && project.workflow.motif_videos_created
+  const motif_videos_created = motif_videos.execution_state === "success" && project.workflow.motif_videos_created;
 
-  const community_videos_created = community_videos.execution_state === "success" && project.workflow.community_videos_created
+  const community_videos_created = community_videos.execution_state === "success" && project.workflow.community_videos_created;
 
-  const umaps_created = visualization.execution_state === "success" && project.workflow.umaps_created
+  const umaps_created = visualize_umap.execution_state === "success" && project.workflow.umaps_created;
 
 
   const tabs = [
@@ -311,11 +337,10 @@ const Project: React.FC = () => {
   return (
     <Container>
       <ProjectHeader>
-        <Header title={project.config.Project}>
+        <Header title={project.config.Project || project.config.project_path}>
           <HeaderButtonContainer>
             <HeaderButton onClick={() => {
               open(project.config.project_path)
-
             }}>Open in File Explorer</HeaderButton>
             <HeaderButton onClick={() => {
               navigate({
