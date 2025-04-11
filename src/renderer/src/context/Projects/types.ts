@@ -13,13 +13,25 @@ import {
   createCommunityVideosVAMEProject,
 } from "./api"
 
+export type ProjectStates = {
+  egocentric_alignment: any;
+  create_trainset: any;
+  evaluate_model: any;
+  train_model: any;
+  segment_session: any;
+  motif_videos: any;
+  community: any;
+  community_videos: any;
+  visualize_umap: any;
+};
+
 export interface Project {
   config?: any;
   assets?: any;
   videos?: string[];
   pes_paths?: string[];
   workflow?: any;
-  states?: any;
+  states?: ProjectStates;
   created_at?: string;
   error?: string;
 }
