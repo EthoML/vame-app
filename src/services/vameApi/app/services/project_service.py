@@ -1,6 +1,7 @@
 import json
 import yaml
 import os
+import time
 from pathlib import Path
 import portalocker
 
@@ -166,12 +167,42 @@ def configure_project(data, project_path: Path):
     return dict(config=None)
 
 
+# Hybrid cache for /load endpoint
+_PROJECT_CACHE = {}
+_CACHE_TTL = 10  # seconds
+
+
+def _get_project_mtime(path_obj):
+    # Return the latest mtime of config.yaml and states.json
+    config_path = path_obj / "config.yaml"
+    states_path = path_obj / "states" / "states.json"
+    mtimes = []
+    for p in [config_path, states_path]:
+        if p.exists():
+            mtimes.append(p.stat().st_mtime)
+    return max(mtimes) if mtimes else 0
+
+
 def load_project(project_path: Path):
     try:
         if isinstance(project_path, Path):
             path_obj = project_path
         else:
             path_obj = Path(project_path)
+        cache_key = str(path_obj.resolve())
+        now = time.time()
+        mtime = _get_project_mtime(path_obj)
+        cache_entry = _PROJECT_CACHE.get(cache_key)
+        if cache_entry:
+            if (
+                cache_entry["mtime"] == mtime
+                and (now - cache_entry["timestamp"] < _CACHE_TTL)
+            ):
+                print(f"[CACHE] Serving cached project for {cache_key}")
+                return cache_entry["data"]
+            else:
+                print(f"[CACHE] Invalidating cache for {cache_key}")
+
         config_path = path_obj / "config.yaml"
 
         # Create a symlink to the project directory if it isn't in the VAME_PROJECTS_DIRECTORY
@@ -209,17 +240,35 @@ def load_project(project_path: Path):
 
         # Defensive: check for required config keys and pes_paths
         if not config:
-            return {
+            result = {
                 "error": f"Project at {path_obj} is missing or has invalid config.yaml."
             }
+            _PROJECT_CACHE[cache_key] = {
+                "data": result,
+                "mtime": mtime,
+                "timestamp": now,
+            }
+            return result
         if "segmentation_algorithms" not in config:
-            return {
+            result = {
                 "error": f"Project at {path_obj} config.yaml missing 'segmentation_algorithms'."
             }
+            _PROJECT_CACHE[cache_key] = {
+                "data": result,
+                "mtime": mtime,
+                "timestamp": now,
+            }
+            return result
         if not pes_paths:
-            return {
+            result = {
                 "error": f"Project at {path_obj} is missing pose estimation (.nc) files."
             }
+            _PROJECT_CACHE[cache_key] = {
+                "data": result,
+                "mtime": mtime,
+                "timestamp": now,
+            }
+            return result
 
         # Get Pose Estimation indexes
         try:
@@ -293,7 +342,7 @@ def load_project(project_path: Path):
             umaps_created=any(umaps_created.values()),
         )
 
-        return dict(
+        result = dict(
             project=str(config_path.parent),
             config=config,
             assets=dict(
@@ -305,6 +354,12 @@ def load_project(project_path: Path):
             workflow=workflow,
             states=states
         )
+        _PROJECT_CACHE[cache_key] = {
+            "data": result,
+            "mtime": mtime,
+            "timestamp": now,
+        }
+        return result
     except Exception as exception:
         print(f"Exception loading project at {project_path}: {exception}")
         return {
