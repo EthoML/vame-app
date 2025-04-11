@@ -47,7 +47,9 @@ app.whenReady().then(() => {
 
   folderHandler()
 
-  if (is.dev) {
+  const separateBackend = process.env.VAME_SEPARATE_BACKEND === "true";
+
+  if (is.dev && !separateBackend) {
     backend = runChildProcess("python", [join(__dirname, "..", "..", "src", "services", "vameApi", "main.py")]);
 
     backend?.stdout.on("data", (data) => {
@@ -60,6 +62,10 @@ app.whenReady().then(() => {
     backend?.stderr.on("data", (data) => {
       console.error(`[electron python error]:`, data.toString());
     });
+  } else if (is.dev && separateBackend) {
+    // In dev-separate mode, do not start the backend, just connect to it
+    console.log("[electron]: Running in dev-separate mode, not starting Python backend. Expecting Flask server to be running separately.");
+    if (!mainWindow) mainWindow = createWindow();
   } else {
     backend = runChildProcess(resolve(join(process.resourcesPath, "python", "main", "main")));
 

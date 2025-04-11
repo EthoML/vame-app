@@ -225,7 +225,9 @@ def load_project(project_path: Path):
         try:
             pose_ref_index_description, ref_index_len = get_pose_ref_index_description(pes_paths[0])
         except Exception as e:
+            import traceback
             print(f"Error getting pose reference index for {path_obj}: {e}")
+            traceback.print_exc()
             pose_ref_index_description, ref_index_len = None, None
 
         # Create the visualization dictionary dynamically - TODO
