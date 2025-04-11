@@ -9,7 +9,13 @@ from app.config import VAME_PROJECTS_DIRECTORY, GLOBAL_STATES_FILE
 
 from app.utils.get_project_path import get_project_path
 from app.utils.get_pose_ref_index_description import get_pose_ref_index_description
-from app.utils.get_assets import get_evaluation_images, get_visualization_images, get_motif_videos, get_community_videos, get_video_results_path
+from app.utils.get_assets import (
+    get_evaluation_images,
+    get_visualization_images,
+    get_motif_videos,
+    get_community_videos,
+    get_video_results_path,
+)
 
 
 def get_projects():
@@ -267,12 +273,12 @@ def load_project(project_path: Path):
 
         # Get Pose Estimation indexes
         try:
-            pose_ref_index_description, ref_index_len = get_pose_ref_index_description(pes_paths[0])
+            keypoints_names, ref_index_len = get_pose_ref_index_description(pes_paths[0])
         except Exception as e:
             import traceback
             print(f"Error getting pose reference index for {path_obj}: {e}")
             traceback.print_exc()
-            pose_ref_index_description, ref_index_len = None, None
+            keypoints_names, ref_index_len = None, None
 
         # Create the visualization dictionary dynamically - TODO
         n_clusters = config.get("n_clusters")
@@ -327,7 +333,7 @@ def load_project(project_path: Path):
         # Provide project workflow status
         workflow = dict(
             organized=(path_obj / 'data' / 'train').exists(),
-            pose_ref_index_description=pose_ref_index_description,
+            keypoints_names=keypoints_names,
             ref_index_len=ref_index_len,
             modeled=len(images["evaluation"]) > 0,
             segmented=has_latent_vector_files,

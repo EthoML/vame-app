@@ -36,6 +36,7 @@ def get_pose_ref_index_description(ds_path: str) -> Tuple[str, int]:
             with xr.open_dataset(ds_path, engine="netcdf4") as tmp_ds:
                 ds_in_memory = tmp_ds.load()  # read entire file into memory
             keypoints = ds_in_memory.keypoints.data
+            # keypoints = ["ks1", "ks2", "ks3"]  # Placeholder for actual keypoints data
         except Exception as e:
             print(f"[ERROR] Error loading dataset: {e}")
             traceback.print_exc()

@@ -12,7 +12,7 @@ import Header from '@renderer/components/Header';
 import { Container, HeaderButton, HeaderButtonContainer, ProjectHeader, ProjectInformation, ProjectInformationCapsule } from './styles';
 
 import ProjectConfiguration from './Tabs/ProjectConfiguration';
-import Organize from './Tabs/Organize';
+import Preprocessing from './Tabs/Preprocessing';
 import Model from './Tabs/Model';
 import Segmentation from './Tabs/Segmentation';
 import MotifVideos from './Tabs/MotifVideos';
@@ -171,13 +171,13 @@ const Project: React.FC = () => {
       })()
     },
     {
-      id: 'data-organization',
-      label: '2. Data Organization',
+      id: 'preprocessing',
+      label: '2. Preprocessing',
       complete: organized,
       content: (() => {
         try {
           return (
-            <Organize
+            <Preprocessing
               project={project}
               blockSubmission={blockSubmit}
               blockTooltip="Waiting VAME to be ready."
@@ -191,15 +191,15 @@ const Project: React.FC = () => {
             />
           );
         } catch (error) {
-          console.error("Error rendering Organize component:", error);
+          console.error("Error rendering Preprocessing component:", error);
           return (
             <div style={{ padding: 20, background: "#f5f5f5" }}>
-              <h3>Data Organization Content (Fallback)</h3>
-              <p>Error rendering the Organize component.</p>
+              <h3>Preprocessing Content (Fallback)</h3>
+              <p>Error rendering the Preprocessing component.</p>
               <p><b>Error:</b> {String(error)}</p>
               <p><b>Original props:</b></p>
               <ul>
-                <li>project: {JSON.stringify(project.config?.project_name || project.config?.Project)}</li>
+                <li>project: {JSON.stringify((project.config as any).project_name || (project.config as any).Project)}</li>
                 <li>blockSubmission: {String(blockSubmit)}</li>
               </ul>
             </div>

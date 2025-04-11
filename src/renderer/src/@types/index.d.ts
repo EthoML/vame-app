@@ -70,7 +70,7 @@ declare global {
     };
     workflow: {
       organized: boolean;
-      pose_ref_index_description: string;
+      keypoints_names: string[];
       ref_index_len: number;
       modeled: boolean;
       segmented: boolean;

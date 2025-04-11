@@ -1,0 +1,22 @@
+{
+    "title": "Preprocessing Parameters",
+    "properties": {
+        "centered_reference_keypoint": {
+            "type": "string",
+            "title": "Centered Reference Keypoint",
+            "description": "Select the referece keypoint for centering.",
+            "enum": []
+        },
+        "orientation_reference_keypoint": {
+            "type": "string",
+            "title": "Orientation Reference Keypoint",
+            "description": "Select the reference keypoint for orientation.",
+            "enum": []
+        }
+    },
+    "required": [
+        "centered_reference_keypoint",
+        "orientation_reference_keypoint",
+        "advanced_options"
+    ]
+}
