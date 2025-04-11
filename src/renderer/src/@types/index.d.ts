@@ -38,7 +38,7 @@ declare global {
       model_snapshot: number;
       mse_prediction_reduction: string;
       mse_reconstruction_reduction: string;
-      n_cluster: number;
+      n_clusters: number;
       n_init_kmeans: number;
       n_layers: number;
       n_neighbors: number;

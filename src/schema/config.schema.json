@@ -26,7 +26,7 @@
       "type": "boolean",
       "description": "Used for data cleaning"
     },
-    "n_cluster": {
+    "n_clusters": {
       "type": "integer",
       "title": "Number of Clusters",
       "description": "The number of motifs"
@@ -39,12 +39,18 @@
       "type": "integer",
       "description": "Please set to 1/2 of video fps. Value should be even, round up if needed"
     },
-    "parametrizations":{
+    "parametrizations": {
       "description": "Hold down the Ctrl (windows) or Command (Mac) button to select multiple options.",
       "type": "string",
       "multiple": true,
-      "enum": ["hmm","kmeans"],
-      "default": ["hmm","kmeans"]
+      "enum": [
+        "hmm",
+        "kmeans"
+      ],
+      "default": [
+        "hmm",
+        "kmeans"
+      ]
     },
     "max_epochs": {
       "type": "integer",
@@ -203,7 +209,7 @@
     "pose_confidence",
     "iqr_factor",
     "robust",
-    "n_cluster",
+    "n_clusters",
     "num_features",
     "time_window",
     "max_epochs",
