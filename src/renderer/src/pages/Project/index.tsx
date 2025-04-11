@@ -423,22 +423,31 @@ const Project: React.FC = () => {
                 pathname: '/create',
                 search: `?project=${project.config.project_path}`
               })
-            }}>Restart Project</HeaderButton>
+            }}>Restart Project: </HeaderButton>
           </HeaderButtonContainer>
         </Header>
         <ProjectInformation>
           <ProjectInformationCapsule>
             <small>
-              <b>Creation Date</b>
+              <b>Creation Date: </b>
               <small>
-                {project.created_at}
+                {project.config.creation_datetime}
               </small>
-            </small></ProjectInformationCapsule>
+            </small>
+          </ProjectInformationCapsule>
           <ProjectInformationCapsule>
             <small>
               <b>Project Location</b>
               <small>
                 {project.config.project_path}
+              </small>
+            </small>
+          </ProjectInformationCapsule>
+          <ProjectInformationCapsule>
+            <small>
+              <b>VAME Version: </b>
+              <small>
+                {project.config.vame_version || "N/A"}
               </small>
             </small>
           </ProjectInformationCapsule>

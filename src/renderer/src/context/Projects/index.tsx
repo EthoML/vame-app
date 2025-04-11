@@ -77,11 +77,11 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
 
     setLoadingProjects(true)
     const promisesProjects = paths.map(async (path) => {
-      return await post<Omit<Project, "created_at">>('load', { project: path })
+      return await post<Omit<Project, "creation_datetime">>('load', { project: path })
     })
 
     const promisesRecents = recentPaths.map(async (path) => {
-      return await post<Omit<Project, "created_at">>('load', { project: path })
+      return await post<Omit<Project, "creation_datetime">>('load', { project: path })
     })
     try {
       const data = await Promise.allSettled(promisesProjects)
@@ -96,8 +96,8 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
               return { error: projectData.error };
             }
             const { Project, project_path } = projectData.config;
-            const created_at = new Date(project_path.split(`${Project}-`)[1]).toLocaleDateString();
-            const project = { ...projectData, created_at };
+            const creation_datetime = new Date(project_path.split(`${Project}-`)[1]).toLocaleDateString();
+            const project = { ...projectData, creation_datetime };
             return project;
           }
         }
@@ -112,8 +112,8 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
               return { error: projectData.error };
             }
             const { Project, project_path } = projectData.config;
-            const created_at = new Date(project_path.split(`${Project}-`)[1]).toLocaleDateString();
-            const project = { ...projectData, created_at };
+            const creation_datetime = new Date(project_path.split(`${Project}-`)[1]).toLocaleDateString();
+            const project = { ...projectData, creation_datetime };
             return project;
           }
         }

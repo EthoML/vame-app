@@ -32,7 +32,7 @@ export interface Project {
   pes_paths?: string[];
   workflow?: any;
   states?: ProjectStates;
-  created_at?: string;
+  creation_datetime?: string;
   error?: string;
 }
 

@@ -5,7 +5,7 @@ declare global {
     config: {
       Project: string;
       project_path: string;
-
+      creation_datetime: string;
       all_data: boolean;
       anneal_function: string;
       annealtime: number;
@@ -154,7 +154,7 @@ declare global {
         };
       };
     };
-    created_at: string;
+    creation_datetime: string;
   };
 
   export type TypeName =
