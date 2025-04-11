@@ -24,14 +24,17 @@ const Create: React.FC = () => {
     try {
       const result = await createProject(formData)
 
-      if (!result.created) 
+      if (!result.created)
         return alert('A project with this name already exists!')
+
+      // Frontend fix: wait before loading project details
+      await new Promise(resolve => setTimeout(resolve, 1500))
 
       navigate({
         pathname: "/project",
         search: `?path=${result.config.project_path}`
       });
-      
+
     } catch (error) {
       alert(error)
     }

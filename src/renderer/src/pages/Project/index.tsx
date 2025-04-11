@@ -86,14 +86,14 @@ const Project: React.FC = () => {
     }
   }, [projectPath])
 
-  useEffect(()=>{
-    if(project){
+  useEffect(() => {
+    if (project) {
       const loadedTab = localStorage.getItem(`selected-tab-${project?.config.Project}`)
-      if(loadedTab){
+      if (loadedTab) {
         setSelectedTab(loadedTab)
       }
     }
-  },[project])
+  }, [project])
 
   if (!project) {
     return (
@@ -102,6 +102,18 @@ const Project: React.FC = () => {
           <b>Loading project details...</b>
           <br />
           <small>{projectPath}</small>
+        </div>
+      </MainContainer>
+    );
+  }
+
+  if (project.error) {
+    return (
+      <MainContainer>
+        <div>
+          <b>Failed to load project:</b>
+          <br />
+          <small>{project.error}</small>
         </div>
       </MainContainer>
     );
@@ -119,17 +131,17 @@ const Project: React.FC = () => {
     visualization,
   } = project.states
 
-  const organized = egocentric_alignment.execution_state==="success" && create_trainset.execution_state==="success"
+  const organized = egocentric_alignment.execution_state === "success" && create_trainset.execution_state === "success"
 
-  const modeled = evaluate_model.execution_state==="success" && train_model.execution_state==="success"
+  const modeled = evaluate_model.execution_state === "success" && train_model.execution_state === "success"
 
-  const segmented = pose_segmentation.execution_state==="success"
+  const segmented = pose_segmentation.execution_state === "success"
 
-  const motif_videos_created = motif_videos.execution_state==="success" && project.workflow.motif_videos_created
+  const motif_videos_created = motif_videos.execution_state === "success" && project.workflow.motif_videos_created
 
-  const community_videos_created = community_videos.execution_state==="success" && project.workflow.community_videos_created
+  const community_videos_created = community_videos.execution_state === "success" && project.workflow.community_videos_created
 
-  const umaps_created = visualization.execution_state==="success" && project.workflow.umaps_created
+  const umaps_created = visualization.execution_state === "success" && project.workflow.umaps_created
 
 
   const tabs = [
@@ -269,7 +281,7 @@ const Project: React.FC = () => {
           const projectPath = project.config.project_path
           await createCommunityVideos({
             project: projectPath,
-            parametrization: data.parametrization, 
+            parametrization: data.parametrization,
           })
         }, "community-videos")}
       />

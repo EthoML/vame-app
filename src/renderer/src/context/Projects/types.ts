@@ -13,6 +13,17 @@ import {
   createCommunityVideosVAMEProject,
 } from "./api"
 
+export interface Project {
+  config?: any;
+  assets?: any;
+  videos?: string[];
+  pes_paths?: string[];
+  workflow?: any;
+  states?: any;
+  created_at?: string;
+  error?: string;
+}
+
 export type IProjectContext = {
   projects: Project[]
   recentProjects: Project[]
@@ -32,7 +43,7 @@ export type IProjectContext = {
 
   segment: typeof segmentVAMEProject
   createMotifVideos: typeof createMotifVideosVAMEProject
-  
+
   communityAnalysis: typeof communityAnalysisVAMEProject
   createCommunityVideos: typeof createCommunityVideosVAMEProject
 

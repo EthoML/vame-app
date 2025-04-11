@@ -55,9 +55,9 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
         setPaths(projectsPath.data)
         setRecentPaths(recentProjectsPath.data)
       } else {
-        if(!projectsPath.success){
+        if (!projectsPath.success) {
           throw new Error(projectsPath.error)
-        } else if (!recentProjectsPath.success){
+        } else if (!recentProjectsPath.success) {
           throw new Error(recentProjectsPath.error)
         }
       }
@@ -90,33 +90,42 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
       setProjects(data.map(icpResponse => {
         if (icpResponse.status === "fulfilled") {
           if (icpResponse.value.success) {
-            const { Project, project_path } = icpResponse.value.data.config
-            const created_at = new Date(project_path.split(`${Project}-`)[1]).toLocaleDateString()
-            const project = { ...icpResponse.value.data, created_at }
-            return project
+            const projectData = icpResponse.value.data;
+            if (projectData.error) {
+              // Return a project object with error info
+              return { error: projectData.error };
+            }
+            const { Project, project_path } = projectData.config;
+            const created_at = new Date(project_path.split(`${Project}-`)[1]).toLocaleDateString();
+            const project = { ...projectData, created_at };
+            return project;
           }
         }
-        return
-      }).filter(p => !!p) as Project[])
+        return;
+      }).filter(p => !!p) as Project[]);
 
       setRecentProjects(data2.map(icpResponse => {
         if (icpResponse.status === "fulfilled") {
           if (icpResponse.value.success) {
-            const { Project, project_path } = icpResponse.value.data.config
-            const created_at = new Date(project_path.split(`${Project}-`)[1]).toLocaleDateString()
-            const project = { ...icpResponse.value.data, created_at }
-            return project
+            const projectData = icpResponse.value.data;
+            if (projectData.error) {
+              return { error: projectData.error };
+            }
+            const { Project, project_path } = projectData.config;
+            const created_at = new Date(project_path.split(`${Project}-`)[1]).toLocaleDateString();
+            const project = { ...projectData, created_at };
+            return project;
           }
         }
-        return
-      }).filter(p => !!p) as Project[])
+        return;
+      }).filter(p => !!p) as Project[]);
 
     } catch (error) {
       window.alert("Something went wrong loading projects.")
     } finally {
       setLoadingProjects(false)
     }
-  }, [paths,recentPaths])
+  }, [paths, recentPaths])
 
   const refresh = useCallback(loadProjectsPaths, [])
 

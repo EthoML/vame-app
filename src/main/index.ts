@@ -48,24 +48,30 @@ app.whenReady().then(() => {
   folderHandler()
 
   if (is.dev) {
-    backend = runChildProcess("python", [join(__dirname, "..", "..", "src", "services", "vameApi", "main.py")])
+    backend = runChildProcess("python", [join(__dirname, "..", "..", "src", "services", "vameApi", "main.py")]);
 
     backend?.stdout.on("data", (data) => {
       if (data?.toString().includes("Flask server started at")) {
-        console.log(`[electron]: Python server is active...`)
+        console.log(`[electron]: Python server is active...`);
         if (!mainWindow)
-          mainWindow = createWindow()
+          mainWindow = createWindow();
       }
     });
+    backend?.stderr.on("data", (data) => {
+      console.error(`[electron python error]:`, data.toString());
+    });
   } else {
-    backend = runChildProcess(resolve(join(process.resourcesPath, "python", "main", "main")))
+    backend = runChildProcess(resolve(join(process.resourcesPath, "python", "main", "main")));
 
     backend?.stdout.on("data", (data) => {
       if (data?.toString().includes("Flask server started at")) {
-        console.log(`[electron]: Python server is active...`)
+        console.log(`[electron]: Python server is active...`);
         if (!mainWindow)
-          mainWindow = createWindow()
+          mainWindow = createWindow();
       }
+    });
+    backend?.stderr.on("data", (data) => {
+      console.error(`[electron python error]:`, data.toString());
     });
   }
 
