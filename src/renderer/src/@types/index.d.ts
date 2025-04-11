@@ -5,7 +5,7 @@ declare global {
     config: {
       Project: string;
       project_path: string;
-      
+
       all_data: boolean;
       anneal_function: string;
       annealtime: number;
@@ -83,11 +83,11 @@ declare global {
     states: {
       community: {
         execution_state?: string;
-        [key:string]: unknown
+        [key: string]: unknown
       };
       community_videos: {
         execution_state?: string;
-        [key:string]: unknown
+        [key: string]: unknown
       };
       create_trainset: {
         execution_state?: string;
@@ -97,7 +97,7 @@ declare global {
       };
       csv_to_numpy: {
         execution_state?: string;
-        [key:string]: unknown
+        [key: string]: unknown
       };
       egocentric_alignment: {
         check_video: boolean;
@@ -110,27 +110,27 @@ declare global {
       };
       evaluate_model: {
         execution_state?: string;
-        [key:string]: unknown
+        [key: string]: unknown
       };
       generative_model: {
         execution_state?: string;
-        [key:string]: unknown
+        [key: string]: unknown
       };
       motif_videos: {
         execution_state?: string;
-        [key:string]: unknown
+        [key: string]: unknown
       };
-      pose_segmentation: {
+      segment_session: {
         execution_state?: string;
-        [key:string]: unknown
+        [key: string]: unknown
       };
       train_model: {
         config: string;
         execution_state?: string;
       };
-      visualization: {
+      visualize_umap: {
         execution_state?: string;
-        [key:string]: unknown
+        [key: string]: unknown
       };
     };
     videos: string[];
@@ -139,18 +139,18 @@ declare global {
       images: {
         evaluation: string[];
         visualization: {
-          hmm: Record<string,string[]>,
-          kmeans: Record<string,string[]>
+          hmm: Record<string, string[]>,
+          kmeans: Record<string, string[]>
         };
       };
       videos: {
         community: {
-          hmm: Record<string,string[]>,
-          kmeans: Record<string,string[]>
+          hmm: Record<string, string[]>,
+          kmeans: Record<string, string[]>
         };
         motif: {
-          hmm: Record<string,string[]>,
-          kmeans: Record<string,string[]>
+          hmm: Record<string, string[]>,
+          kmeans: Record<string, string[]>
         };
       };
     };
@@ -169,7 +169,7 @@ declare global {
   export interface Schema {
     title: string;
     properties: Properties;
-    
+
     type?: "object";
     description?: string;
 
@@ -189,7 +189,7 @@ declare global {
     | ArrayBooleanProperty
     | ArrayObjectProperty
 
-  export type SimpleProperty = 
+  export type SimpleProperty =
     | StringProperty
     | BooleanProperty
     | NumberProperty
@@ -234,21 +234,21 @@ declare global {
     minimum?: number;
   };
 
-  export type EnumProperty = DefaultPropertyAttrs &  {
+  export type EnumProperty = DefaultPropertyAttrs & {
     type: "string";
     enum: string[];
     multiple?: boolean;
     default?: string;
   };
 
-  export type ObjectProperty = DefaultPropertyAttrs &  {
+  export type ObjectProperty = DefaultPropertyAttrs & {
     type: "object";
     properties: Record<string, SimpleProperty>
     default?: Record<string, any>
     required?: string[];
   };
 
-  interface DefaultArrayPropertyAttrs extends DefaultPropertyAttrs{
+  interface DefaultArrayPropertyAttrs extends DefaultPropertyAttrs {
     maxItems?: number;
     minItems?: number;
   }
@@ -287,4 +287,4 @@ declare module 'react' {
   }
 }
 
-export {};
+export { };
