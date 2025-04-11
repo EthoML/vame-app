@@ -145,24 +145,19 @@ def delete_project(project_path):
 
 
 def configure_project(data, project_path: Path):
-    from vame.util import auxiliary
+    from vame.util.auxiliary import write_config
 
-    if isinstance(project_path, Path):
-        path_obj = project_path
-    else:
-        path_obj = Path(project_path)
-    config_path = path_obj / "config.yaml"
-
+    config_path = Path(project_path) / "config.yaml"
     if config_path.exists():
         with open(str(config_path), "r") as file:
             config = yaml.safe_load(file)
-            config_update = data["config"]
+            config_update = data.get("config", {})
 
-            if config_update:
-                config.update(config_update)
-                auxiliary.write_config(str(config_path), config)
+        if config_update:
+            config.update(config_update)
+            write_config(str(config_path), config)
 
-            return dict(config=config)
+        return dict(config=config)
 
     return dict(config=None)
 

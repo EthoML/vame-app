@@ -31,10 +31,6 @@
       "title": "Number of Clusters",
       "description": "The number of motifs"
     },
-    "num_features": {
-      "type": "integer",
-      "description": "Please set to number of annotation points * 2"
-    },
     "time_window": {
       "type": "integer",
       "description": "Please set to 1/2 of video fps. Value should be even, round up if needed"
