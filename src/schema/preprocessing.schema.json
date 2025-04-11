@@ -4,7 +4,7 @@
         "centered_reference_keypoint": {
             "type": "string",
             "title": "Centered Reference Keypoint",
-            "description": "Select the referece keypoint for centering.",
+            "description": "Select the reference keypoint for centering.",
             "enum": []
         },
         "orientation_reference_keypoint": {
@@ -12,11 +12,45 @@
             "title": "Orientation Reference Keypoint",
             "description": "Select the reference keypoint for orientation.",
             "enum": []
+        },
+        "run_lowconf_cleaning": {
+            "type": "boolean",
+            "title": "Run Low Confidence Cleaning",
+            "description": "Clean low confidence keypoints during preprocessing.",
+            "default": true
+        },
+        "run_egocentric_alignment": {
+            "type": "boolean",
+            "title": "Run Egocentric Alignment",
+            "description": "Perform egocentric alignment during preprocessing.",
+            "default": true
+        },
+        "run_outlier_cleaning": {
+            "type": "boolean",
+            "title": "Run Outlier Cleaning",
+            "description": "Clean outliers during preprocessing.",
+            "default": true
+        },
+        "run_savgol_filtering": {
+            "type": "boolean",
+            "title": "Run Savitzky-Golay Filtering",
+            "description": "Apply Savitzky-Golay filtering during preprocessing.",
+            "default": true
+        },
+        "run_rescaling": {
+            "type": "boolean",
+            "title": "Run Rescaling",
+            "description": "Perform rescaling during preprocessing.",
+            "default": false
         }
     },
     "required": [
         "centered_reference_keypoint",
         "orientation_reference_keypoint",
-        "advanced_options"
+        "run_lowconf_cleaning",
+        "run_egocentric_alignment",
+        "run_outlier_cleaning",
+        "run_savgol_filtering",
+        "run_rescaling"
     ]
 }

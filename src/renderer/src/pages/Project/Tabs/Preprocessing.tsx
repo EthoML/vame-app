@@ -117,10 +117,12 @@ const Preprocessing = ({
       // Default to first keypoint for centered and second for orientation if available
       centered_reference_keypoint: keypoints_names[0] || "",
       orientation_reference_keypoint: keypoints_names[1] || keypoints_names[0] || "",
-      advanced_options: {
-        crop_size: crop_size.map(n => String(n)),
-        use_video
-      }
+      // Add the new boolean fields with their default values
+      run_lowconf_cleaning: true,
+      run_egocentric_alignment: true,
+      run_outlier_cleaning: true,
+      run_savgol_filtering: true,
+      run_rescaling: false
     }
 
     // If we have old pose_ref_index data and keypoints, try to map them
@@ -161,7 +163,12 @@ const Preprocessing = ({
             centeredIndex >= 0 ? centeredIndex : 0,
             orientationIndex >= 0 ? orientationIndex : (keypoints_names.length > 1 ? 1 : 0)
           ],
-          advanced_options: formData?.advanced_options || { crop_size: ["300", "300"], use_video: false }
+          // Include the new boolean fields
+          run_lowconf_cleaning: formData?.run_lowconf_cleaning !== undefined ? formData.run_lowconf_cleaning : true,
+          run_egocentric_alignment: formData?.run_egocentric_alignment !== undefined ? formData.run_egocentric_alignment : true,
+          run_outlier_cleaning: formData?.run_outlier_cleaning !== undefined ? formData.run_outlier_cleaning : true,
+          run_savgol_filtering: formData?.run_savgol_filtering !== undefined ? formData.run_savgol_filtering : true,
+          run_rescaling: formData?.run_rescaling !== undefined ? formData.run_rescaling : false
         }
 
         // Call the original onFormSubmit with the converted data
@@ -171,7 +178,11 @@ const Preprocessing = ({
         // Fallback to a minimal valid submission
         onFormSubmit({
           pose_ref_index: [0, 0],
-          advanced_options: { crop_size: ["300", "300"], use_video: false }
+          run_lowconf_cleaning: true,
+          run_egocentric_alignment: true,
+          run_outlier_cleaning: true,
+          run_savgol_filtering: true,
+          run_rescaling: false
         })
       }
     }
