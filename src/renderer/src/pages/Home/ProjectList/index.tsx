@@ -8,37 +8,37 @@ interface Props {
 }
 
 const ProjectsList: React.FC<Props> = ({
-    projects,
-    onDelete,
-    onEdit
+  projects,
+  onDelete,
+  onEdit
 }) => {
 
-    return (
+  return (
     <List>
-    {projects.map((project) => (
-      <ListItem key={project.config.project_path}>
-        <div>
-          <h3>{project.config.Project}</h3>
-          <small>{project.config.project_path}</small>
-        </div>
-        <ButtonContainer>
-          <Button onClick={() => {
-            onEdit(project)
-          }}>Edit</Button>
-          <Button onClick={() => {
+      {projects.map((project) => (
+        <ListItem key={project.config.project_path}>
+          <div>
+            <h3>{project.config.project_name}</h3>
+            <small>{project.config.project_path}</small>
+          </div>
+          <ButtonContainer>
+            <Button onClick={() => {
+              onEdit(project)
+            }}>Edit</Button>
+            <Button onClick={() => {
 
-            // Check to make sure user wants to delete the project
-            if (!window.confirm(`Are you sure you want to delete project "${project.config.Project}"?`)) return
+              // Check to make sure user wants to delete the project
+              if (!window.confirm(`Are you sure you want to delete project "${project.config.project_name}"?`)) return
 
-            onDelete(project)
-          }}>
-            Delete
-          </Button>
-        </ButtonContainer>
-      </ListItem>
-    ))}
-  </List>
-)
+              onDelete(project)
+            }}>
+              Delete
+            </Button>
+          </ButtonContainer>
+        </ListItem>
+      ))}
+    </List>
+  )
 }
 
 export default ProjectsList;

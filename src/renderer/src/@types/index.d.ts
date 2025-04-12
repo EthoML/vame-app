@@ -5,7 +5,9 @@ declare global {
     config: {
       Project: string;
       project_path: string;
+      project_name: string;
       creation_datetime: string;
+      vame_version: string;
       keypoints: string[];
       all_data: boolean;
       anneal_function: string;
@@ -102,6 +104,10 @@ declare global {
         [key: string]: unknown
       };
       preprocessing: {
+        execution_state?: string;
+        [key: string]: unknown
+      };
+      preprocessing_visualization: {
         execution_state?: string;
         [key: string]: unknown
       };

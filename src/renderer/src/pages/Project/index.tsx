@@ -58,13 +58,14 @@ const Project: React.FC = () => {
     try {
       setBlockSubmit(true)
       await callback()
-      await refresh()
 
       if (tab) {
-        const localItem = `selected-tab-${project?.config.Project}`
+        const localItem = `selected-tab-${project?.config.project_name}`
         localStorage.setItem(localItem, tab)
         setSelectedTab(tab)
       }
+
+      await refresh()
     } catch (e) {
       console.log
     } finally {
@@ -88,7 +89,7 @@ const Project: React.FC = () => {
 
   useEffect(() => {
     if (project) {
-      const loadedTab = localStorage.getItem(`selected-tab-${project?.config.Project || project?.config.project_path}`)
+      const loadedTab = localStorage.getItem(`selected-tab-${project?.config.project_name}`)
       if (loadedTab) {
         setSelectedTab(loadedTab)
       }
@@ -114,6 +115,7 @@ const Project: React.FC = () => {
   // Check if states exist and have expected properties
   const configuredState = project.states?.update_config || {};
   const preprocessingState = project.states?.preprocessing || {};
+  const preprocessingVisualizationState = project.states?.preprocessing_visualization || {};
   const create_trainset = project.states?.create_trainset || {};
   const evaluate_model = project.states?.evaluate_model || {};
   const train_model = project.states?.train_model || {};
@@ -124,7 +126,7 @@ const Project: React.FC = () => {
   const visualize_umap = project.states?.visualize_umap || {};
 
   const projectConfigured = configuredState.execution_state === "success";
-  const organized = preprocessingState.execution_state === "success" && create_trainset.execution_state === "success";
+  const projectPreprocessed = preprocessingState.execution_state === "success" && preprocessingVisualizationState.execution_state === "success";
   const modeled = evaluate_model.execution_state === "success" && train_model.execution_state === "success";
   const segmented = segment_session.execution_state === "success";
   const motif_videos_created = motif_videos.execution_state === "success" && project.workflow?.motif_videos_created;
@@ -175,7 +177,7 @@ const Project: React.FC = () => {
       id: 'preprocessing',
       label: '2. Preprocessing',
       disabled: tabsLock && !projectConfigured,
-      complete: organized,
+      complete: projectPreprocessed,
       content: (() => {
         try {
           return (
@@ -212,7 +214,7 @@ const Project: React.FC = () => {
     {
       id: 'model-creation',
       label: '3. Model Creation',
-      disabled: tabsLock && !organized,
+      disabled: tabsLock && !projectPreprocessed,
       complete: modeled,
       tooltip: "Organize your project first.",
       content: (
@@ -223,7 +225,7 @@ const Project: React.FC = () => {
           <ul>
             <li>project: {JSON.stringify(project.config?.project_name || project.config?.Project)}</li>
             <li>blockSubmission: {String(blockSubmit)}</li>
-            <li>disabled: {String(tabsLock && !organized)}</li>
+            <li>disabled: {String(tabsLock && !projectPreprocessed)}</li>
           </ul>
         </div>
       )
@@ -416,7 +418,7 @@ const Project: React.FC = () => {
   return (
     <Container>
       <ProjectHeader>
-        <Header title={project.config.Project || project.config.project_path}>
+        <Header title={project.config.project_name || project.config.project_path}>
           <HeaderButtonContainer>
             <HeaderButton onClick={() => {
               open(project.config.project_path)
@@ -434,7 +436,7 @@ const Project: React.FC = () => {
             <small>
               <b>Creation Date: </b>
               <small>
-                {project.config.creation_datetime}
+                {project.config.creation_datetime || ""}
               </small>
             </small>
           </ProjectInformationCapsule>
@@ -442,7 +444,7 @@ const Project: React.FC = () => {
             <small>
               <b>Project Location</b>
               <small>
-                {project.config.project_path}
+                {project.config.project_path || ""}
               </small>
             </small>
           </ProjectInformationCapsule>
@@ -450,7 +452,7 @@ const Project: React.FC = () => {
             <small>
               <b>VAME Version: </b>
               <small>
-                {project.config.vame_version || "N/A"}
+                {project.config.vame_version || ""}
               </small>
             </small>
           </ProjectInformationCapsule>

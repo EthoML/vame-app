@@ -1,9 +1,10 @@
 from pathlib import Path
 from flask_restx import Resource
 from flask import request, jsonify
-from . import api
+
 import vame
 
+from . import api
 from app.utils.resolve_request_util import resolve_request_data
 from app.utils.not_bad_request_exception import not_bad_request_exception
 
@@ -15,19 +16,22 @@ class Preprocess(Resource):
         try:
             data, project_path = resolve_request_data(request)
             config = vame.auxiliary.read_config(str(Path(project_path) / "config.yaml"))
-            # vame.preprocessing(
-            #     config=config,
-            #     centered_reference_keypoint=data["centered_reference_keypoint"],
-            #     orientation_reference_keypoint=data["orientation_reference_keypoint"],
-            #     run_lowconf_cleaning=data["run_lowconf_cleaning"],
-            #     run_egocentric_alignment=data["run_egocentric_alignment"],
-            #     run_outlier_cleaning=data["run_outlier_cleaning"],
-            #     run_savgol_filtering=data["run_savgol_filtering"],
-            #     run_rescaling=data["run_rescaling"],
-            #     save_logs=False,
-            # )
-            print("Preprocessing:")
-            print(data)
+            vame.preprocessing(
+                config=config,
+                centered_reference_keypoint=data["centered_reference_keypoint"],
+                orientation_reference_keypoint=data["orientation_reference_keypoint"],
+                run_lowconf_cleaning=data["run_lowconf_cleaning"],
+                run_egocentric_alignment=data["run_egocentric_alignment"],
+                run_outlier_cleaning=data["run_outlier_cleaning"],
+                run_savgol_filtering=data["run_savgol_filtering"],
+                run_rescaling=data["run_rescaling"],
+                save_logs=False,
+            )
+            vame.visualization.preprocessing.preprocessing_visualization(
+                config=config,
+                save_to_file=True,
+                show_figure=False,
+            )
             return jsonify(dict(result='success'))
 
         except Exception as exception:
