@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 
+
 def resolve_request_data(request):
     data = json.loads(request.data) if request.data else {}
     project_path = Path(data.pop("project") if "project" in data else Path(data["config"].parent))

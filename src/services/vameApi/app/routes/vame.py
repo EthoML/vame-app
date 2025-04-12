@@ -6,6 +6,7 @@ from app.utils.resolve_request_util import resolve_request_data
 from app.utils.get_assets import get_evaluation_images, get_visualization_images
 from app.utils.not_bad_request_exception import not_bad_request_exception
 
+
 @api.route('/align', methods=['POST'])
 class Align(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
@@ -62,6 +63,7 @@ class CreateTrainset(Resource):
             if not_bad_request_exception(exception):
                 api.abort(500, str(exception))
 
+
 @api.route('/train', methods=['POST'])
 class TrainModel(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
@@ -82,6 +84,7 @@ class TrainModel(Resource):
             if not_bad_request_exception(exception):
                 api.abort(500, str(exception))
 
+
 @api.route('/evaluate', methods=['POST'])
 class EvaluateModel(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
@@ -99,6 +102,7 @@ class EvaluateModel(Resource):
         except Exception as exception:
             if not_bad_request_exception(exception):
                 api.abort(500, str(exception))
+
 
 @api.route('/segment', methods=['POST'])
 class Segment(Resource):
@@ -118,6 +122,7 @@ class Segment(Resource):
             if not_bad_request_exception(exception):
                 api.abort(500, str(exception))
 
+
 @api.route('/motif_videos', methods=['POST'])
 class MotifVideos(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
@@ -135,6 +140,7 @@ class MotifVideos(Resource):
         except Exception as exception:
             if not_bad_request_exception(exception):
                 api.abort(500, str(exception))
+
 
 @api.route('/community', methods=['POST'])
 class Community(Resource):
@@ -154,6 +160,7 @@ class Community(Resource):
             if not_bad_request_exception(exception):
                 api.abort(500, str(exception))
 
+
 @api.route('/community_videos', methods=['POST'])
 class CommunityVideos(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
@@ -172,6 +179,7 @@ class CommunityVideos(Resource):
             if not_bad_request_exception(exception):
                 api.abort(500, str(exception))
 
+
 @api.route('/visualization', methods=['POST'])
 class Visualization(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
@@ -185,15 +193,16 @@ class Visualization(Resource):
                 **data,
                 save_logs=True
             )
-            
+
             if(data["parametrization"] == "hmm"):
                 return dict(result=get_visualization_images(project_path=project_path,parametrization="hmm-15"))
             else:
                 return dict(result=get_visualization_images(project_path=project_path,parametrization="kmeans-15"))
-            
+
         except Exception as exception:
             if not_bad_request_exception(exception):
                 api.abort(500, str(exception))
+
 
 @api.route('/generative_model', methods=['POST'])
 class GenerativeModel(Resource):
@@ -209,6 +218,7 @@ class GenerativeModel(Resource):
         except Exception as exception:
             if not_bad_request_exception(exception):
                 api.abort(500, str(exception))
+
 
 @api.route('/gif', methods=['POST'])
 class CreateGif(Resource):

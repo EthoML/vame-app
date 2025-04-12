@@ -28,12 +28,11 @@ const Preprocessing = ({
   blockTooltip,
 }: TabProps) => {
   try {
-    // If keypoints_names is not available, create a default array with common keypoints
+    // If keypoints is not available, create a default array with common keypoints
     let keypoints_names: string[] = []
-    if (Array.isArray(project?.workflow?.keypoints_names) && project.workflow.keypoints_names.length > 0) {
-      keypoints_names = project.workflow.keypoints_names
+    if (Array.isArray(project?.config?.keypoints) && project.config.keypoints.length > 0) {
+      keypoints_names = project.config.keypoints
     } else {
-      // Create default keypoint names if none are available
       keypoints_names = [""]
     }
 
@@ -57,11 +56,11 @@ const Preprocessing = ({
     // Safely get organized state
     const isOrganized = !!project?.workflow?.organized
 
-    // Set up operations with safety checks
-    const operations = ["Create Training Set"]
-    if (project?.config && !project.config.egocentric_data) {
-      operations.unshift("Align Data")
-    }
+    // // Set up operations with safety checks
+    // const operations = ["Create Training Set"]
+    // if (project?.config && !project.config.egocentric_data) {
+    //   operations.unshift("Align Data")
+    // }
 
     // Safely handle egocentric_data property
     try {
@@ -83,10 +82,6 @@ const Preprocessing = ({
       console.error("Error setting readOnly:", err)
     }
 
-    // Safely extract alignment data with fallbacks
-    const alignment = project?.states?.["egocentric_alignment"] || {}
-    const pose_ref_index = Array.isArray(alignment.pose_ref_index) ? alignment.pose_ref_index : undefined
-
     // Initialize states with safe defaults
     let states: any = {
       // Default to first keypoint for centered and second for orientation if available
@@ -100,59 +95,29 @@ const Preprocessing = ({
       run_rescaling: false
     }
 
-    // If we have old pose_ref_index data and keypoints, try to map them
-    try {
-      if (pose_ref_index && pose_ref_index.length >= 2 && keypoints_names.length > 0) {
-        // Map numeric indices to keypoint names if possible
-        const index1 = pose_ref_index[0]
-        const index2 = pose_ref_index[1]
-
-        if (typeof index1 === 'number' && index1 >= 0 && index1 < keypoints_names.length) {
-          states.centered_reference_keypoint = keypoints_names[index1]
-        }
-
-        if (typeof index2 === 'number' && index2 >= 0 && index2 < keypoints_names.length) {
-          states.orientation_reference_keypoint = keypoints_names[index2]
-        }
-      }
-    } catch (err) {
-      console.error("Error mapping pose_ref_index to keypoint names:", err)
-    }
-
     const [terminal, setTerminal] = useState(false)
 
     // Safe form submit handler
     const handleFormSubmit = (formData: any) => {
       try {
-        // Convert the dropdown selections back to pose_ref_index array format
-        const centered = formData?.centered_reference_keypoint || ""
-        const orientation = formData?.orientation_reference_keypoint || ""
-
-        // Find indices of the selected keypoints with safety checks
-        const centeredIndex = keypoints_names.indexOf(centered)
-        const orientationIndex = keypoints_names.indexOf(orientation)
-
         // Create a compatible format for the backend
         const compatibleData = {
-          pose_ref_index: [
-            centeredIndex >= 0 ? centeredIndex : 0,
-            orientationIndex >= 0 ? orientationIndex : (keypoints_names.length > 1 ? 1 : 0)
-          ],
-          // Include the new boolean fields
+          centered_reference_keypoint: formData?.centered_reference_keypoint || "",
+          orientation_reference_keypoint: formData?.orientation_reference_keypoint || "",
           run_lowconf_cleaning: formData?.run_lowconf_cleaning !== undefined ? formData.run_lowconf_cleaning : true,
           run_egocentric_alignment: formData?.run_egocentric_alignment !== undefined ? formData.run_egocentric_alignment : true,
           run_outlier_cleaning: formData?.run_outlier_cleaning !== undefined ? formData.run_outlier_cleaning : true,
           run_savgol_filtering: formData?.run_savgol_filtering !== undefined ? formData.run_savgol_filtering : true,
           run_rescaling: formData?.run_rescaling !== undefined ? formData.run_rescaling : false
         }
-
         // Call the original onFormSubmit with the converted data
         onFormSubmit(compatibleData)
       } catch (err) {
         console.error("Error in form submission:", err)
         // Fallback to a minimal valid submission
         onFormSubmit({
-          pose_ref_index: [0, 0],
+          centered_reference_keypoint: keypoints_names[0] || "",
+          orientation_reference_keypoint: keypoints_names[1] || keypoints_names[0] || "",
           run_lowconf_cleaning: true,
           run_egocentric_alignment: true,
           run_outlier_cleaning: true,
@@ -189,7 +154,7 @@ const Preprocessing = ({
               initialValues={states}
               schema={schema}
               blockSubmission={blockSubmission}
-              submitText={operations.join(" + ")}
+              submitText="Run Preprocessing"
               onFormSubmit={handleFormSubmit}
             />
           </>

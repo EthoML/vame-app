@@ -270,9 +270,6 @@ def load_project(project_path: Path):
             }
             return result
 
-        # Get Pose Estimation keypoints
-        keypoints_names = config.get("keypoints", [])
-
         # Create the visualization dictionary dynamically - TODO
         n_clusters = config.get("n_clusters")
         segmentation_algorithms = config["segmentation_algorithms"]
@@ -326,7 +323,6 @@ def load_project(project_path: Path):
         # Provide project workflow status
         workflow = dict(
             organized=(path_obj / 'data' / 'train').exists(),
-            keypoints_names=keypoints_names,
             modeled=len(images["evaluation"]) > 0,
             segmented=has_latent_vector_files,
             motif_videos_created=any(motif_videos_created.values()),

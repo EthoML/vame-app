@@ -30,7 +30,6 @@ const Project: React.FC = () => {
     getProject,
     refresh,
     configureProject,
-    align,
     createTrainset,
     train,
     evaluate,
@@ -39,6 +38,7 @@ const Project: React.FC = () => {
     createCommunityVideos,
     createMotifVideos,
     createUMAPVisualization,
+    preprocessing
   } = useProjects()
 
   const {
@@ -112,7 +112,7 @@ const Project: React.FC = () => {
   console.log("Project states:", project.states);
 
   // Check if states exist and have expected properties
-  const egocentric_alignment = project.states?.egocentric_alignment || {};
+  const preprocessingState = project.states?.preprocessing || {};
   const create_trainset = project.states?.create_trainset || {};
   const evaluate_model = project.states?.evaluate_model || {};
   const train_model = project.states?.train_model || {};
@@ -122,7 +122,7 @@ const Project: React.FC = () => {
   const community_videos = project.states?.community_videos || {};
   const visualize_umap = project.states?.visualize_umap || {};
 
-  const organized = egocentric_alignment.execution_state === "success" && create_trainset.execution_state === "success";
+  const organized = preprocessingState.execution_state === "success" && create_trainset.execution_state === "success";
   const modeled = evaluate_model.execution_state === "success" && train_model.execution_state === "success";
   const segmented = segment_session.execution_state === "success";
   const motif_videos_created = motif_videos.execution_state === "success" && project.workflow?.motif_videos_created;
@@ -182,10 +182,10 @@ const Project: React.FC = () => {
               blockSubmission={blockSubmit}
               blockTooltip="Waiting VAME to be ready."
               onFormSubmit={async (params) => submitTab(async () => {
-                const { pose_ref_index, advanced_options } = params as any;
-                pose_ref_index.description = `${pose_ref_index.description}. `;
-                await align({ project: project.config.project_path, pose_ref_index, ...advanced_options });
-                await createTrainset({ project: project.config.project_path, pose_ref_index });
+                await preprocessing({
+                  project: project.config.project_path,
+                  ...params
+                });
                 // TODO: Allow users to inspect the quality of the trainset here
               }, 'model-creation')}
             />

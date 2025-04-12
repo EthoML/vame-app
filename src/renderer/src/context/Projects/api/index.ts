@@ -3,7 +3,8 @@ export * from "./deleteVAMEProject"
 
 export * from "./configureVAMEProject"
 
-export * from "./alignVAMEProject"
+export * from "./preprocessingVAMEProject"
+
 export * from "./createTrainsetVAMEProject"
 
 export * from "./trainVAMEProject"
@@ -24,4 +25,3 @@ export * from "./createMotifVideosVAMEProject"
 // motif community videos
 
 export * from "./createUMAPVisualizationVAMEProject"
-

@@ -6,6 +6,7 @@ declare global {
       Project: string;
       project_path: string;
       creation_datetime: string;
+      keypoints: string[];
       all_data: boolean;
       anneal_function: string;
       annealtime: number;
@@ -69,7 +70,6 @@ declare global {
     };
     workflow: {
       organized: boolean;
-      keypoints_names: string[];
       modeled: boolean;
       segmented: boolean;
       motif_videos_created: boolean;
@@ -97,14 +97,9 @@ declare global {
         execution_state?: string;
         [key: string]: unknown
       };
-      egocentric_alignment: {
-        check_video: boolean;
-        config: string;
-        crop_size: number[];
+      preprocessing: {
         execution_state?: string;
-        pose_ref_index: number[];
-        use_video: boolean;
-        video_format: string;
+        [key: string]: unknown
       };
       evaluate_model: {
         execution_state?: string;

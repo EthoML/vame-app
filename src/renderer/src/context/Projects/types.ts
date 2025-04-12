@@ -2,7 +2,7 @@ import {
   createVAMEProject,
   deleteVAMEProject,
   configureVAMEProject,
-  alignVAMEProject,
+  preprocessingVAMEProject,
   createTrainsetVAMEProject,
   trainVAMEProject,
   evaluateVAMEProject,
@@ -14,7 +14,7 @@ import {
 } from "./api"
 
 export type ProjectStates = {
-  egocentric_alignment: any;
+  preprocessing: any;
   create_trainset: any;
   evaluate_model: any;
   train_model: any;
@@ -47,7 +47,8 @@ export type IProjectContext = {
   deleteProject: typeof deleteVAMEProject
   configureProject: typeof configureVAMEProject
 
-  align: typeof alignVAMEProject
+  preprocessing: typeof preprocessingVAMEProject
+
   createTrainset: typeof createTrainsetVAMEProject
 
   train: typeof trainVAMEProject
@@ -60,5 +61,4 @@ export type IProjectContext = {
   createCommunityVideos: typeof createCommunityVideosVAMEProject
 
   createUMAPVisualization: typeof createUMAPVisualizationVAMEProject
-
 }

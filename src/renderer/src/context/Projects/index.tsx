@@ -16,7 +16,7 @@ import {
   createVAMEProject,
   deleteVAMEProject,
   configureVAMEProject,
-  alignVAMEProject,
+  preprocessingVAMEProject,
   createTrainsetVAMEProject,
   trainVAMEProject,
   evaluateVAMEProject,
@@ -155,12 +155,6 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
     return res
   }, [])
 
-  const align = useCallback(async (data) => {
-    const res = await alignVAMEProject(data)
-    await refresh()
-    return res
-  }, [])
-
   const createTrainset = useCallback(async (data) => {
     const res = await createTrainsetVAMEProject(data)
     await refresh()
@@ -215,6 +209,12 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
     return res
   }, [])
 
+  const preprocessing = useCallback(async (data) => {
+    const res = await preprocessingVAMEProject(data)
+    await refresh()
+    return res
+  }, [])
+
   const getProject = useCallback((path: string) => {
     return projects.find(p => p.config.project_path === path)
   }, [projects])
@@ -247,7 +247,8 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
 
     configureProject,
 
-    align,
+    preprocessing,
+
     createTrainset,
 
     train,
