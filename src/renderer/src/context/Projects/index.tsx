@@ -210,7 +210,7 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
   }, [])
 
   const runPreprocessing = useCallback(async (data) => {
-    const res = await runPreprocessing(data)
+    const res = await preprocessingVAMEProject(data)
     await refresh()
     return res
   }, [])
