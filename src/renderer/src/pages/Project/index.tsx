@@ -30,6 +30,7 @@ const Project: React.FC = () => {
     getProject,
     refresh,
     configureProject,
+    preprocessing,
     createTrainset,
     train,
     evaluate,
@@ -37,8 +38,7 @@ const Project: React.FC = () => {
     communityAnalysis,
     createCommunityVideos,
     createMotifVideos,
-    createUMAPVisualization,
-    preprocessing
+    createUMAPVisualization
   } = useProjects()
 
   const {
