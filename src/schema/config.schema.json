@@ -3,13 +3,6 @@
   "title": "VAME Project Configuration",
   "type": "object",
   "properties": {
-    "video_sets": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "readOnly": true
-    },
     "egocentric_data": {
       "type": "boolean",
       "description": "Check this box if the input data is ALREADY egocentrically aligned"
@@ -200,7 +193,6 @@
     }
   },
   "required": [
-    "video_sets",
     "egocentric_data",
     "pose_confidence",
     "iqr_factor",

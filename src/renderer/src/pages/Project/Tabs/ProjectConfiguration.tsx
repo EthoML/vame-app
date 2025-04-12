@@ -20,7 +20,6 @@ const ProjectConfiguration = ({
   }
 
   const {
-    video_sets,
     egocentric_data,
     pose_confidence,
     iqr_factor,
@@ -34,7 +33,6 @@ const ProjectConfiguration = ({
   } = project.config
 
   const toEdit = {
-    video_sets,
     egocentric_data,
     pose_confidence,
     iqr_factor,

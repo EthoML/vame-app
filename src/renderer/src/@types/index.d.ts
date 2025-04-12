@@ -65,7 +65,6 @@ declare global {
       test_fraction: number;
       time_window: number;
       transition_function: string;
-      video_sets: string[];
       zdims: number;
     };
     workflow: {
