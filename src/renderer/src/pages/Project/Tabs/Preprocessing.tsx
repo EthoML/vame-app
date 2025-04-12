@@ -34,7 +34,7 @@ const Preprocessing = ({
       keypoints_names = project.workflow.keypoints_names
     } else {
       // Create default keypoint names if none are available
-      keypoints_names = ["Nose", "Left Ear", "Right Ear", "Left Shoulder", "Right Shoulder", "Tail"]
+      keypoints_names = [""]
     }
 
     // Clone schema with safety check
@@ -48,29 +48,6 @@ const Preprocessing = ({
 
     // Safely set the enum values for the dropdown fields
     try {
-      // Make sure we have a valid schema structure
-      if (!schema.properties) {
-        schema.properties = {}
-      }
-
-      // Create the properties if they don't exist
-      if (!schema.properties.centered_reference_keypoint) {
-        schema.properties.centered_reference_keypoint = {
-          type: "string",
-          title: "Centered Reference Keypoint",
-          description: "Select the keypoint for centering."
-        }
-      }
-
-      if (!schema.properties.orientation_reference_keypoint) {
-        schema.properties.orientation_reference_keypoint = {
-          type: "string",
-          title: "Orientation Reference Keypoint",
-          description: "Select the keypoint for orientation."
-        }
-      }
-
-      // Set the enum values
       schema.properties.centered_reference_keypoint.enum = keypoints_names
       schema.properties.orientation_reference_keypoint.enum = keypoints_names
     } catch (err) {

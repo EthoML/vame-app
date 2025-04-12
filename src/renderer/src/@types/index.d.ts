@@ -71,7 +71,6 @@ declare global {
     workflow: {
       organized: boolean;
       keypoints_names: string[];
-      ref_index_len: number;
       modeled: boolean;
       segmented: boolean;
       motif_videos_created: boolean;

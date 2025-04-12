@@ -8,7 +8,6 @@ import portalocker
 from app.config import VAME_PROJECTS_DIRECTORY, GLOBAL_STATES_FILE
 
 from app.utils.get_project_path import get_project_path
-from app.utils.get_pose_ref_index_description import get_pose_ref_index_description
 from app.utils.get_assets import (
     get_evaluation_images,
     get_visualization_images,
@@ -271,14 +270,8 @@ def load_project(project_path: Path):
             }
             return result
 
-        # Get Pose Estimation indexes
-        try:
-            keypoints_names, ref_index_len = get_pose_ref_index_description(pes_paths[0])
-        except Exception as e:
-            import traceback
-            print(f"Error getting pose reference index for {path_obj}: {e}")
-            traceback.print_exc()
-            keypoints_names, ref_index_len = None, None
+        # Get Pose Estimation keypoints
+        keypoints_names = config.get("keypoints", [])
 
         # Create the visualization dictionary dynamically - TODO
         n_clusters = config.get("n_clusters")
@@ -334,7 +327,6 @@ def load_project(project_path: Path):
         workflow = dict(
             organized=(path_obj / 'data' / 'train').exists(),
             keypoints_names=keypoints_names,
-            ref_index_len=ref_index_len,
             modeled=len(images["evaluation"]) > 0,
             segmented=has_latent_vector_files,
             motif_videos_created=any(motif_videos_created.values()),
