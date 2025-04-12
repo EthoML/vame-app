@@ -79,6 +79,9 @@ export const TabButton = styled.button<TabButtonProps>`
 
 export const PaddedTab = styled.div`
   padding: 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 `;
 
 export const GridTab = styled.div`
@@ -86,6 +89,7 @@ export const GridTab = styled.div`
   grid-template-rows: 1fr auto;
   gap: 20px;
   height: 100%;
+  min-height: 0;
 `;
 
 export const PaddedBottomRow = styled.div`

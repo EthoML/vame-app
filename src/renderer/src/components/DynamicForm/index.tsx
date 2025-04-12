@@ -1,7 +1,7 @@
 import React from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { extractDefaultValues } from "@renderer/utils/extractDefaultValues"
-import { Button, InputGroup, InputLabel } from './styles';
+import { Button, InputGroup, InputLabel, FormLayout, FormScrollContent, FormFooter } from './styles';
 import DynamicInput from "./DynamicInput"
 import { header } from "@renderer/utils/text";
 import { isEmpty } from "@renderer/utils/objectIsEmpty";
@@ -43,25 +43,28 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
   return (
     <FormProvider {...methods}>
 
-      <form
-        onSubmit={methods.handleSubmit(onFormSubmit)}>
-        {properties.map(([name, property]) => {
-          const required = schema.required?.includes(name)
+      <FormLayout
+        onSubmit={methods.handleSubmit(onFormSubmit)}
+      >
+        <FormScrollContent>
+          {properties.map(([name, property]) => {
+            const required = schema.required?.includes(name)
 
-          return (
-            <InputGroup key={name}>
-              <InputLabel required={required} readOnly={property.readOnly}>
-                <span>{property.title ?? header(name)}</span>
-                {property.description && <small>{property.description}</small>}
-              </InputLabel>
-              <DynamicInput name={name} property={property} required={required} readOnly={property.readOnly} />
-            </InputGroup>
-          )
-        })}
-
-        <Button type="submit" disabled={blockSubmission || readOnly}>{submitText}</Button>
-
-      </form>
+            return (
+              <InputGroup key={name}>
+                <InputLabel required={required} readOnly={property.readOnly}>
+                  <span>{property.title ?? header(name)}</span>
+                  {property.description && <small>{property.description}</small>}
+                </InputLabel>
+                <DynamicInput name={name} property={property} required={required} readOnly={property.readOnly} />
+              </InputGroup>
+            )
+          })}
+        </FormScrollContent>
+        <FormFooter>
+          <Button type="submit" disabled={blockSubmission || readOnly}>{submitText}</Button>
+        </FormFooter>
+      </FormLayout>
     </FormProvider>
   );
 }

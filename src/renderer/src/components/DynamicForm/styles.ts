@@ -1,6 +1,34 @@
 import styled from "styled-components";
 import ButtonComponent from "@renderer/components/Button"
 
+// --- Layout for the whole form ---
+export const FormLayout = styled.form`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0; /* for flexbox scrolling */
+`;
+
+/* --- Footer for the button --- */
+export const FormFooter = styled.div`
+  flex-shrink: 0;
+  padding: 16px 0 24px 0;
+  background: white;
+  z-index: 10;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.03);
+  display: flex;
+  align-items: flex-end;
+  position: sticky;
+  bottom: 0;
+`;
+
+/* --- Scrollable content area above the button --- */
+export const FormScrollContent = styled.div`
+  height: calc(100% - 56px);
+  overflow-y: auto;
+  min-height: 0;
+`;
+
 // Accordion Component
 export const Accordion = styled.div`
   background-color: #f1f1f1;
