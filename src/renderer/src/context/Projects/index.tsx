@@ -209,8 +209,8 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
     return res
   }, [])
 
-  const preprocessing = useCallback(async (data) => {
-    const res = await preprocessingVAMEProject(data)
+  const runPreprocessing = useCallback(async (data) => {
+    const res = await runPreprocessing(data)
     await refresh()
     return res
   }, [])
@@ -244,7 +244,7 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
     createProject,
     deleteProject,
     configureProject,
-    preprocessing,
+    runPreprocessing,
     createTrainset,
     train,
     evaluate,

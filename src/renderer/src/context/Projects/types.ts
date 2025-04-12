@@ -47,7 +47,7 @@ export type IProjectContext = {
   deleteProject: typeof deleteVAMEProject
   configureProject: typeof configureVAMEProject
 
-  preprocessing: typeof preprocessingVAMEProject
+  runPreprocessing: typeof preprocessingVAMEProject
 
   createTrainset: typeof createTrainsetVAMEProject
 

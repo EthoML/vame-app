@@ -30,7 +30,7 @@ const Project: React.FC = () => {
     getProject,
     refresh,
     configureProject,
-    preprocessing,
+    runPreprocessing,
     createTrainset,
     train,
     evaluate,
@@ -144,7 +144,6 @@ const Project: React.FC = () => {
               blockTooltip="Waiting VAME to be ready."
               onFormSubmit={async (formData) => submitTab(async () => {
                 const { advanced_options, ...mainProperties } = formData as any
-
                 await configureProject(
                   {
                     config: { ...mainProperties, ...advanced_options }, project: project.config.project_path
@@ -182,7 +181,7 @@ const Project: React.FC = () => {
               blockSubmission={blockSubmit}
               blockTooltip="Waiting VAME to be ready."
               onFormSubmit={async (params) => submitTab(async () => {
-                await preprocessing({
+                await runPreprocessing({
                   project: project.config.project_path,
                   ...params
                 });
