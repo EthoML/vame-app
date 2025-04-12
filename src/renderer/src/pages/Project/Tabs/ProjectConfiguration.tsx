@@ -58,7 +58,7 @@ const ProjectConfiguration = ({
             initialValues={toEdit}
             schema={schema}
             blockSubmission={blockSubmission}
-            submitText="Finalize Configuration"
+            submitText="Confirm Configuration"
             onFormSubmit={onFormSubmit}
           />
         </>

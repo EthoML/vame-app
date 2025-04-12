@@ -112,6 +112,7 @@ const Project: React.FC = () => {
   console.log("Project states:", project.states);
 
   // Check if states exist and have expected properties
+  const configuredState = project.states?.update_config || {};
   const preprocessingState = project.states?.preprocessing || {};
   const create_trainset = project.states?.create_trainset || {};
   const evaluate_model = project.states?.evaluate_model || {};
@@ -122,6 +123,7 @@ const Project: React.FC = () => {
   const community_videos = project.states?.community_videos || {};
   const visualize_umap = project.states?.visualize_umap || {};
 
+  const projectConfigured = configuredState.execution_state === "success";
   const organized = preprocessingState.execution_state === "success" && create_trainset.execution_state === "success";
   const modeled = evaluate_model.execution_state === "success" && train_model.execution_state === "success";
   const segmented = segment_session.execution_state === "success";
@@ -134,7 +136,7 @@ const Project: React.FC = () => {
     {
       id: 'project-configuration',
       label: '1. Project Configuration',
-      complete: organized,
+      complete: projectConfigured,
       content: (() => {
         try {
           return (
@@ -149,7 +151,7 @@ const Project: React.FC = () => {
                     config: { ...mainProperties, ...advanced_options }, project: project.config.project_path
                   }).catch(e => alert(e))
 
-              }, 'data-organization')}
+              }, 'preprocessing')}
             />
           );
         } catch (error) {
@@ -172,6 +174,7 @@ const Project: React.FC = () => {
     {
       id: 'preprocessing',
       label: '2. Preprocessing',
+      disabled: tabsLock && !projectConfigured,
       complete: organized,
       content: (() => {
         try {

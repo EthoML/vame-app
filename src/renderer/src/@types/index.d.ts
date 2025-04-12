@@ -79,6 +79,10 @@ declare global {
       umaps_created: boolean;
     };
     states: {
+      update_config: {
+        execution_state?: string;
+        [key: string]: unknown
+      };
       community: {
         execution_state?: string;
         [key: string]: unknown
