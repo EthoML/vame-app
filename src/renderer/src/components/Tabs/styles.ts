@@ -62,6 +62,9 @@ export const TabButton = styled.button<TabButtonProps>`
 
   &:disabled {
     pointer-events: none;
+    color: #888;
+    opacity: 0.5;
+    background-color: #f5f5f5;
   }
 
   ${(props) =>
