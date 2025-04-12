@@ -2,7 +2,9 @@ from flask_restx import Namespace
 import traceback
 from flask import jsonify
 
+
 api = Namespace('/', description='Main API Namespace')
+
 
 @api.errorhandler(Exception)
 def exception_handler(error):

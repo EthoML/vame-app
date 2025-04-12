@@ -5,6 +5,7 @@ from logging.config import dictConfig
 import os
 from app.config import VAME_APP_DIRECTORY
 
+
 def create_app():
     app = Flask("VAME API", os.path.abspath(VAME_APP_DIRECTORY))
     CORS(app)
@@ -25,15 +26,16 @@ def create_app():
             'handlers': ['wsgi']
         }
     })
-  
+
     api = Api(app, version='2.0', title='VAME API', description="The REST API for VAME.")
 
-    from app.routes import project, file, health_check, vame
+    from app.routes import project, file, health_check, vame, preprocessing
 
     api.add_namespace(health_check.api)
     api.add_namespace(file.api)
     api.add_namespace(project.api)
     api.add_namespace(vame.api)
+    api.add_namespace(preprocessing.api)
 
     return app
 
