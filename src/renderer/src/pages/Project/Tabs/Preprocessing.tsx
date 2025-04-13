@@ -305,12 +305,29 @@ const VisualizationSection = ({ project }: { project: any }) => {
               </button>
             ))}
           </div>
-          <div style={{ minHeight: 220, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div
+            style={{
+              minHeight: 220,
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "#f8f9fa",
+              borderRadius: 6,
+              boxShadow: "0 2px 8px #0001",
+              overflow: "auto"
+            }}
+          >
             {images[activeTab] ? (
               <img
                 src={images[activeTab]!}
                 alt={`${activeTab} visualization`}
-                style={{ maxWidth: "100%", maxHeight: 320, borderRadius: 6, boxShadow: "0 2px 8px #0001" }}
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  objectFit: "contain",
+                  display: "block"
+                }}
               />
             ) : (
               <span style={{ color: "#888" }}>No image available for {activeTab}.</span>
