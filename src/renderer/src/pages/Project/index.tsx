@@ -190,7 +190,7 @@ const Project: React.FC = () => {
                   project: project.config.project_path,
                   ...params
                 });
-              }, 'model-creation')}
+              }, 'model-training')}
             />
           );
         } catch (error) {
@@ -211,40 +211,45 @@ const Project: React.FC = () => {
       })()
     },
     {
-      id: 'model-creation',
-      label: '3. Model Creation',
+      id: 'model-training',
+      label: '3. Model Training',
       disabled: tabsLock && !projectPreprocessed,
       complete: modeled,
       tooltip: "Organize your project first.",
-      content: (
-        <div style={{ padding: 20, background: "#f5f5f5" }}>
-          <h3>Model Creation Content</h3>
-          <p>This is a placeholder for the Model component.</p>
-          <p><b>Original props:</b></p>
-          <ul>
-            <li>project: {JSON.stringify(project.config?.project_name || project.config?.Project)}</li>
-            <li>blockSubmission: {String(blockSubmit)}</li>
-            <li>disabled: {String(tabsLock && !projectPreprocessed)}</li>
-          </ul>
-        </div>
-      )
-      /* Original content:
-      <Model
-        project={project}
-        blockSubmission={blockSubmit}
-        blockTooltip="Waiting VAME to be ready."
-        onFormSubmit={({ train: needTrain, evaluate: needEvaluate }: any) => {
-          const runAll = needTrain && needEvaluate
-          return submitTab(async () => {
-            const projectPath = project.config.project_path
-
-            if (needTrain) await train({ project: projectPath })
-            if (needEvaluate) await evaluate({ project: projectPath })
-
-          }, runAll ? 'segmentation' : 'model-creation')
-        }}
-      />
-      */
+      content: (() => {
+        try {
+          return (
+            <Model
+              project={project}
+              blockSubmission={blockSubmit}
+              blockTooltip="Waiting VAME to be ready."
+              onFormSubmit={({ train: needTrain, evaluate: needEvaluate }: any) => {
+                const runAll = needTrain && needEvaluate;
+                return submitTab(async () => {
+                  const projectPath = project.config.project_path;
+                  if (needTrain) await train({ project: projectPath });
+                  if (needEvaluate) await evaluate({ project: projectPath });
+                }, runAll ? 'segmentation' : 'model-creation');
+              }}
+            />
+          );
+        } catch (error) {
+          console.error("Error rendering Model component:", error);
+          return (
+            <div style={{ padding: 20, background: "#f5f5f5" }}>
+              <h3>Model Training Content (Fallback)</h3>
+              <p>Error rendering the Model component.</p>
+              <p><b>Error:</b> {String(error)}</p>
+              <p><b>Original props:</b></p>
+              <ul>
+                <li>project: {JSON.stringify(project.config?.project_name || project.config?.Project)}</li>
+                <li>blockSubmission: {String(blockSubmit)}</li>
+                <li>disabled: {String(tabsLock && !projectPreprocessed)}</li>
+              </ul>
+            </div>
+          );
+        }
+      })()
     },
     {
       id: 'segmentation',
