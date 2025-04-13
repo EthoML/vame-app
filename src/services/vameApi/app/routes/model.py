@@ -34,8 +34,6 @@ class TrainModel(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         import vame
-        import matplotlib
-        matplotlib.use('agg')
         try:
             data, project_path = resolve_request_data(request)
 
@@ -43,7 +41,6 @@ class TrainModel(Resource):
                 **data,
                 save_logs=True
             )
-
             return dict(result=result)
         except Exception as exception:
             if not_bad_request_exception(exception):
