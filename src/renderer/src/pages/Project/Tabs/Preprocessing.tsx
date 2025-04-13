@@ -2,9 +2,14 @@ import { useState } from "react"
 
 import DynamicForm from "../../../components/DynamicForm"
 import TerminalModal from "../../../components/TerminalModal"
+import {
+  Accordion,
+  AccordionHeader,
+  AccordionContent,
+} from "@renderer/components/DynamicForm/styles"
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faTerminal } from "@fortawesome/free-solid-svg-icons"
+import { faTerminal, faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons"
 import { TabProps } from "./types"
 
 import preprocessingSchema from '../../../../../schema/preprocessing.schema.json'
@@ -27,6 +32,9 @@ const Preprocessing = ({
   blockSubmission = false,
   blockTooltip,
 }: TabProps) => {
+  // Accordion open/close state
+  const [isPreprocessingOpen, setPreprocessingOpen] = useState(true)
+  const [isVisualizeOpen, setVisualizeOpen] = useState(false)
   try {
     // If keypoints is not available, create a default array with common keypoints
     let keypoints_names: string[] = []
@@ -129,36 +137,67 @@ const Preprocessing = ({
 
     return (
       <PaddedTab>
-        <div style={{ marginBottom: '20px' }}>
-          Open logs:{" "}
-          <ControlButton onClick={() => setTerminal(true)}>
-            <FontAwesomeIcon icon={faTerminal} />
-          </ControlButton>
-        </div>
+        <Accordion>
+          <AccordionHeader onClick={() => setPreprocessingOpen((v) => !v)}>
+            Run Preprocessing
+            <span style={{ marginLeft: "auto" }}>
+              <FontAwesomeIcon icon={isPreprocessingOpen ? faChevronUp : faChevronDown} />
+            </span>
+          </AccordionHeader>
+          <AccordionContent $isOpen={isPreprocessingOpen}>
+            <div
+              style={{
+                marginBottom: "20px",
+                background: "transparent",
+                padding: "12px 16px",
+                borderRadius: "6px",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              Open logs:{" "}
+              <ControlButton onClick={() => setTerminal(true)} style={{ marginLeft: 8 }}>
+                <FontAwesomeIcon icon={faTerminal} />
+              </ControlButton>
+            </div>
 
-        <TerminalModal
-          projectPath={project.config.project_path}
-          logName={["egocentric_alignment", "create_trainset"]}
-          isOpen={terminal}
-          onClose={() => setTerminal(false)}
-        />
-
-        <Tippy
-          content={blockTooltip}
-          placement="bottom"
-          hideOnClick={false}
-          disabled={!blockSubmission || !blockTooltip}
-        >
-          <>
-            <DynamicForm
-              initialValues={states}
-              schema={schema}
-              blockSubmission={blockSubmission}
-              submitText="Run Preprocessing"
-              onFormSubmit={handleFormSubmit}
+            <TerminalModal
+              projectPath={project.config.project_path}
+              logName={["egocentric_alignment", "create_trainset"]}
+              isOpen={terminal}
+              onClose={() => setTerminal(false)}
             />
-          </>
-        </Tippy>
+
+            <Tippy
+              content={blockTooltip}
+              placement="bottom"
+              hideOnClick={false}
+              disabled={!blockSubmission || !blockTooltip}
+            >
+              <>
+                <DynamicForm
+                  initialValues={states}
+                  schema={schema}
+                  blockSubmission={blockSubmission}
+                  submitText="Run Preprocessing"
+                  onFormSubmit={handleFormSubmit}
+                />
+              </>
+            </Tippy>
+          </AccordionContent>
+        </Accordion>
+        <Accordion>
+          <AccordionHeader onClick={() => setVisualizeOpen((v) => !v)}>
+            Visualize Preprocessing Results
+            <span style={{ marginLeft: "auto" }}>
+              <FontAwesomeIcon icon={isVisualizeOpen ? faChevronUp : faChevronDown} />
+            </span>
+          </AccordionHeader>
+          <AccordionContent $isOpen={isVisualizeOpen}>
+            {/* Placeholder for visualization content */}
+            Visualization content goes here.
+          </AccordionContent>
+        </Accordion>
       </PaddedTab>
     )
   } catch (error) {

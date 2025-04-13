@@ -5,7 +5,6 @@ import ButtonComponent from "@renderer/components/Button"
 export const FormLayout = styled.form`
   display: flex;
   flex-direction: column;
-  height: 100%;
   min-height: 0; /* for flexbox scrolling */
 `;
 
@@ -13,12 +12,9 @@ export const FormLayout = styled.form`
 export const FormFooter = styled.div`
   flex-shrink: 0;
   padding: 16px 0 24px 0;
-  background: white;
-  z-index: 10;
-  box-shadow: 0 -2px 8px rgba(0,0,0,0.03);
+  background: transparent;
   display: flex;
   align-items: flex-end;
-  position: sticky;
   bottom: 0;
 `;
 
@@ -103,13 +99,20 @@ export const InputLabel = styled.label<InputLabelProps>`
 
 export const Button = styled.button`
   padding: 10px;
-  background-color: #007bff;
   width: 100%;
+  background-color: #0056b3;
   color: white;
-  border: none;
+  border: 2px solid #007bff;
   border-radius: 5px;
   font-weight: bold;
   cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover,
+  &:focus {
+    background-color: #003366;
+    color: white;
+  }
 
   &[disabled] {
     pointer-events: none;
