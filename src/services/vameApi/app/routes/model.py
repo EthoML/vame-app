@@ -1,3 +1,4 @@
+from pathlib import Path
 from flask_restx import Resource
 from flask import request, jsonify
 
@@ -15,8 +16,9 @@ class CreateTrainset(Resource):
 
         try:
             data, project_path = resolve_request_data(request)
+            config = vame.auxiliary.read_config(str(Path(project_path) / "config.yaml"))
             result = vame.create_trainset(
-                config=data["config"],
+                config=config,
                 test_fraction=data["test_fraction"],
                 split_mode=data["split_mode"],
                 save_logs=True,
