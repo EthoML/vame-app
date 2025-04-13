@@ -1,0 +1,29 @@
+{
+    "title": "Create Training Set",
+    "type": "object",
+    "properties": {
+        "test_fraction": {
+            "type": "number",
+            "title": "Test Fraction",
+            "minimum": 0.1,
+            "maximum": 0.9,
+            "multipleOf": 0.01,
+            "default": 0.2,
+            "description": "Fraction of data to use for testing, between 0.1 and 0.9"
+        },
+        "split_mode": {
+            "type": "string",
+            "title": "Split Mode",
+            "enum": [
+                "mode_1",
+                "mode_2"
+            ],
+            "default": "mode_2",
+            "description": "'mode_1': initial fraction form combined data. 'mode_2': random chunks from each session."
+        }
+    },
+    "required": [
+        "test_fraction",
+        "split_mode"
+    ]
+}

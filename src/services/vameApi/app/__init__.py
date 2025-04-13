@@ -29,14 +29,20 @@ def create_app():
 
     api = Api(app, version='2.0', title='VAME API', description="The REST API for VAME.")
 
-    from app.routes import project, file, health_check, vame, preprocessing
+    from app.routes import (
+        project,
+        file,
+        health_check,
+        vame,
+        preprocessing,
+        model,
+    )
 
     api.add_namespace(health_check.api)
     api.add_namespace(file.api)
     api.add_namespace(project.api)
     api.add_namespace(vame.api)
     api.add_namespace(preprocessing.api)
+    api.add_namespace(model.api)
 
     return app
-
-

@@ -14,6 +14,7 @@ import { Container, HeaderButton, HeaderButtonContainer, ProjectHeader, ProjectI
 import ProjectConfiguration from './Tabs/ProjectConfiguration';
 import Preprocessing from './Tabs/Preprocessing';
 import Model from './Tabs/Model';
+import ModelTrainingAccordion from './Tabs/ModelTrainingAccordion';
 import Segmentation from './Tabs/Segmentation';
 import MotifVideos from './Tabs/MotifVideos';
 import { CommunityAnalysis } from './Tabs/CommunityAnalysis';
@@ -216,40 +217,9 @@ const Project: React.FC = () => {
       disabled: tabsLock && !projectPreprocessed,
       complete: modeled,
       tooltip: "Organize your project first.",
-      content: (() => {
-        try {
-          return (
-            <Model
-              project={project}
-              blockSubmission={blockSubmit}
-              blockTooltip="Waiting VAME to be ready."
-              onFormSubmit={({ train: needTrain, evaluate: needEvaluate }: any) => {
-                const runAll = needTrain && needEvaluate;
-                return submitTab(async () => {
-                  const projectPath = project.config.project_path;
-                  if (needTrain) await train({ project: projectPath });
-                  if (needEvaluate) await evaluate({ project: projectPath });
-                }, runAll ? 'segmentation' : 'model-creation');
-              }}
-            />
-          );
-        } catch (error) {
-          console.error("Error rendering Model component:", error);
-          return (
-            <div style={{ padding: 20, background: "#f5f5f5" }}>
-              <h3>Model Training Content (Fallback)</h3>
-              <p>Error rendering the Model component.</p>
-              <p><b>Error:</b> {String(error)}</p>
-              <p><b>Original props:</b></p>
-              <ul>
-                <li>project: {JSON.stringify(project.config?.project_name || project.config?.Project)}</li>
-                <li>blockSubmission: {String(blockSubmit)}</li>
-                <li>disabled: {String(tabsLock && !projectPreprocessed)}</li>
-              </ul>
-            </div>
-          );
-        }
-      })()
+      content: (
+        <ModelTrainingAccordion project={project} />
+      )
     },
     {
       id: 'segmentation',
