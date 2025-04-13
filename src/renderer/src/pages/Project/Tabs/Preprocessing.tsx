@@ -139,7 +139,7 @@ const Preprocessing = ({
       <PaddedTab>
         <Accordion>
           <AccordionHeader onClick={() => setPreprocessingOpen((v) => !v)}>
-            Run Preprocessing
+            1. Run Preprocessing
             <span style={{ marginLeft: "auto" }}>
               <FontAwesomeIcon icon={isPreprocessingOpen ? faChevronUp : faChevronDown} />
             </span>
@@ -188,7 +188,7 @@ const Preprocessing = ({
         </Accordion>
         <Accordion>
           <AccordionHeader onClick={() => setVisualizeOpen((v) => !v)}>
-            Visualize Preprocessing Results
+            2. Visualize Preprocessing Results
             <span style={{ marginLeft: "auto" }}>
               <FontAwesomeIcon icon={isVisualizeOpen ? faChevronUp : faChevronDown} />
             </span>

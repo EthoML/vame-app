@@ -190,7 +190,6 @@ const Project: React.FC = () => {
                   project: project.config.project_path,
                   ...params
                 });
-                // TODO: Allow users to inspect the quality of the trainset here
               }, 'model-creation')}
             />
           );
