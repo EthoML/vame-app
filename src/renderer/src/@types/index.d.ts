@@ -85,24 +85,6 @@ declare global {
         execution_state?: string;
         [key: string]: unknown
       };
-      community: {
-        execution_state?: string;
-        [key: string]: unknown
-      };
-      community_videos: {
-        execution_state?: string;
-        [key: string]: unknown
-      };
-      create_trainset: {
-        execution_state?: string;
-        check_parameter: boolean;
-        config: string;
-        pose_ref_index: number[];
-      };
-      csv_to_numpy: {
-        execution_state?: string;
-        [key: string]: unknown
-      };
       preprocessing: {
         execution_state?: string;
         [key: string]: unknown
@@ -111,11 +93,27 @@ declare global {
         execution_state?: string;
         [key: string]: unknown
       };
+      create_trainset: {
+        execution_state?: string;
+        [key: string]: unknown
+      };
+      train_model: {
+        config: string;
+        execution_state?: string;
+      };
       evaluate_model: {
         execution_state?: string;
         [key: string]: unknown
       };
       generative_model: {
+        execution_state?: string;
+        [key: string]: unknown
+      };
+      community: {
+        execution_state?: string;
+        [key: string]: unknown
+      };
+      community_videos: {
         execution_state?: string;
         [key: string]: unknown
       };
@@ -127,17 +125,13 @@ declare global {
         execution_state?: string;
         [key: string]: unknown
       };
-      train_model: {
-        config: string;
-        execution_state?: string;
-      };
       visualize_umap: {
         execution_state?: string;
         [key: string]: unknown
       };
     };
     videos: string[];
-    csvs: string[];
+    pes_paths: string[];
     assets: {
       images: {
         evaluation: string[];
