@@ -128,7 +128,9 @@ const Project: React.FC = () => {
 
   const projectConfigured = configuredState.execution_state === "success";
   const projectPreprocessed = preprocessingState.execution_state === "success" && preprocessingVisualizationState.execution_state === "success";
-  const modeled = evaluate_model.execution_state === "success" && train_model.execution_state === "success";
+  const trainsetCreated = create_trainset.execution_state === "success";
+  const modelCreated = train_model.execution_state === "success";
+  const modelEvaluated = evaluate_model.execution_state === "success";
   const segmented = segment_session.execution_state === "success";
   const motif_videos_created = motif_videos.execution_state === "success" && project.workflow?.motif_videos_created;
   const community_videos_created = community_videos.execution_state === "success" && project.workflow?.community_videos_created;
@@ -216,7 +218,7 @@ const Project: React.FC = () => {
       id: 'model-training',
       label: '3. Model Training',
       disabled: tabsLock && !projectPreprocessed,
-      complete: modeled,
+      complete: trainsetCreated && modelCreated && modelEvaluated,
       tooltip: "Organize your project first.",
       content: (
         <ModelTrainingAccordion project={project} />
@@ -225,7 +227,7 @@ const Project: React.FC = () => {
     {
       id: 'segmentation',
       label: '4. Pose Segmentation',
-      disabled: tabsLock && !modeled,
+      disabled: tabsLock && !modelEvaluated,
       complete: segmented,
       tooltip: "Model your project first.",
       content: (
@@ -236,7 +238,7 @@ const Project: React.FC = () => {
           <ul>
             <li>project: {JSON.stringify(project.config?.project_name || project.config?.Project)}</li>
             <li>blockSubmission: {String(blockSubmit)}</li>
-            <li>disabled: {String(tabsLock && !modeled)}</li>
+            <li>disabled: {String(tabsLock && !modelEvaluated)}</li>
           </ul>
         </div>
       )

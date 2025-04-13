@@ -32,11 +32,22 @@ type ModelTrainingAccordionProps = {
 
 
 const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
-    const [openStep, setOpenStep] = useState<null | number>(0);
+    // Independent open/close state for each accordion
+    const [openSteps, setOpenSteps] = useState([true, false, false, false]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
 
+    // States
+    const create_trainset = project.states?.create_trainset || {};
+    const train_model = project.states?.train_model || {};
+    const evaluate_model = project.states?.evaluate_model || {};
+
+    const trainsetCreated = create_trainset.execution_state === "success";
+    const modelCreated = train_model.execution_state === "success";
+    const modelEvaluated = evaluate_model.execution_state === "success";
+
+    // Handlers
     const handleCreateTrainset = async (formData: any) => {
         setLoading(true);
         setError(null);
@@ -55,20 +66,38 @@ const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
         }
     };
 
-    const steps = [
-        {
-            label: "1. Create Training Set",
-            content: (
-                <>
+    // Toggle handler for independent accordions
+    const handleToggle = (idx: number, enabled: boolean) => {
+        if (!enabled) return;
+        setOpenSteps((prev) => {
+            const next = [...prev];
+            next[idx] = !next[idx];
+            return next;
+        });
+    };
+
+    return (
+        <PaddedTab>
+            {/* Accordion 1: Create Training Set */}
+            <Accordion>
+                <AccordionHeader
+                    $disabled={false}
+                    onClick={() => handleToggle(0, true)}
+                >
+                    1. Create Training Set
+                    {trainsetCreated && (
+                        <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
+                            ✓
+                        </span>
+                    )}
+                    <span style={{ marginLeft: "auto" }}>
+                        <FontAwesomeIcon icon={openSteps[0] ? faChevronUp : faChevronDown} />
+                    </span>
+                </AccordionHeader>
+                <AccordionContent $isOpen={openSteps[0]}>
                     <div>
-                        <b>Create Training Set</b>
-                        <p>Configure and create the training set for your model.</p>
                         <DynamicForm
                             schema={createTrainsetSchema}
-                            initialValues={{
-                                test_fraction: 0.2,
-                                split_mode: "mode_1",
-                            }}
                             blockSubmission={loading}
                             submitText={loading ? "Creating..." : "Create Training Set"}
                             onFormSubmit={handleCreateTrainset}
@@ -81,61 +110,74 @@ const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
                         )}
                         <PlaceholderLog step="Create Training Set" />
                     </div>
-                </>
-            ),
-        },
-        {
-            label: "2. Train Model",
-            content: (
-                <>
+                </AccordionContent>
+            </Accordion>
+            {/* Accordion 2: Train Model */}
+            <Accordion>
+                <AccordionHeader
+                    $disabled={!trainsetCreated}
+                    onClick={() => handleToggle(1, trainsetCreated)}
+                >
+                    2. Train Model
+                    {modelCreated && (
+                        <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
+                            ✓
+                        </span>
+                    )}
+                    <span style={{ marginLeft: "auto" }}>
+                        <FontAwesomeIcon icon={openSteps[1] ? faChevronUp : faChevronDown} />
+                    </span>
+                </AccordionHeader>
+                <AccordionContent $isOpen={openSteps[1]}>
                     <div>
                         <b>Train Model</b>
                         <p>This section will allow you to train your model. (Functionality coming soon.)</p>
                         <PlaceholderLog step="Train Model" />
                     </div>
-                </>
-            ),
-        },
-        {
-            label: "3. Evaluate Model",
-            content: (
-                <>
+                </AccordionContent>
+            </Accordion>
+            {/* Accordion 3: Evaluate Model */}
+            <Accordion>
+                <AccordionHeader
+                    $disabled={!modelCreated}
+                    onClick={() => handleToggle(2, modelCreated)}
+                >
+                    3. Evaluate Model
+                    {modelEvaluated && (
+                        <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
+                            ✓
+                        </span>
+                    )}
+                    <span style={{ marginLeft: "auto" }}>
+                        <FontAwesomeIcon icon={openSteps[2] ? faChevronUp : faChevronDown} />
+                    </span>
+                </AccordionHeader>
+                <AccordionContent $isOpen={openSteps[2]}>
                     <div>
                         <b>Evaluate Model</b>
                         <p>This section will allow you to evaluate your model. (Functionality coming soon.)</p>
                         <PlaceholderLog step="Evaluate Model" />
                     </div>
-                </>
-            ),
-        },
-        {
-            label: "4. Visualize Model Results",
-            content: (
-                <>
+                </AccordionContent>
+            </Accordion>
+            {/* Accordion 4: Visualize Model Results */}
+            <Accordion>
+                <AccordionHeader
+                    $disabled={!modelEvaluated}
+                    onClick={() => handleToggle(3, modelEvaluated)}
+                >
+                    4. Visualize Model Results
+                    <span style={{ marginLeft: "auto" }}>
+                        <FontAwesomeIcon icon={openSteps[3] ? faChevronUp : faChevronDown} />
+                    </span>
+                </AccordionHeader>
+                <AccordionContent $isOpen={openSteps[3]}>
                     <div>
                         <b>Visualize Model Results</b>
                         <p>Visualization functionality will be added here.</p>
                     </div>
-                </>
-            ),
-        },
-    ];
-
-    return (
-        <PaddedTab>
-            {steps.map((step, idx) => (
-                <Accordion key={step.label}>
-                    <AccordionHeader onClick={() => setOpenStep(openStep === idx ? null : idx)}>
-                        {step.label}
-                        <span style={{ marginLeft: "auto" }}>
-                            <FontAwesomeIcon icon={openStep === idx ? faChevronUp : faChevronDown} />
-                        </span>
-                    </AccordionHeader>
-                    <AccordionContent $isOpen={openStep === idx}>
-                        {step.content}
-                    </AccordionContent>
-                </Accordion>
-            ))}
+                </AccordionContent>
+            </Accordion>
         </PaddedTab>
     );
 };
