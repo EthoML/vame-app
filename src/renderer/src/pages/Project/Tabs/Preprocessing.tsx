@@ -35,6 +35,12 @@ const Preprocessing = ({
   // Accordion open/close state
   const [isPreprocessingOpen, setPreprocessingOpen] = useState(true)
   const [isVisualizeOpen, setVisualizeOpen] = useState(false)
+
+  // Check if project is preprocessed
+  const preprocessingState = project.states?.preprocessing || {};
+  const preprocessingVisualizationState = project.states?.preprocessing_visualization || {};
+  const projectPreprocessed = preprocessingState.execution_state === "success" && preprocessingVisualizationState.execution_state === "success";
+
   try {
     // If keypoints is not available, create a default array with common keypoints
     let keypoints_names: string[] = []
@@ -138,8 +144,15 @@ const Preprocessing = ({
     return (
       <PaddedTab>
         <Accordion>
-          <AccordionHeader onClick={() => setPreprocessingOpen((v) => !v)}>
+          <AccordionHeader
+            onClick={() => setPreprocessingOpen((v) => !v)}
+          >
             1. Run Preprocessing
+            {projectPreprocessed && (
+              <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
+                ✓
+              </span>
+            )}
             <span style={{ marginLeft: "auto" }}>
               <FontAwesomeIcon icon={isPreprocessingOpen ? faChevronUp : faChevronDown} />
             </span>
@@ -187,8 +200,18 @@ const Preprocessing = ({
           </AccordionContent>
         </Accordion>
         <Accordion>
-          <AccordionHeader onClick={() => setVisualizeOpen((v) => !v)}>
+          <AccordionHeader
+            $disabled={!projectPreprocessed}
+            onClick={() => {
+              if (projectPreprocessed) setVisualizeOpen((v) => !v);
+            }}
+          >
             2. Visualize Preprocessing Results
+            {projectPreprocessed && (
+              <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
+                ✓
+              </span>
+            )}
             <span style={{ marginLeft: "auto" }}>
               <FontAwesomeIcon icon={isVisualizeOpen ? faChevronUp : faChevronDown} />
             </span>

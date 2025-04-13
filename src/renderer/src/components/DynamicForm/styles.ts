@@ -32,14 +32,18 @@ export const Accordion = styled.div`
   margin-bottom: 10px;
 `;
 
-export const AccordionHeader = styled.div`
-  background-color: black;
-  color: white;
-  cursor: pointer;
+export const AccordionHeader = styled.div<{ $disabled?: boolean }>`
+  background-color:rgb(166, 166, 166);
+  color: black;
+  font-weight: 500;
+  cursor: ${({ $disabled }) => ($disabled ? 'not-allowed' : 'pointer')};
+  opacity: ${({ $disabled }) => ($disabled ? 0.6 : 1)};
   padding: 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  user-select: none;
+  transition: background 0.2s, color 0.2s, opacity 0.2s;
 `;
 
 interface AccordionContentProps {

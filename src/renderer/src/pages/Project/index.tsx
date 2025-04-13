@@ -118,8 +118,8 @@ const Project: React.FC = () => {
   const preprocessingState = project.states?.preprocessing || {};
   const preprocessingVisualizationState = project.states?.preprocessing_visualization || {};
   const create_trainset = project.states?.create_trainset || {};
-  const evaluate_model = project.states?.evaluate_model || {};
   const train_model = project.states?.train_model || {};
+  const evaluate_model = project.states?.evaluate_model || {};
   const segment_session = project.states?.segment_session || {};
   const motif_videos = project.states?.motif_videos || {};
   const community = project.states?.community || {};
@@ -179,6 +179,7 @@ const Project: React.FC = () => {
       label: '2. Preprocessing',
       disabled: tabsLock && !projectConfigured,
       complete: projectPreprocessed,
+      tooltip: "Finish project configuration first.",
       content: (() => {
         try {
           return (
@@ -191,7 +192,7 @@ const Project: React.FC = () => {
                   project: project.config.project_path,
                   ...params
                 });
-              }, 'model-training')}
+              }, 'preprocessing')}
             />
           );
         } catch (error) {
