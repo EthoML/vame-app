@@ -194,8 +194,8 @@ const Preprocessing = ({
             </span>
           </AccordionHeader>
           <AccordionContent $isOpen={isVisualizeOpen}>
-            {/* Placeholder for visualization content */}
-            Visualization content goes here.
+            {/* Visualization UI */}
+            <VisualizationSection project={project} />
           </AccordionContent>
         </Accordion>
       </PaddedTab>
@@ -205,5 +205,121 @@ const Preprocessing = ({
     return <ErrorFallback error={error as Error} />
   }
 }
+
+/**
+ * VisualizationSection component for session dropdown, fetch button, and image tabs.
+ */
+import { useState as useReactState, useContext } from "react";
+import { ProjectsContext } from "../../../context/Projects";
+import type { IProjectContext } from "../../../context/Projects/types";
+
+const VisualizationSection = ({ project }: { project: any }) => {
+  const { getPreprocessingVisualization } = useContext(ProjectsContext) as IProjectContext;
+  const sessionNames: string[] = Array.isArray(project?.config?.session_names)
+    ? project.config.session_names
+    : [];
+  const [selectedSession, setSelectedSession] = useReactState<string>(
+    sessionNames[0] || ""
+  );
+  const [loading, setLoading] = useReactState(false);
+  const [images, setImages] = useReactState<{
+    timeseries: string | null;
+    scatter: string | null;
+    cloud: string | null;
+  } | null>(null);
+  const [activeTab, setActiveTab] = useReactState<"timeseries" | "scatter" | "cloud">("timeseries");
+  const [error, setError] = useReactState<string | null>(null);
+
+  const handleGetImages = async () => {
+    setLoading(true);
+    setError(null);
+    setImages(null);
+    try {
+      const result = await getPreprocessingVisualization({
+        project: project.config.project_path,
+        session_name: selectedSession,
+      });
+      // Ensure all keys are present and never undefined
+      setImages({
+        timeseries: result.timeseries ?? null,
+        scatter: result.scatter ?? null,
+        cloud: result.cloud ?? null,
+      });
+    } catch (err: any) {
+      setError(err.message || "Failed to fetch images.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{ marginTop: 16 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+        <label htmlFor="session-select" style={{ fontWeight: 500 }}>Session:</label>
+        <select
+          id="session-select"
+          value={selectedSession}
+          onChange={e => setSelectedSession(e.target.value)}
+          style={{ minWidth: 120, padding: "4px 8px" }}
+        >
+          {sessionNames.map(name => (
+            <option key={name} value={name}>{name}</option>
+          ))}
+        </select>
+        <button
+          onClick={handleGetImages}
+          disabled={loading || !selectedSession}
+          style={{
+            marginLeft: 8,
+            padding: "4px 12px",
+            fontWeight: 500,
+            background: "#1976d2",
+            color: "#fff",
+            border: "none",
+            borderRadius: 4,
+            cursor: loading ? "not-allowed" : "pointer"
+          }}
+        >
+          {loading ? "Loading..." : "Get Images"}
+        </button>
+      </div>
+      {error && (
+        <div style={{ color: "red", marginBottom: 12 }}>{error}</div>
+      )}
+      {images && (
+        <div>
+          <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
+            {(["timeseries", "scatter", "cloud"] as const).map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                style={{
+                  padding: "6px 16px",
+                  borderBottom: activeTab === tab ? "2px solid #1976d2" : "2px solid transparent",
+                  background: "none",
+                  fontWeight: activeTab === tab ? 600 : 400,
+                  cursor: "pointer"
+                }}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </button>
+            ))}
+          </div>
+          <div style={{ minHeight: 220, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {images[activeTab] ? (
+              <img
+                src={images[activeTab]!}
+                alt={`${activeTab} visualization`}
+                style={{ maxWidth: "100%", maxHeight: 320, borderRadius: 6, boxShadow: "0 2px 8px #0001" }}
+              />
+            ) : (
+              <span style={{ color: "#888" }}>No image available for {activeTab}.</span>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default Preprocessing

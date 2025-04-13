@@ -3,6 +3,7 @@ import {
   deleteVAMEProject,
   configureVAMEProject,
   preprocessingVAMEProject,
+  preprocessingVisualization,
   createTrainsetVAMEProject,
   trainVAMEProject,
   evaluateVAMEProject,
@@ -15,6 +16,7 @@ import {
 
 export type ProjectStates = {
   preprocessing: any;
+  preprocessing_visualization: any;
   create_trainset: any;
   evaluate_model: any;
   train_model: any;
@@ -48,6 +50,7 @@ export type IProjectContext = {
   configureProject: typeof configureVAMEProject
 
   runPreprocessing: typeof preprocessingVAMEProject
+  getPreprocessingVisualization: typeof preprocessingVisualization
 
   createTrainset: typeof createTrainsetVAMEProject
 

@@ -17,6 +17,7 @@ import {
   deleteVAMEProject,
   configureVAMEProject,
   preprocessingVAMEProject,
+  preprocessingVisualization,
   createTrainsetVAMEProject,
   trainVAMEProject,
   evaluateVAMEProject,
@@ -215,6 +216,11 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
     return res
   }, [])
 
+  const getPreprocessingVisualization = useCallback(async (data) => {
+    const res = await preprocessingVisualization(data)
+    return res
+  }, [])
+
   const getProject = useCallback((path: string) => {
     return projects.find(p => p.config.project_path === path)
   }, [projects])
@@ -245,6 +251,7 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
     deleteProject,
     configureProject,
     runPreprocessing,
+    getPreprocessingVisualization,
     createTrainset,
     train,
     evaluate,
