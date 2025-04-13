@@ -10,6 +10,7 @@ import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import DynamicForm from "@renderer/components/DynamicForm";
 import { createTrainsetVAMEProject } from "../../../context/Projects/api/createTrainsetVAMEProject";
 import createTrainsetSchema from '../../../../../schema/create-trainset.schema.json';
+import trainModelSchema from '../../../../../schema/train-model.schema.json';
 
 const PlaceholderLog = ({ step }: { step: string }) => (
     <div
@@ -38,6 +39,11 @@ const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
 
+    // Train Model form state
+    const [trainLoading, setTrainLoading] = useState(false);
+    const [trainError, setTrainError] = useState<string | null>(null);
+    const [trainSuccess, setTrainSuccess] = useState<string | null>(null);
+
     // States
     const create_trainset = project.states?.create_trainset || {};
     const train_model = project.states?.train_model || {};
@@ -63,6 +69,22 @@ const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
             setError(err.message || "Failed to create training set.");
         } finally {
             setLoading(false);
+        }
+    };
+
+    // Handler for Train Model form submission
+    const handleTrainModel = async (formData: any) => {
+        setTrainLoading(true);
+        setTrainError(null);
+        setTrainSuccess(null);
+        try {
+            // Placeholder: Replace with actual API call
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            setTrainSuccess("Model training started (placeholder).");
+        } catch (err: any) {
+            setTrainError(err.message || "Failed to start model training.");
+        } finally {
+            setTrainLoading(false);
         }
     };
 
@@ -97,7 +119,7 @@ const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
                 <AccordionContent $isOpen={openSteps[0]}>
                     <div>
                         <DynamicForm
-                            schema={createTrainsetSchema}
+                            schema={createTrainsetSchema as Schema}
                             blockSubmission={loading}
                             submitText={loading ? "Creating..." : "Create Training Set"}
                             onFormSubmit={handleCreateTrainset}
@@ -130,8 +152,18 @@ const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
                 </AccordionHeader>
                 <AccordionContent $isOpen={openSteps[1]}>
                     <div>
-                        <b>Train Model</b>
-                        <p>This section will allow you to train your model. (Functionality coming soon.)</p>
+                        <DynamicForm
+                            schema={trainModelSchema as Schema}
+                            blockSubmission={trainLoading}
+                            submitText={trainLoading ? "Training..." : "Train Model"}
+                            onFormSubmit={handleTrainModel}
+                        />
+                        {trainError && (
+                            <div style={{ color: "red", marginTop: 8 }}>{trainError}</div>
+                        )}
+                        {trainSuccess && (
+                            <div style={{ color: "green", marginTop: 8 }}>{trainSuccess}</div>
+                        )}
                         <PlaceholderLog step="Train Model" />
                     </div>
                 </AccordionContent>
