@@ -1,6 +1,7 @@
 from pathlib import Path
 from flask_restx import Resource
 from flask import request, jsonify
+import vame
 
 from . import api
 from app.utils.resolve_request_util import resolve_request_data
@@ -12,8 +13,6 @@ from app.utils.not_bad_request_exception import not_bad_request_exception
 class CreateTrainset(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
-        import vame
-
         try:
             data, project_path = resolve_request_data(request)
             config = vame.auxiliary.read_config(str(Path(project_path) / "config.yaml"))
@@ -33,15 +32,42 @@ class CreateTrainset(Resource):
 class TrainModel(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
-        import vame
+        import threading
+        import time
+
+        def background_train_task(data, project_path, config):
+            # print(data)
+            # time.sleep(20)
+            config["batch_size"] = data["batch_size"]
+            config["max_epochs"] = data["max_epochs"]
+            vame.auxiliary.write_config(
+                config_path=str(Path(project_path) / "config.yaml"),
+                config=config,
+            )
+            vame.train_model(config=config, save_logs=True)
+
         try:
             data, project_path = resolve_request_data(request)
+            config = vame.auxiliary.read_config(str(Path(project_path) / "config.yaml"))
+            thread = threading.Thread(target=background_train_task, args=(data, project_path, config))
+            thread.start()
+            time.sleep(2)  # Give the thread a moment to start
+            return {"status": "started"}
+        except Exception as exception:
+            if not_bad_request_exception(exception):
+                api.abort(500, str(exception))
 
-            result = vame.train_model(
-                **data,
-                save_logs=True
-            )
-            return dict(result=result)
+
+@api.route('/train_state', methods=['POST'])
+class TrainState(Resource):
+    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def post(self):
+        try:
+            data, project_path = resolve_request_data(request)
+            config = vame.auxiliary.read_config(str(Path(project_path) / "config.yaml"))
+            states = vame.auxiliary.read_states(config=config)
+            train_model_state = states.get("train_model", {}).get("execution_state", "not_found")
+            return dict(train_model=train_model_state)
         except Exception as exception:
             if not_bad_request_exception(exception):
                 api.abort(500, str(exception))
@@ -51,9 +77,6 @@ class TrainModel(Resource):
 class EvaluateModel(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
-        import vame
-        import matplotlib
-        matplotlib.use('agg')
         try:
             data, project_path = resolve_request_data(request)
             vame.evaluate_model(

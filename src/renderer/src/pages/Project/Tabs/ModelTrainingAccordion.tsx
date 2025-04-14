@@ -9,6 +9,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import DynamicForm from "@renderer/components/DynamicForm";
 import { createTrainsetVAMEProject } from "../../../context/Projects/api/createTrainsetVAMEProject";
+import { trainVAMEProject } from "../../../context/Projects/api/trainVAMEProject";
+import { getTrainStateVAMEProject } from "../../../context/Projects/api/trainStateVAMEProject";
 import createTrainsetSchema from '../../../../../schema/create-trainset.schema.json';
 import trainModelSchema from '../../../../../schema/train-model.schema.json';
 
@@ -35,14 +37,48 @@ type ModelTrainingAccordionProps = {
 const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
     // Independent open/close state for each accordion
     const [openSteps, setOpenSteps] = useState([true, false, false, false]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [success, setSuccess] = useState<string | null>(null);
+
+    // Create Trainset form state
+    const [createTrainsetLoading, setCreateTrainsetLoading] = useState(false);
+    const [createTrainsetError, setCreateTrainsetError] = useState<string | null>(null);
+    const [createTrainsetSuccess, setCreateTrainsetSuccess] = useState<string | null>(null);
 
     // Train Model form state
     const [trainLoading, setTrainLoading] = useState(false);
+    const [trainStarting, setTrainStarting] = useState(false);
     const [trainError, setTrainError] = useState<string | null>(null);
-    const [trainSuccess, setTrainSuccess] = useState<string | null>(null);
+
+    // Polling state for train_model
+    const [trainModelState, setTrainModelState] = useState<string | null>(null);
+    const [isPolling, setIsPolling] = useState(false);
+
+    // Poll train_model state after training starts
+    React.useEffect(() => {
+        let interval: NodeJS.Timeout | null = null;
+        if (isPolling) {
+            interval = setInterval(async () => {
+                try {
+                    const state = await getTrainStateVAMEProject({
+                        project: project.config.project_path,
+                    });
+                    setTrainModelState(state);
+                    if (
+                        state === "success" ||
+                        state === "failed" ||
+                        state === "aborted" ||
+                        state === "not_found"
+                    ) {
+                        setIsPolling(false);
+                    }
+                } catch (err) {
+                    // Optionally handle polling error
+                }
+            }, 3000);
+        }
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [isPolling, project.config.project_path]);
 
     // States
     const create_trainset = project.states?.create_trainset || {};
@@ -53,22 +89,22 @@ const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
     const modelCreated = train_model.execution_state === "success";
     const modelEvaluated = evaluate_model.execution_state === "success";
 
-    // Handlers
+    // Handler for Create Training Set form submission
     const handleCreateTrainset = async (formData: any) => {
-        setLoading(true);
-        setError(null);
-        setSuccess(null);
+        setCreateTrainsetLoading(true);
+        setCreateTrainsetError(null);
+        setCreateTrainsetSuccess(null);
         try {
             await createTrainsetVAMEProject({
                 project: project.config.project_path,
                 test_fraction: formData.test_fraction,
                 split_mode: formData.split_mode,
             });
-            setSuccess("Training set created successfully.");
+            setCreateTrainsetSuccess("Training set created successfully.");
         } catch (err: any) {
-            setError(err.message || "Failed to create training set.");
+            setCreateTrainsetError(err.message || "Failed to create training set.");
         } finally {
-            setLoading(false);
+            setCreateTrainsetLoading(false);
         }
     };
 
@@ -76,11 +112,12 @@ const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
     const handleTrainModel = async (formData: any) => {
         setTrainLoading(true);
         setTrainError(null);
-        setTrainSuccess(null);
         try {
-            // Placeholder: Replace with actual API call
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-            setTrainSuccess("Model training started (placeholder).");
+            await trainVAMEProject({
+                project: project.config.project_path,
+                ...formData,
+            });
+            setIsPolling(true);
         } catch (err: any) {
             setTrainError(err.message || "Failed to start model training.");
         } finally {
@@ -120,15 +157,15 @@ const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
                     <div>
                         <DynamicForm
                             schema={createTrainsetSchema as Schema}
-                            blockSubmission={loading}
-                            submitText={loading ? "Creating..." : "Create Training Set"}
+                            blockSubmission={createTrainsetLoading}
+                            submitText={createTrainsetLoading ? "Creating..." : "Create Training Set"}
                             onFormSubmit={handleCreateTrainset}
                         />
-                        {error && (
-                            <div style={{ color: "red", marginTop: 8 }}>{error}</div>
+                        {createTrainsetError && (
+                            <div style={{ color: "red", marginTop: 8 }}>{createTrainsetError}</div>
                         )}
-                        {success && (
-                            <div style={{ color: "green", marginTop: 8 }}>{success}</div>
+                        {createTrainsetSuccess && (
+                            <div style={{ color: "green", marginTop: 8 }}>{createTrainsetSuccess}</div>
                         )}
                         <PlaceholderLog step="Create Training Set" />
                     </div>
@@ -154,15 +191,46 @@ const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
                     <div>
                         <DynamicForm
                             schema={trainModelSchema as Schema}
-                            blockSubmission={trainLoading}
+                            blockSubmission={trainLoading || trainModelState === "running"}
                             submitText={trainLoading ? "Training..." : "Train Model"}
                             onFormSubmit={handleTrainModel}
                         />
                         {trainError && (
                             <div style={{ color: "red", marginTop: 8 }}>{trainError}</div>
                         )}
-                        {trainSuccess && (
-                            <div style={{ color: "green", marginTop: 8 }}>{trainSuccess}</div>
+                        {(isPolling || trainModelState) && (
+                            <div style={{ marginTop: 8 }}>
+                                {isPolling && (
+                                    <span style={{ color: "#888" }}>
+                                        Polling training state...
+                                    </span>
+                                )}
+                                {trainModelState === "running" && (
+                                    <span style={{ color: "#007bff", marginLeft: 8 }}>
+                                        State: <b>Running</b>
+                                    </span>
+                                )}
+                                {trainModelState === "success" && (
+                                    <span style={{ color: "green", marginLeft: 8 }}>
+                                        State: <b>Success</b> — Training completed successfully.
+                                    </span>
+                                )}
+                                {trainModelState === "failed" && (
+                                    <span style={{ color: "red", marginLeft: 8 }}>
+                                        State: <b>Failed</b> — Training failed.
+                                    </span>
+                                )}
+                                {trainModelState === "aborted" && (
+                                    <span style={{ color: "orange", marginLeft: 8 }}>
+                                        State: <b>Aborted</b> — Training was aborted.
+                                    </span>
+                                )}
+                                {trainModelState === "not_found" && (
+                                    <span style={{ color: "#888", marginLeft: 8 }}>
+                                        State: <b>Not Found</b> — No training state found.
+                                    </span>
+                                )}
+                            </div>
                         )}
                         <PlaceholderLog step="Train Model" />
                     </div>

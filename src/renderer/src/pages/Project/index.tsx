@@ -397,15 +397,21 @@ const Project: React.FC = () => {
       <ProjectHeader>
         <Header title={project.config.project_name || project.config.project_path}>
           <HeaderButtonContainer>
-            <HeaderButton onClick={() => {
-              open(project.config.project_path)
-            }}>Open in File Explorer</HeaderButton>
-            <HeaderButton onClick={() => {
-              navigate({
-                pathname: '/create',
-                search: `?project=${project.config.project_path}`
-              })
-            }}>Restart Project: </HeaderButton>
+            <HeaderButton
+              onClick={() => {
+                open(project.config.project_path)
+              }}>
+              Open in File Explorer
+            </HeaderButton>
+            <HeaderButton
+              onClick={() => {
+                navigate({
+                  pathname: '/create',
+                  search: `?project=${project.config.project_path}`
+                })
+              }}>
+              Restart Project
+            </HeaderButton>
           </HeaderButtonContainer>
         </Header>
         <ProjectInformation>
