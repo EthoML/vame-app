@@ -3,11 +3,11 @@ import { post } from "@renderer/utils/requests"
 
 type ConfigureProjectProps = {
     project: string
-    [key:string]: any
+    [key: string]: any
 }
 
 export const configureVAMEProject = async (data: ConfigureProjectProps) => {
-    const result = await post<Project>('configure', { ...data})
+    const result = await post<ProjectType>('configure', { ...data })
 
     if (result.success) {
         return result.data

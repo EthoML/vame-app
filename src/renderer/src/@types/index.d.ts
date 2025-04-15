@@ -1,6 +1,57 @@
 declare global {
 
-  export type Project = {
+  export type ProjectStates = {
+    update_config: {
+      execution_state?: string;
+      [key: string]: unknown
+    };
+    preprocessing: {
+      execution_state?: string;
+      [key: string]: unknown
+    };
+    preprocessing_visualization: {
+      execution_state?: string;
+      [key: string]: unknown
+    };
+    create_trainset: {
+      execution_state?: string;
+      [key: string]: unknown
+    };
+    train_model: {
+      execution_state?: string;
+      [key: string]: unknown
+    };
+    evaluate_model: {
+      execution_state?: string;
+      [key: string]: unknown
+    };
+    generative_model: {
+      execution_state?: string;
+      [key: string]: unknown
+    };
+    community: {
+      execution_state?: string;
+      [key: string]: unknown
+    };
+    community_videos: {
+      execution_state?: string;
+      [key: string]: unknown
+    };
+    motif_videos: {
+      execution_state?: string;
+      [key: string]: unknown
+    };
+    segment_session: {
+      execution_state?: string;
+      [key: string]: unknown
+    };
+    visualize_umap: {
+      execution_state?: string;
+      [key: string]: unknown
+    };
+  };
+
+  export type ProjectType = {
     project: string;
     config: {
       Project: string;
@@ -80,56 +131,7 @@ declare global {
       motif_community_videos_created: boolean;
       umaps_created: boolean;
     };
-    states: {
-      update_config: {
-        execution_state?: string;
-        [key: string]: unknown
-      };
-      preprocessing: {
-        execution_state?: string;
-        [key: string]: unknown
-      };
-      preprocessing_visualization: {
-        execution_state?: string;
-        [key: string]: unknown
-      };
-      create_trainset: {
-        execution_state?: string;
-        [key: string]: unknown
-      };
-      train_model: {
-        config: string;
-        execution_state?: string;
-      };
-      evaluate_model: {
-        execution_state?: string;
-        [key: string]: unknown
-      };
-      generative_model: {
-        execution_state?: string;
-        [key: string]: unknown
-      };
-      community: {
-        execution_state?: string;
-        [key: string]: unknown
-      };
-      community_videos: {
-        execution_state?: string;
-        [key: string]: unknown
-      };
-      motif_videos: {
-        execution_state?: string;
-        [key: string]: unknown
-      };
-      segment_session: {
-        execution_state?: string;
-        [key: string]: unknown
-      };
-      visualize_umap: {
-        execution_state?: string;
-        [key: string]: unknown
-      };
-    };
+    states: ProjectStates;
     videos: string[];
     pes_paths: string[];
     assets: {

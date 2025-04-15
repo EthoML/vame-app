@@ -22,6 +22,7 @@ import CommunityVideos from './Tabs/CommunityVideos';
 import UMAPVisualization from './Tabs/UMAPVisualization';
 import { MainContainer } from '@renderer/components/Container';
 import { useSettings } from '@renderer/context/Settings';
+import { getProjectStateVAMEProject } from "../../context/Projects/api/getProjectStateVAMEProject";
 
 const Project: React.FC = () => {
 
@@ -46,12 +47,45 @@ const Project: React.FC = () => {
     tabsLock
   } = useSettings()
 
-  const [project, setProject] = useState<Project | undefined>()
+  const [project, setProject] = useState<ProjectType | undefined>()
+  const [projectStates, setProjectStates] = useState<ProjectStates>(
+    {
+      update_config: {},
+      preprocessing: {},
+      preprocessing_visualization: {},
+      create_trainset: {},
+      train_model: {},
+      evaluate_model: {},
+      generative_model: {},
+      segment_session: {},
+      motif_videos: {},
+      community: {},
+      community_videos: {},
+      visualize_umap: {}
+    }
+  );
   const [blockSubmit, setBlockSubmit] = useState(true);
   const [selectedTab, setSelectedTab] = useState<string>("project-configuration");
 
   const navigate = useNavigate()
 
+  // Function to fetch and update project states
+  const fetchProjectStates = async () => {
+    // Check that project is defined before calling the API.
+    if (!project) return;
+    try {
+      // Make your asynchronous API call. Adjust the object structure as needed.
+      const updatedStates = await getProjectStateVAMEProject({
+        project: project.config.project_path
+      });
+      // Update state with fetched data.
+      setProjectStates(updatedStates.states);
+    } catch (e) {
+      console.error("Error fetching project states:", e);
+    }
+  };
+
+  // Function to handle tab submission
   const submitTab = useCallback(async (
     callback: () => Promise<void>,
     tab?: string
@@ -71,6 +105,7 @@ const Project: React.FC = () => {
       console.log
     } finally {
       setBlockSubmit(false)
+      console.log("[DEBUG] setBlockSubmit(false) called in submitTab finally block");
     }
   }, [project])
 
@@ -84,7 +119,10 @@ const Project: React.FC = () => {
         })
       })
 
-      onProjectReady(projectPath, () => setBlockSubmit(false))
+      onProjectReady(projectPath, () => {
+        setBlockSubmit(false);
+        console.log("[DEBUG] setBlockSubmit(false) called in onProjectReady callback");
+      })
     }
   }, [projectPath])
 
@@ -93,6 +131,7 @@ const Project: React.FC = () => {
       const loadedTab = localStorage.getItem(`selected-tab-${project?.config.project_name}`)
       if (loadedTab) {
         setSelectedTab(loadedTab)
+        setProjectStates(project.states)
       }
     }
   }, [project])
@@ -109,22 +148,18 @@ const Project: React.FC = () => {
     );
   }
 
-  // Minimal UI for debugging
-  console.log("Project object:", project);
-  console.log("Project states:", project.states);
-
   // Check if states exist and have expected properties
-  const configuredState = project.states?.update_config || {};
-  const preprocessingState = project.states?.preprocessing || {};
-  const preprocessingVisualizationState = project.states?.preprocessing_visualization || {};
-  const create_trainset = project.states?.create_trainset || {};
-  const train_model = project.states?.train_model || {};
-  const evaluate_model = project.states?.evaluate_model || {};
-  const segment_session = project.states?.segment_session || {};
-  const motif_videos = project.states?.motif_videos || {};
-  const community = project.states?.community || {};
-  const community_videos = project.states?.community_videos || {};
-  const visualize_umap = project.states?.visualize_umap || {};
+  const configuredState = projectStates?.update_config || {};
+  const preprocessingState = projectStates?.preprocessing || {};
+  const preprocessingVisualizationState = projectStates?.preprocessing_visualization || {};
+  const create_trainset = projectStates?.create_trainset || {};
+  const train_model = projectStates?.train_model || {};
+  const evaluate_model = projectStates?.evaluate_model || {};
+  const segment_session = projectStates?.segment_session || {};
+  const motif_videos = projectStates?.motif_videos || {};
+  const community = projectStates?.community || {};
+  const community_videos = projectStates?.community_videos || {};
+  const visualize_umap = projectStates?.visualize_umap || {};
 
   const projectConfigured = configuredState.execution_state === "success";
   const projectPreprocessed = preprocessingState.execution_state === "success" && preprocessingVisualizationState.execution_state === "success";
@@ -153,9 +188,9 @@ const Project: React.FC = () => {
                 const { advanced_options, ...mainProperties } = formData as any
                 await configureProject(
                   {
-                    config: { ...mainProperties, ...advanced_options }, project: project.config.project_path
+                    config: { ...mainProperties, ...advanced_options },
+                    project: project.config.project_path
                   }).catch(e => alert(e))
-
               }, 'preprocessing')}
             />
           );
@@ -221,7 +256,21 @@ const Project: React.FC = () => {
       complete: trainsetCreated && modelCreated && modelEvaluated,
       tooltip: "Organize your project first.",
       content: (
-        <ModelTrainingAccordion project={project} />
+        // <ModelTrainingAccordion
+        //   project={project}
+        //   projectStates={projectStates}
+        //   onRequestCompleted={fetchProjectStates}
+        // />
+        <div style={{ padding: 20, background: "#f5f5f5" }}>
+          <h3>Model Training Content</h3>
+          <p>This is a placeholder for the ModelTrainingAccordion component.</p>
+          <p><b>Original props:</b></p>
+          <ul>
+            <li>project: {JSON.stringify(project.config?.project_name || project.config?.Project)}</li>
+            <li>blockSubmission: {String(blockSubmit)}</li>
+            <li>disabled: {String(tabsLock && !projectPreprocessed)}</li>
+          </ul>
+        </div>
       )
     },
     {
