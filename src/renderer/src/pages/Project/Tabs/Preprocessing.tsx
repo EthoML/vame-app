@@ -29,7 +29,7 @@ const ErrorFallback = ({ error }: { error: Error }) => (
 const Preprocessing = ({
   project,
   onFormSubmit,
-  blockSubmission = false,
+  blockSubmission,
   blockTooltip,
 }: TabProps) => {
   // Accordion open/close state
@@ -67,9 +67,6 @@ const Preprocessing = ({
       console.error("Error setting enum values:", err)
     }
 
-    // Safely get organized state
-    const isOrganized = !!project?.workflow?.organized
-
     // // Set up operations with safety checks
     // const operations = ["Create Training Set"]
     // if (project?.config && !project.config.egocentric_data) {
@@ -83,17 +80,6 @@ const Preprocessing = ({
       }
     } catch (err) {
       console.error("Error handling egocentric_data:", err)
-    }
-
-    // Safely set readOnly property
-    try {
-      if (isOrganized && schema?.properties) {
-        Object.values(schema.properties).forEach((v: any) => {
-          if (v) v.readOnly = true
-        })
-      }
-    } catch (err) {
-      console.error("Error setting readOnly:", err)
     }
 
     // Initialize states with safe defaults

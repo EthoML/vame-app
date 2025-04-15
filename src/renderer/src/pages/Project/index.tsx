@@ -102,7 +102,7 @@ const Project: React.FC = () => {
 
       await refresh()
     } catch (e) {
-      console.log
+      console.log("[DEBUG] Error in submitTab:", e);
     } finally {
       setBlockSubmit(false)
       console.log("[DEBUG] setBlockSubmit(false) called in submitTab finally block");
@@ -111,9 +111,11 @@ const Project: React.FC = () => {
 
 
   useEffect(() => {
+    console.log("[DEBUG] projectPath on mount:", projectPath);
     if (projectPath) {
       onConnected(async () => {
         post('project/register', { project: projectPath }).then(res => {
+          console.log("[DEBUG] post('project/register') result:", res);
           if (res.success)
             setProject(getProject(projectPath))
         })
@@ -256,21 +258,11 @@ const Project: React.FC = () => {
       complete: trainsetCreated && modelCreated && modelEvaluated,
       tooltip: "Organize your project first.",
       content: (
-        // <ModelTrainingAccordion
-        //   project={project}
-        //   projectStates={projectStates}
-        //   onRequestCompleted={fetchProjectStates}
-        // />
-        <div style={{ padding: 20, background: "#f5f5f5" }}>
-          <h3>Model Training Content</h3>
-          <p>This is a placeholder for the ModelTrainingAccordion component.</p>
-          <p><b>Original props:</b></p>
-          <ul>
-            <li>project: {JSON.stringify(project.config?.project_name || project.config?.Project)}</li>
-            <li>blockSubmission: {String(blockSubmit)}</li>
-            <li>disabled: {String(tabsLock && !projectPreprocessed)}</li>
-          </ul>
-        </div>
+        <ModelTrainingAccordion
+          project={project}
+          projectStates={projectStates}
+          onRequestCompleted={fetchProjectStates}
+        />
       )
     },
     {
