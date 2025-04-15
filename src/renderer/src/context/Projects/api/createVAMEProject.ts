@@ -8,7 +8,7 @@ export interface CreateProps {
 }
 
 export interface CreateResponse {
-  config: Project["config"]
+  config: ProjectType["config"]
   created: boolean
   project: string
 }

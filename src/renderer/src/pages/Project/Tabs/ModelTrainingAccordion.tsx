@@ -31,13 +31,18 @@ const PlaceholderLog = ({ step }: { step: string }) => (
 );
 
 type ModelTrainingAccordionProps = {
-    project: any;
+    project: ProjectType;
+    projectStates: ProjectStates;
+    onRequestCompleted: () => void;
 };
 
-
-const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
-    console.log("project prop:", project);
-    const [projectStates, setProjectStates] = useState(project.states || {});
+const ModelTrainingAccordion = ({
+    project,
+    projectStates,
+    onRequestCompleted,
+}: ModelTrainingAccordionProps) => {
+    // console.log("project prop:", project);
+    // console.log("projectStates prop:", projectStates);
 
     // Independent open/close state for each accordion
     const [openSteps, setOpenSteps] = useState([true, false, false, false]);
@@ -74,8 +79,7 @@ const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
                     ) {
                         setIsPolling(false);
                         try {
-                            const updatedStates = await getProjectStateVAMEProject({ project: project.config.project_path });
-                            setProjectStates(updatedStates.states);
+                            onRequestCompleted();
                         } catch (e) {
                             console.error("Error fetching project states:", e);
                         }
@@ -116,8 +120,7 @@ const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
         } finally {
             setCreateTrainsetLoading(false);
             try {
-                const updatedStates = await getProjectStateVAMEProject({ project: project.config.project_path });
-                setProjectStates(updatedStates.states);
+                onRequestCompleted();
             } catch (e) {
                 console.error("Error fetching project states:", e);
             }
@@ -139,8 +142,7 @@ const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
         } finally {
             setTrainLoading(false);
             try {
-                const updatedStates = await getProjectStateVAMEProject({ project: project.config.project_path });
-                setProjectStates(updatedStates.states);
+                onRequestCompleted();
             } catch (e) {
                 console.error("Error fetching project states:", e);
             }

@@ -9,15 +9,16 @@ import Tippy from '@tippyjs/react'
 const ProjectConfiguration = ({
   project,
   onFormSubmit,
-  blockSubmission = false,
+  blockSubmission,
   blockTooltip,
 }: TabProps) => {
 
   const schema = structuredClone(projectConfigSchema) as unknown as Schema
 
-  if (project.workflow.organized) {
-    Object.values(schema.properties).forEach(v => v.readOnly = true)
-  }
+  // Sets the form to read-only, if the project is already organized
+  // if (project.workflow.organized) {
+  //   Object.values(schema.properties).forEach(v => v.readOnly = true)
+  // }
 
   const {
     egocentric_data,

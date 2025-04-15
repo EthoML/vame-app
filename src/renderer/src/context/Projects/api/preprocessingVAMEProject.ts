@@ -6,7 +6,7 @@ type PreprocessingProjectProps = {
 };
 
 export const preprocessingVAMEProject = async (data: PreprocessingProjectProps) => {
-    const result = await post<Project>("preprocessing", { ...data });
+    const result = await post<ProjectType>("preprocessing", { ...data });
 
     if (result.success) {
         return result.data;

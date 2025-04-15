@@ -37,8 +37,8 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
   const [loadingProjects, setLoadingProjects] = useState<boolean>(true);
   const [loadingPaths, setLoadingPaths] = useState<boolean>(true);
 
-  const [projects, setProjects] = useState<Project[]>([])
-  const [recentProjects, setRecentProjects] = useState<Project[]>([])
+  const [projects, setProjects] = useState<ProjectType[]>([])
+  const [recentProjects, setRecentProjects] = useState<ProjectType[]>([])
 
   // deal with paths
   const [paths, setPaths] = useState<string[]>([]);
@@ -78,11 +78,11 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
 
     setLoadingProjects(true)
     const promisesProjects = paths.map(async (path) => {
-      return await post<Omit<Project, "creation_datetime">>('load', { project: path })
+      return await post<Omit<ProjectType, "creation_datetime">>('load', { project: path })
     })
 
     const promisesRecents = recentPaths.map(async (path) => {
-      return await post<Omit<Project, "creation_datetime">>('load', { project: path })
+      return await post<Omit<ProjectType, "creation_datetime">>('load', { project: path })
     })
     try {
       const data = await Promise.allSettled(promisesProjects)
@@ -103,7 +103,7 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
           }
         }
         return;
-      }).filter(p => !!p) as Project[]);
+      }).filter(p => !!p) as ProjectType[]);
 
       setRecentProjects(data2.map(icpResponse => {
         if (icpResponse.status === "fulfilled") {
@@ -119,7 +119,7 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
           }
         }
         return;
-      }).filter(p => !!p) as Project[]);
+      }).filter(p => !!p) as ProjectType[]);
 
     } catch (error) {
       window.alert("Something went wrong loading projects.")

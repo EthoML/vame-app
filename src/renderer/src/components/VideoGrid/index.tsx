@@ -9,7 +9,7 @@ export type VideoType = {
 }
 
 type VideoGridProps = {
-  project: Project
+  project: ProjectType
   videos: Record<string, VideoType[]>
 }
 

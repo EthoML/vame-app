@@ -3,11 +3,11 @@ import { post } from "@renderer/utils/requests"
 
 type SegmentProjectTrainsetProps = {
     project: string
-    [key:string]: any
+    [key: string]: any
 }
 
 export const segmentVAMEProject = async (data: SegmentProjectTrainsetProps) => {
-    const result = await post<Project>('segment', { ...data})
+    const result = await post<ProjectType>('segment', { ...data })
 
     if (result.success) {
         return result.data

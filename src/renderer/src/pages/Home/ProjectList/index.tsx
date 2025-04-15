@@ -2,9 +2,9 @@ import Button from "@renderer/components/Button";
 import { ButtonContainer, List, ListItem } from "./styles";
 
 interface Props {
-  projects: Project[],
-  onDelete: (project: Project) => void,
-  onEdit: (project: Project) => void
+  projects: ProjectType[],
+  onDelete: (project: ProjectType) => void,
+  onEdit: (project: ProjectType) => void
 }
 
 const ProjectsList: React.FC<Props> = ({
