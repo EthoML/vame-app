@@ -144,7 +144,7 @@ const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
                     onClick={() => handleToggle(0, true)}
                 >
                     1. Create Training Set
-                    {trainsetCreated && (
+                    {createTrainsetSuccess && (
                         <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
                             ✓
                         </span>
@@ -174,8 +174,8 @@ const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
             {/* Accordion 2: Train Model */}
             <Accordion>
                 <AccordionHeader
-                    $disabled={!trainsetCreated}
-                    onClick={() => handleToggle(1, trainsetCreated)}
+                    $disabled={!createTrainsetSuccess}
+                    onClick={() => handleToggle(1, true)}
                 >
                     2. Train Model
                     {modelCreated && (
