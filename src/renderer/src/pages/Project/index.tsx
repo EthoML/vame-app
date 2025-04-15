@@ -123,7 +123,6 @@ const Project: React.FC = () => {
 
       onProjectReady(projectPath, () => {
         setBlockSubmit(false);
-        console.log("[DEBUG] setBlockSubmit(false) called in onProjectReady callback");
       })
     }
   }, [projectPath])
