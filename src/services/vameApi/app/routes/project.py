@@ -110,7 +110,7 @@ class StateProject(Resource):
     def post(self):
         try:
             data, project_path = resolve_request_data(request)
-            config = configure_project(data, project_path)
+            config = vame.read_config(str(Path(project_path) / "config.yaml"))
             states = vame.read_states(config=config)
             return dict(states=states)
         except Exception as exception:

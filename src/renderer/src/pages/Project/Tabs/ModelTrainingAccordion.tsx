@@ -37,6 +37,8 @@ type ModelTrainingAccordionProps = {
 
 const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
     console.log("project prop:", project);
+    const [projectStates, setProjectStates] = useState(project.states || {});
+
     // Independent open/close state for each accordion
     const [openSteps, setOpenSteps] = useState([true, false, false, false]);
 
@@ -73,6 +75,7 @@ const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
                         setIsPolling(false);
                         try {
                             const updatedStates = await getProjectStateVAMEProject({ project: project.config.project_path });
+                            setProjectStates(updatedStates.states);
                         } catch (e) {
                             console.error("Error fetching project states:", e);
                         }
@@ -88,7 +91,6 @@ const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
     }, [isPolling, project.config.project_path]);
 
     // States
-    const projectStates = project.states || {};
     const create_trainset = projectStates.create_trainset || {};
     const train_model = projectStates.train_model || {};
     const evaluate_model = projectStates.evaluate_model || {};
@@ -115,6 +117,7 @@ const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
             setCreateTrainsetLoading(false);
             try {
                 const updatedStates = await getProjectStateVAMEProject({ project: project.config.project_path });
+                setProjectStates(updatedStates.states);
             } catch (e) {
                 console.error("Error fetching project states:", e);
             }
@@ -137,6 +140,7 @@ const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
             setTrainLoading(false);
             try {
                 const updatedStates = await getProjectStateVAMEProject({ project: project.config.project_path });
+                setProjectStates(updatedStates.states);
             } catch (e) {
                 console.error("Error fetching project states:", e);
             }
