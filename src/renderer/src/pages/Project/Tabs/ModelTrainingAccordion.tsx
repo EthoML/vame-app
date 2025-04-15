@@ -35,6 +35,7 @@ type ModelTrainingAccordionProps = {
 
 
 const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
+    console.log("project prop:", project);
     // Independent open/close state for each accordion
     const [openSteps, setOpenSteps] = useState([true, false, false, false]);
 
@@ -144,7 +145,7 @@ const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
                     onClick={() => handleToggle(0, true)}
                 >
                     1. Create Training Set
-                    {createTrainsetSuccess && (
+                    {trainsetCreated && (
                         <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
                             ✓
                         </span>
@@ -164,8 +165,8 @@ const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
                         {createTrainsetError && (
                             <div style={{ color: "red", marginTop: 8 }}>{createTrainsetError}</div>
                         )}
-                        {createTrainsetSuccess && (
-                            <div style={{ color: "green", marginTop: 8 }}>{createTrainsetSuccess}</div>
+                        {trainsetCreated && (
+                            <div style={{ color: "green", marginTop: 8 }}>Training set created successfully.</div>
                         )}
                         <PlaceholderLog step="Create Training Set" />
                     </div>
@@ -174,7 +175,7 @@ const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
             {/* Accordion 2: Train Model */}
             <Accordion>
                 <AccordionHeader
-                    $disabled={!createTrainsetSuccess}
+                    $disabled={!trainsetCreated}
                     onClick={() => handleToggle(1, true)}
                 >
                     2. Train Model
