@@ -34,15 +34,17 @@ type ModelTrainingAccordionProps = {
     project: ProjectType;
     projectStates: ProjectStates;
     onRequestCompleted: () => void;
+    onFormSubmit?: () => Promise<void>;
 };
 
 const ModelTrainingAccordion = ({
     project,
     projectStates,
     onRequestCompleted,
+    onFormSubmit,
 }: ModelTrainingAccordionProps) => {
     // console.log("project prop:", project);
-    // console.log("projectStates prop:", projectStates);
+    console.log("projectStates prop:", projectStates);
 
     // Independent open/close state for each accordion
     const [openSteps, setOpenSteps] = useState([true, false, false, false]);
@@ -95,9 +97,9 @@ const ModelTrainingAccordion = ({
     }, [isPolling, project.config.project_path]);
 
     // States
-    const create_trainset = projectStates.create_trainset || {};
-    const train_model = projectStates.train_model || {};
-    const evaluate_model = projectStates.evaluate_model || {};
+    const create_trainset = project.states.create_trainset || {};
+    const train_model = project.states.train_model || {};
+    const evaluate_model = project.states.evaluate_model || {};
 
     const trainsetCreated = create_trainset.execution_state === "success";
     const modelCreated = train_model.execution_state === "success";
@@ -124,6 +126,13 @@ const ModelTrainingAccordion = ({
             } catch (e) {
                 console.error("Error fetching project states:", e);
             }
+            if (onFormSubmit) {
+                try {
+                    await onFormSubmit();
+                } catch (e) {
+                    console.error("Error calling onFormSubmit:", e);
+                }
+            }
         }
     };
 
@@ -145,6 +154,13 @@ const ModelTrainingAccordion = ({
                 onRequestCompleted();
             } catch (e) {
                 console.error("Error fetching project states:", e);
+            }
+            if (onFormSubmit) {
+                try {
+                    await onFormSubmit();
+                } catch (e) {
+                    console.error("Error calling onFormSubmit:", e);
+                }
             }
         }
     };

@@ -104,8 +104,7 @@ const Project: React.FC = () => {
     } catch (e) {
       console.log("[DEBUG] Error in submitTab:", e);
     } finally {
-      setBlockSubmit(false)
-      console.log("[DEBUG] setBlockSubmit(false) called in submitTab finally block");
+      setBlockSubmit(false);
     }
   }, [project])
 
@@ -192,7 +191,9 @@ const Project: React.FC = () => {
                     config: { ...mainProperties, ...advanced_options },
                     project: project.config.project_path
                   }).catch(e => alert(e))
-              }, 'preprocessing')}
+              },
+                'preprocessing')
+              }
             />
           );
         } catch (error) {
@@ -225,12 +226,17 @@ const Project: React.FC = () => {
               project={project}
               blockSubmission={blockSubmit}
               blockTooltip="Waiting VAME to be ready."
-              onFormSubmit={async (params) => submitTab(async () => {
-                await runPreprocessing({
-                  project: project.config.project_path,
-                  ...params
-                });
-              }, 'preprocessing')}
+              onFormSubmit={
+                async (params) => submitTab(
+                  async () => {
+                    await runPreprocessing({
+                      project: project.config.project_path,
+                      ...params
+                    });
+                  },
+                  'preprocessing'
+                )
+              }
             />
           );
         } catch (error) {
@@ -261,6 +267,7 @@ const Project: React.FC = () => {
           project={project}
           projectStates={projectStates}
           onRequestCompleted={fetchProjectStates}
+          onFormSubmit={async () => submitTab(async () => { }, 'model-training')}
         />
       )
     },
