@@ -1,7 +1,9 @@
-from flask_restx import Resource
-from flask import request, jsonify
 from pathlib import Path
 import json
+import vame
+from flask_restx import Resource
+from flask import request, jsonify
+
 from . import api
 from app.utils.resolve_request_util import resolve_request_data
 from app.services.project_service import (
@@ -12,7 +14,7 @@ from app.services.project_service import (
     load_project,
     create_project,
     delete_project,
-    configure_project
+    configure_project,
 )
 
 from app.utils.not_bad_request_exception import not_bad_request_exception
@@ -67,11 +69,8 @@ class Create(Resource):
     def post(self):
         try:
             data = json.loads(request.data) if request.data else {}
-
             project = create_project(data)
-
             return jsonify(project)
-
         except Exception as exception:
             print("exception", exception)
             if not_bad_request_exception(exception):
@@ -105,12 +104,25 @@ class ConfigureProject(Resource):
                 api.abort(500, str(exception))
 
 
+@api.route('/project/state', methods=['POST'])
+class StateProject(Resource):
+    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def post(self):
+        try:
+            data, project_path = resolve_request_data(request)
+            config = configure_project(data, project_path)
+            states = vame.read_states(config=config)
+            return dict(states=states)
+        except Exception as exception:
+            if not_bad_request_exception(exception):
+                api.abort(500, str(exception))
+
+
 @api.route('/load')
 class Load(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         _, project_path = resolve_request_data(request)
-
         try:
             loaded_project = load_project(Path(project_path))
             return jsonify(loaded_project)

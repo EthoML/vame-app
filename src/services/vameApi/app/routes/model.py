@@ -15,7 +15,7 @@ class CreateTrainset(Resource):
     def post(self):
         try:
             data, project_path = resolve_request_data(request)
-            config = vame.auxiliary.read_config(str(Path(project_path) / "config.yaml"))
+            config = vame.read_config(str(Path(project_path) / "config.yaml"))
             result = vame.create_trainset(
                 config=config,
                 test_fraction=data["test_fraction"],
@@ -40,7 +40,7 @@ class TrainModel(Resource):
             # time.sleep(20)
             config["batch_size"] = data["batch_size"]
             config["max_epochs"] = data["max_epochs"]
-            vame.auxiliary.write_config(
+            vame.write_config(
                 config_path=str(Path(project_path) / "config.yaml"),
                 config=config,
             )
@@ -48,7 +48,7 @@ class TrainModel(Resource):
 
         try:
             data, project_path = resolve_request_data(request)
-            config = vame.auxiliary.read_config(str(Path(project_path) / "config.yaml"))
+            config = vame.read_config(str(Path(project_path) / "config.yaml"))
             thread = threading.Thread(target=background_train_task, args=(data, project_path, config))
             thread.start()
             time.sleep(2)  # Give the thread a moment to start
@@ -64,8 +64,8 @@ class TrainState(Resource):
     def post(self):
         try:
             data, project_path = resolve_request_data(request)
-            config = vame.auxiliary.read_config(str(Path(project_path) / "config.yaml"))
-            states = vame.auxiliary.read_states(config=config)
+            config = vame.read_config(str(Path(project_path) / "config.yaml"))
+            states = vame.read_states(config=config)
             train_model_state = states.get("train_model", {}).get("execution_state", "not_found")
             return dict(train_model=train_model_state)
         except Exception as exception:
@@ -79,7 +79,7 @@ class EvaluateModel(Resource):
     def post(self):
         try:
             data, project_path = resolve_request_data(request)
-            config = vame.auxiliary.read_config(str(Path(project_path) / "config.yaml"))
+            config = vame.read_config(str(Path(project_path) / "config.yaml"))
             vame.evaluate_model(
                 config=config,
                 save_logs=True,

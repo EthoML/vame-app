@@ -16,7 +16,7 @@ class Preprocess(Resource):
     def post(self):
         try:
             data, project_path = resolve_request_data(request)
-            config = vame.auxiliary.read_config(str(Path(project_path) / "config.yaml"))
+            config = vame.read_config(str(Path(project_path) / "config.yaml"))
             vame.preprocessing(
                 config=config,
                 centered_reference_keypoint=data["centered_reference_keypoint"],
