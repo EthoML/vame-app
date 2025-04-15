@@ -11,6 +11,7 @@ import DynamicForm from "@renderer/components/DynamicForm";
 import { createTrainsetVAMEProject } from "../../../context/Projects/api/createTrainsetVAMEProject";
 import { trainVAMEProject } from "../../../context/Projects/api/trainVAMEProject";
 import { getTrainStateVAMEProject } from "../../../context/Projects/api/trainStateVAMEProject";
+import { getProjectStateVAMEProject } from "../../../context/Projects/api/getProjectStateVAMEProject";
 import createTrainsetSchema from '../../../../../schema/create-trainset.schema.json';
 import trainModelSchema from '../../../../../schema/train-model.schema.json';
 
@@ -70,9 +71,14 @@ const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
                         state === "not_found"
                     ) {
                         setIsPolling(false);
+                        try {
+                            const updatedStates = await getProjectStateVAMEProject({ project: project.config.project_path });
+                        } catch (e) {
+                            console.error("Error fetching project states:", e);
+                        }
                     }
                 } catch (err) {
-                    // Optionally handle polling error
+                    console.error("Error during polling:", err);
                 }
             }, 3000);
         }
@@ -82,9 +88,10 @@ const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
     }, [isPolling, project.config.project_path]);
 
     // States
-    const create_trainset = project.states?.create_trainset || {};
-    const train_model = project.states?.train_model || {};
-    const evaluate_model = project.states?.evaluate_model || {};
+    const projectStates = project.states || {};
+    const create_trainset = projectStates.create_trainset || {};
+    const train_model = projectStates.train_model || {};
+    const evaluate_model = projectStates.evaluate_model || {};
 
     const trainsetCreated = create_trainset.execution_state === "success";
     const modelCreated = train_model.execution_state === "success";
@@ -106,6 +113,11 @@ const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
             setCreateTrainsetError(err.message || "Failed to create training set.");
         } finally {
             setCreateTrainsetLoading(false);
+            try {
+                const updatedStates = await getProjectStateVAMEProject({ project: project.config.project_path });
+            } catch (e) {
+                console.error("Error fetching project states:", e);
+            }
         }
     };
 
@@ -123,6 +135,11 @@ const ModelTrainingAccordion = ({ project }: ModelTrainingAccordionProps) => {
             setTrainError(err.message || "Failed to start model training.");
         } finally {
             setTrainLoading(false);
+            try {
+                const updatedStates = await getProjectStateVAMEProject({ project: project.config.project_path });
+            } catch (e) {
+                console.error("Error fetching project states:", e);
+            }
         }
     };
 
