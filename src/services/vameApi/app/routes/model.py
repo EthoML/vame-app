@@ -79,9 +79,10 @@ class EvaluateModel(Resource):
     def post(self):
         try:
             data, project_path = resolve_request_data(request)
+            config = vame.auxiliary.read_config(str(Path(project_path) / "config.yaml"))
             vame.evaluate_model(
-                **data,
-                save_logs=True
+                config=config,
+                save_logs=True,
             )
             return dict(result=get_evaluation_images(project_path))
         except Exception as exception:
