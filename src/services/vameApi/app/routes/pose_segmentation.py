@@ -14,7 +14,7 @@ from app.utils.not_bad_request_exception import not_bad_request_exception
 class Segment(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
-        def background_task(config):
+        def background_task(config: dict):
             vame.segment_session(
                 config=config,
                 save_logs=True,
@@ -27,7 +27,7 @@ class Segment(Resource):
                 config_path=str(Path(project_path) / "config.yaml"),
                 config=config,
             )
-            thread = threading.Thread(target=background_task, args=(config))
+            thread = threading.Thread(target=background_task, kwargs={"config": config})
             thread.start()
             time.sleep(2)  # Give the thread a moment to start
             return {"status": "started"}

@@ -70,15 +70,14 @@ const PoseSegmentationAccordion = ({
                         try {
                             await onFormSubmit();
                         } catch (e) {
-                            // eslint-disable-next-line no-console
                             console.error("Error calling onFormSubmit:", e);
                         }
                         setBlockSubmit(false);
                         setOpenSteps([false, false]);
                     }
                 } catch (err) {
-                    // eslint-disable-next-line no-console
                     console.error("Error during polling:", err);
+                    setBlockSubmit(false);
                 }
             }, 3000);
         }
