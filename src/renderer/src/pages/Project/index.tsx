@@ -48,22 +48,6 @@ const Project: React.FC = () => {
   } = useSettings()
 
   const [project, setProject] = useState<ProjectType | undefined>()
-  const [projectStates, setProjectStates] = useState<ProjectStates>(
-    {
-      update_config: {},
-      preprocessing: {},
-      preprocessing_visualization: {},
-      create_trainset: {},
-      train_model: {},
-      evaluate_model: {},
-      generative_model: {},
-      segment_session: {},
-      motif_videos: {},
-      community: {},
-      community_videos: {},
-      visualize_umap: {}
-    }
-  );
   const [blockSubmit, setBlockSubmit] = useState(true);
   const [selectedTab, setSelectedTab] = useState<string>("project-configuration");
 
@@ -115,7 +99,6 @@ const Project: React.FC = () => {
       const loadedTab = localStorage.getItem(`selected-tab-${project?.config.project_name}`)
       if (loadedTab) {
         setSelectedTab(loadedTab)
-        setProjectStates(project.states)
       }
     }
   }, [project])
@@ -133,17 +116,17 @@ const Project: React.FC = () => {
   }
 
   // Check if states exist and have expected properties
-  const configuredState = projectStates?.update_config || {};
-  const preprocessingState = projectStates?.preprocessing || {};
-  const preprocessingVisualizationState = projectStates?.preprocessing_visualization || {};
-  const create_trainset = projectStates?.create_trainset || {};
-  const train_model = projectStates?.train_model || {};
-  const evaluate_model = projectStates?.evaluate_model || {};
-  const segment_session = projectStates?.segment_session || {};
-  const motif_videos = projectStates?.motif_videos || {};
-  const community = projectStates?.community || {};
-  const community_videos = projectStates?.community_videos || {};
-  const visualize_umap = projectStates?.visualize_umap || {};
+  const configuredState = project.states?.update_config || {};
+  const preprocessingState = project.states?.preprocessing || {};
+  const preprocessingVisualizationState = project.states?.preprocessing_visualization || {};
+  const create_trainset = project.states?.create_trainset || {};
+  const train_model = project.states?.train_model || {};
+  const evaluate_model = project.states?.evaluate_model || {};
+  const segment_session = project.states?.segment_session || {};
+  const motif_videos = project.states?.motif_videos || {};
+  const community = project.states?.community || {};
+  const community_videos = project.states?.community_videos || {};
+  const visualize_umap = project.states?.visualize_umap || {};
 
   const projectConfigured = configuredState.execution_state === "success";
   const projectPreprocessed = preprocessingState.execution_state === "success" && preprocessingVisualizationState.execution_state === "success";
@@ -249,7 +232,6 @@ const Project: React.FC = () => {
       content: (
         <ModelTrainingAccordion
           project={project}
-          projectStates={projectStates}
           onFormSubmit={async () => submitTab(async () => { }, 'model-training')}
           blockSubmit={blockSubmit}
           setBlockSubmit={setBlockSubmit}

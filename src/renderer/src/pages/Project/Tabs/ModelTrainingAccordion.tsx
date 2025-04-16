@@ -40,30 +40,33 @@ type ModelTrainingAccordionProps = {
 
 const ModelTrainingAccordion = ({
     project,
-    projectStates,
     onFormSubmit,
     setBlockSubmit,
     blockSubmit,
 }: ModelTrainingAccordionProps) => {
-    // console.log("project prop:", project);
-    console.log("projectStates prop:", projectStates);
-
     // Independent open/close state for each accordion
-    const [openSteps, setOpenSteps] = useState([true, false, false, false]);
+    const [openSteps, setOpenSteps] = useState([false, false, false, false]);
 
     // Create Trainset form state
     const [createTrainsetLoading, setCreateTrainsetLoading] = useState(false);
     const [createTrainsetError, setCreateTrainsetError] = useState<string | null>(null);
-    const [createTrainsetSuccess, setCreateTrainsetSuccess] = useState<string | null>(null);
 
     // Train Model form state
     const [trainLoading, setTrainLoading] = useState(false);
-    const [trainStarting, setTrainStarting] = useState(false);
     const [trainError, setTrainError] = useState<string | null>(null);
 
     // Polling state for train_model
     const [trainModelState, setTrainModelState] = useState<string | null>(null);
     const [isPolling, setIsPolling] = useState(false);
+
+    // States
+    const create_trainset = project.states.create_trainset || {};
+    const train_model = project.states.train_model || {};
+    const evaluate_model = project.states.evaluate_model || {};
+
+    const trainsetCreated = create_trainset.execution_state === "success";
+    const modelCreated = train_model.execution_state === "success";
+    const modelEvaluated = evaluate_model.execution_state === "success";
 
     // Poll train_model state after training starts
     React.useEffect(() => {
@@ -82,12 +85,13 @@ const ModelTrainingAccordion = ({
                         state === "not_found"
                     ) {
                         setIsPolling(false);
-                        setBlockSubmit(false);
                         try {
                             await onFormSubmit();
                         } catch (e) {
                             console.error("Error calling onFormSubmit:", e);
                         }
+                        setBlockSubmit(false);
+                        setOpenSteps([false, false, false, false]);
                     }
                 } catch (err) {
                     console.error("Error during polling:", err);
@@ -99,20 +103,10 @@ const ModelTrainingAccordion = ({
         };
     }, [isPolling, project.config.project_path, setBlockSubmit]);
 
-    // States
-    const create_trainset = project.states.create_trainset || {};
-    const train_model = project.states.train_model || {};
-    const evaluate_model = project.states.evaluate_model || {};
-
-    const trainsetCreated = create_trainset.execution_state === "success";
-    const modelCreated = train_model.execution_state === "success";
-    const modelEvaluated = evaluate_model.execution_state === "success";
-
     // Handler for Create Training Set form submission
     const handleCreateTrainset = async (formData: any) => {
         setCreateTrainsetLoading(true);
         setCreateTrainsetError(null);
-        setCreateTrainsetSuccess(null);
         setBlockSubmit(true);
         try {
             await createTrainsetVAMEProject({
@@ -120,7 +114,6 @@ const ModelTrainingAccordion = ({
                 test_fraction: formData.test_fraction,
                 split_mode: formData.split_mode,
             });
-            setCreateTrainsetSuccess("Training set created successfully.");
         } catch (err: any) {
             setCreateTrainsetError(err.message || "Failed to create training set.");
         } finally {
