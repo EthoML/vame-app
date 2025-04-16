@@ -11,9 +11,10 @@ import DynamicForm from "@renderer/components/DynamicForm";
 import { createTrainsetVAMEProject } from "../../../context/Projects/api/createTrainsetVAMEProject";
 import { trainVAMEProject } from "../../../context/Projects/api/trainVAMEProject";
 import { getTrainStateVAMEProject } from "../../../context/Projects/api/trainStateVAMEProject";
-import { getProjectStateVAMEProject } from "../../../context/Projects/api/getProjectStateVAMEProject";
+import { evaluateVAMEProject } from "../../../context/Projects/api/evaluateVAMEProject";
 import createTrainsetSchema from '../../../../../schema/create-trainset.schema.json';
 import trainModelSchema from '../../../../../schema/train-model.schema.json';
+import evaluateModelSchema from '../../../../../schema/evaluate-model.schema.json';
 
 const PlaceholderLog = ({ step }: { step: string }) => (
     <div
@@ -58,6 +59,9 @@ const ModelTrainingAccordion = ({
     // Polling state for train_model
     const [trainModelState, setTrainModelState] = useState<string | null>(null);
     const [isPolling, setIsPolling] = useState(false);
+
+    // Evaluate Model form state
+    const [evaluateError, setEvaluateError] = useState<string | null>(null);
 
     // States
     const create_trainset = project.states.create_trainset || {};
@@ -143,6 +147,26 @@ const ModelTrainingAccordion = ({
             setBlockSubmit(false);
         } finally {
             setTrainLoading(false);
+        }
+    };
+
+    // Handler for Evaluate Model form submission
+    const handleEvaluateModel = async (formData: any) => {
+        setBlockSubmit(true);
+        try {
+            await evaluateVAMEProject({
+                project: project.config.project_path,
+                ...formData,
+            });
+        } catch (err: any) {
+            setEvaluateError(err.message || "Failed to start model evaluation.");
+        } finally {
+            try {
+                await onFormSubmit();
+            } catch (e) {
+                console.error("Error calling onFormSubmit:", e);
+            }
+            setBlockSubmit(false);
         }
     };
 
@@ -275,8 +299,18 @@ const ModelTrainingAccordion = ({
                 </AccordionHeader>
                 <AccordionContent $isOpen={openSteps[2]}>
                     <div>
-                        <b>Evaluate Model</b>
-                        <p>This section will allow you to evaluate your model. (Functionality coming soon.)</p>
+                        <DynamicForm
+                            schema={evaluateModelSchema as Schema}
+                            blockSubmission={blockSubmit}
+                            submitText={"Evaluate Model"}
+                            onFormSubmit={handleEvaluateModel}
+                        />
+                        {evaluateError && (
+                            <div style={{ color: "red", marginTop: 8 }}>{evaluateError}</div>
+                        )}
+                        {modelEvaluated && (
+                            <div style={{ color: "green", marginTop: 8 }}>Model evaluated successfully.</div>
+                        )}
                         <PlaceholderLog step="Evaluate Model" />
                     </div>
                 </AccordionContent>

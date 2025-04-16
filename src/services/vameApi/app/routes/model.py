@@ -84,7 +84,8 @@ class EvaluateModel(Resource):
                 config=config,
                 save_logs=True,
             )
-            return dict(result=get_evaluation_images(project_path))
+            # return dict(result=get_evaluation_images(project_path))
+            return dict(result="success")
         except Exception as exception:
             if not_bad_request_exception(exception):
                 api.abort(500, str(exception))
