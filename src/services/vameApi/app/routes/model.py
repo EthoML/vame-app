@@ -1,4 +1,6 @@
 from pathlib import Path
+import threading
+import time
 from flask_restx import Resource
 from flask import request, jsonify
 import base64
@@ -32,10 +34,7 @@ class CreateTrainset(Resource):
 class TrainModel(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
-        import threading
-        import time
-
-        def background_train_task(data, project_path, config):
+        def background_task(data, project_path, config):
             config["batch_size"] = data["batch_size"]
             config["max_epochs"] = data["max_epochs"]
             vame.write_config(
@@ -53,7 +52,7 @@ class TrainModel(Resource):
         try:
             data, project_path = resolve_request_data(request)
             config = vame.read_config(str(Path(project_path) / "config.yaml"))
-            thread = threading.Thread(target=background_train_task, args=(data, project_path, config))
+            thread = threading.Thread(target=background_task, args=(data, project_path, config))
             thread.start()
             time.sleep(2)  # Give the thread a moment to start
             return {"status": "started"}
