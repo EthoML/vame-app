@@ -1,48 +1,10 @@
 from flask_restx import Resource
-from flask import request, jsonify
+from flask import request
 
 from . import api
 from app.utils.resolve_request_util import resolve_request_data
 from app.utils.get_assets import get_visualization_images
 from app.utils.not_bad_request_exception import not_bad_request_exception
-
-
-@api.route('/segment', methods=['POST'])
-class Segment(Resource):
-    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
-    def post(self):
-        import vame
-        import matplotlib
-        matplotlib.use('agg')
-        try:
-            data, project_path = resolve_request_data(request)
-            result = vame.pose_segmentation(
-                **data,
-                save_logs=True
-            )
-            return dict(result=result)
-        except Exception as exception:
-            if not_bad_request_exception(exception):
-                api.abort(500, str(exception))
-
-
-@api.route('/motif_videos', methods=['POST'])
-class MotifVideos(Resource):
-    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
-    def post(self):
-        import vame
-        import matplotlib
-        matplotlib.use('agg')
-        try:
-            data, project_path = resolve_request_data(request)
-            result = vame.motif_videos(
-                **data,
-                save_logs=True
-            )
-            return dict(result=result)
-        except Exception as exception:
-            if not_bad_request_exception(exception):
-                api.abort(500, str(exception))
 
 
 @api.route('/community', methods=['POST'])

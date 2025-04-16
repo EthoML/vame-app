@@ -39,6 +39,7 @@ def create_app():
         vame,
         preprocessing,
         model,
+        pose_segmentation,
     )
 
     api.add_namespace(health_check.api)
@@ -47,5 +48,6 @@ def create_app():
     api.add_namespace(vame.api)
     api.add_namespace(preprocessing.api)
     api.add_namespace(model.api)
+    api.add_namespace(pose_segmentation.api)
 
     return app

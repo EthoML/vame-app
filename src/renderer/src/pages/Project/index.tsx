@@ -15,6 +15,7 @@ import ProjectConfiguration from './Tabs/ProjectConfiguration';
 import Preprocessing from './Tabs/Preprocessing';
 import Model from './Tabs/Model';
 import ModelTrainingAccordion from './Tabs/ModelTrainingAccordion';
+import PoseSegmentationAccordion from './Tabs/PoseSegmentationAccordion';
 import Segmentation from './Tabs/Segmentation';
 import MotifVideos from './Tabs/MotifVideos';
 import { CommunityAnalysis } from './Tabs/CommunityAnalysis';
@@ -242,28 +243,13 @@ const Project: React.FC = () => {
       complete: segmented,
       tooltip: "Model your project first.",
       content: (
-        <div style={{ padding: 20, background: "#f5f5f5" }}>
-          <h3>Segmentation Content</h3>
-          <p>This is a placeholder for the Segmentation component.</p>
-          <p><b>Original props:</b></p>
-          <ul>
-            <li>project: {JSON.stringify(project.config?.project_name || project.config?.Project)}</li>
-            <li>blockSubmission: {String(blockSubmit)}</li>
-            <li>disabled: {String(tabsLock && !modelEvaluated)}</li>
-          </ul>
-        </div>
+        <PoseSegmentationAccordion
+          project={project}
+          blockSubmit={blockSubmit}
+          setBlockSubmit={setBlockSubmit}
+          onFormSubmit={async () => submitTab(async () => { }, 'segmentation')}
+        />
       )
-      /* Original content:
-      <Segmentation
-        project={project}
-        blockSubmission={blockSubmit}
-        blockTooltip="Waiting VAME to be ready."
-        onFormSubmit={() => submitTab(async () => {
-          const projectPath = project.config.project_path
-          await segment({ project: projectPath })
-        }, 'segmentation')}
-      />
-      */
     },
     {
       id: 'motifs-videos',
