@@ -251,6 +251,7 @@ const Project: React.FC = () => {
           project={project}
           projectStates={projectStates}
           onFormSubmit={async () => submitTab(async () => { }, 'model-training')}
+          setBlockSubmit={setBlockSubmit}
         />
       )
     },

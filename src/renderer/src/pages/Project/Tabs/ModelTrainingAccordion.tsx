@@ -34,12 +34,14 @@ type ModelTrainingAccordionProps = {
     project: ProjectType;
     projectStates: ProjectStates;
     onFormSubmit: () => Promise<void>;
+    setBlockSubmit: (value: boolean) => void;
 };
 
 const ModelTrainingAccordion = ({
     project,
     projectStates,
     onFormSubmit,
+    setBlockSubmit,
 }: ModelTrainingAccordionProps) => {
     // console.log("project prop:", project);
     console.log("projectStates prop:", projectStates);
@@ -78,6 +80,7 @@ const ModelTrainingAccordion = ({
                         state === "not_found"
                     ) {
                         setIsPolling(false);
+                        setBlockSubmit(false);
                         try {
                             await onFormSubmit();
                         } catch (e) {
@@ -92,7 +95,7 @@ const ModelTrainingAccordion = ({
         return () => {
             if (interval) clearInterval(interval);
         };
-    }, [isPolling, project.config.project_path]);
+    }, [isPolling, project.config.project_path, setBlockSubmit]);
 
     // States
     const create_trainset = project.states.create_trainset || {};
@@ -108,6 +111,7 @@ const ModelTrainingAccordion = ({
         setCreateTrainsetLoading(true);
         setCreateTrainsetError(null);
         setCreateTrainsetSuccess(null);
+        setBlockSubmit(true);
         try {
             await createTrainsetVAMEProject({
                 project: project.config.project_path,
@@ -124,11 +128,13 @@ const ModelTrainingAccordion = ({
             } catch (e) {
                 console.error("Error calling onFormSubmit:", e);
             }
+            setBlockSubmit(false);
         }
     };
 
     // Handler for Train Model form submission
     const handleTrainModel = async (formData: any) => {
+        setBlockSubmit(true);
         setTrainLoading(true);
         setTrainError(null);
         try {
@@ -139,6 +145,7 @@ const ModelTrainingAccordion = ({
             setIsPolling(true);
         } catch (err: any) {
             setTrainError(err.message || "Failed to start model training.");
+            setBlockSubmit(false);
         } finally {
             setTrainLoading(false);
         }
