@@ -3,12 +3,6 @@ from typing import Union
 import yaml
 
 
-def get_evaluation_images(project_path: Path):
-    evaluation_output = project_path / 'model' / 'evaluate'
-    png_files = list(evaluation_output.glob('*.png'))
-    return [ str(png_file.relative_to(project_path)) for png_file in png_files ]
-
-
 def get_visualization_images(project_path: Path, parametrization: str):
     community_subfolders = get_video_related_asset(
         project_path,

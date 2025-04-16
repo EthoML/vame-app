@@ -1,11 +1,11 @@
 from pathlib import Path
 from flask_restx import Resource
 from flask import request, jsonify
+import base64
 import vame
 
 from . import api
 from app.utils.resolve_request_util import resolve_request_data
-from app.utils.get_assets import get_evaluation_images
 from app.utils.not_bad_request_exception import not_bad_request_exception
 
 
@@ -36,8 +36,6 @@ class TrainModel(Resource):
         import time
 
         def background_train_task(data, project_path, config):
-            # print(data)
-            # time.sleep(20)
             config["batch_size"] = data["batch_size"]
             config["max_epochs"] = data["max_epochs"]
             vame.write_config(
@@ -45,6 +43,12 @@ class TrainModel(Resource):
                 config=config,
             )
             vame.train_model(config=config, save_logs=True)
+            vame.visualization.plot_loss(
+                config=config,
+                model_name=config["model_name"],
+                save_to_file=True,
+                show_figure=False,
+            )
 
         try:
             data, project_path = resolve_request_data(request)
@@ -84,8 +88,30 @@ class EvaluateModel(Resource):
                 config=config,
                 save_logs=True,
             )
-            # return dict(result=get_evaluation_images(project_path))
             return dict(result="success")
+        except Exception as exception:
+            if not_bad_request_exception(exception):
+                api.abort(500, str(exception))
+
+
+@api.route('/model-images', methods=['POST'])
+class ModelImages(Resource):
+    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def post(self):
+        try:
+            data, project_path = resolve_request_data(request)
+            config = vame.read_config(str(Path(project_path) / "config.yaml"))
+            model_name = config["model_name"]
+            images_path = Path(project_path) / "model" / "evaluate"
+            images_content = dict()
+            if (images_path / f"mse_and_kl_loss_{model_name}.png").exists():
+                with open(images_path / f"mse_and_kl_loss_{model_name}.png", "rb") as image_file:
+                    images_content["mse_and_kl_loss"] = base64.b64encode(image_file.read()).decode("utf-8")
+            if (images_path / "future_reconstruction.png").exists():
+                with open(images_path / "future_reconstruction.png", "rb") as image_file:
+                    images_content["future_reconstruction"] = base64.b64encode(image_file.read()).decode("utf-8")
+
+            return jsonify(images_content)
         except Exception as exception:
             if not_bad_request_exception(exception):
                 api.abort(500, str(exception))

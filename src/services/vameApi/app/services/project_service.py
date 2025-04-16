@@ -6,15 +6,7 @@ from pathlib import Path
 import portalocker
 
 from app.config import VAME_PROJECTS_DIRECTORY, GLOBAL_STATES_FILE
-
 from app.utils.get_project_path import get_project_path
-from app.utils.get_assets import (
-    get_evaluation_images,
-    get_visualization_images,
-    get_motif_videos,
-    get_community_videos,
-    get_video_results_path,
-)
 
 
 def get_projects():
