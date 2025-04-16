@@ -15,6 +15,7 @@ import { evaluateVAMEProject } from "../../../context/Projects/api/evaluateVAMEP
 import createTrainsetSchema from '../../../../../schema/create-trainset.schema.json';
 import trainModelSchema from '../../../../../schema/train-model.schema.json';
 import evaluateModelSchema from '../../../../../schema/evaluate-model.schema.json';
+import ModelVisualizationSection from "./ModelVisualizationSection";
 
 const PlaceholderLog = ({ step }: { step: string }) => (
     <div
@@ -33,7 +34,6 @@ const PlaceholderLog = ({ step }: { step: string }) => (
 
 type ModelTrainingAccordionProps = {
     project: ProjectType;
-    projectStates: ProjectStates;
     onFormSubmit: () => Promise<void>;
     setBlockSubmit: (value: boolean) => void;
     blockSubmit: boolean;
@@ -169,6 +169,8 @@ const ModelTrainingAccordion = ({
             setBlockSubmit(false);
         }
     };
+
+    // (Removed unused handleGetImages and related state)
 
     // Toggle handler for independent accordions
     const handleToggle = (idx: number, enabled: boolean) => {
@@ -327,10 +329,7 @@ const ModelTrainingAccordion = ({
                     </span>
                 </AccordionHeader>
                 <AccordionContent $isOpen={openSteps[3]}>
-                    <div>
-                        <b>Visualize Model Results</b>
-                        <p>Visualization functionality will be added here.</p>
-                    </div>
+                    <ModelVisualizationSection project={project} />
                 </AccordionContent>
             </Accordion>
         </PaddedTab>
