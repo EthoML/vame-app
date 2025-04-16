@@ -33,7 +33,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
   })
 
   const properties = Object.entries(schema.properties)
-  const readOnly = !properties.some(([_, p]) => !p.readOnly)
+  const readOnly = properties.length > 0 && !properties.some(([_, p]) => !p.readOnly)
 
   // const handleSubmit = (data) => {
   //   console.log(data)
