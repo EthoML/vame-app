@@ -35,6 +35,7 @@ type ModelTrainingAccordionProps = {
     projectStates: ProjectStates;
     onFormSubmit: () => Promise<void>;
     setBlockSubmit: (value: boolean) => void;
+    blockSubmit: boolean;
 };
 
 const ModelTrainingAccordion = ({
@@ -42,6 +43,7 @@ const ModelTrainingAccordion = ({
     projectStates,
     onFormSubmit,
     setBlockSubmit,
+    blockSubmit,
 }: ModelTrainingAccordionProps) => {
     // console.log("project prop:", project);
     console.log("projectStates prop:", projectStates);
@@ -183,7 +185,7 @@ const ModelTrainingAccordion = ({
                     <div>
                         <DynamicForm
                             schema={createTrainsetSchema as Schema}
-                            blockSubmission={createTrainsetLoading}
+                            blockSubmission={blockSubmit}
                             submitText={createTrainsetLoading ? "Creating..." : "Create Training Set"}
                             onFormSubmit={handleCreateTrainset}
                         />
@@ -217,7 +219,7 @@ const ModelTrainingAccordion = ({
                     <div>
                         <DynamicForm
                             schema={trainModelSchema as Schema}
-                            blockSubmission={trainLoading || trainModelState === "running"}
+                            blockSubmission={blockSubmit}
                             submitText={trainLoading ? "Training..." : "Train Model"}
                             onFormSubmit={handleTrainModel}
                         />
