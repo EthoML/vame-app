@@ -33,14 +33,12 @@ const PlaceholderLog = ({ step }: { step: string }) => (
 type ModelTrainingAccordionProps = {
     project: ProjectType;
     projectStates: ProjectStates;
-    onRequestCompleted: () => void;
-    onFormSubmit?: () => Promise<void>;
+    onFormSubmit: () => Promise<void>;
 };
 
 const ModelTrainingAccordion = ({
     project,
     projectStates,
-    onRequestCompleted,
     onFormSubmit,
 }: ModelTrainingAccordionProps) => {
     // console.log("project prop:", project);
@@ -81,9 +79,9 @@ const ModelTrainingAccordion = ({
                     ) {
                         setIsPolling(false);
                         try {
-                            onRequestCompleted();
+                            await onFormSubmit();
                         } catch (e) {
-                            console.error("Error fetching project states:", e);
+                            console.error("Error calling onFormSubmit:", e);
                         }
                     }
                 } catch (err) {
@@ -122,16 +120,9 @@ const ModelTrainingAccordion = ({
         } finally {
             setCreateTrainsetLoading(false);
             try {
-                onRequestCompleted();
+                await onFormSubmit();
             } catch (e) {
-                console.error("Error fetching project states:", e);
-            }
-            if (onFormSubmit) {
-                try {
-                    await onFormSubmit();
-                } catch (e) {
-                    console.error("Error calling onFormSubmit:", e);
-                }
+                console.error("Error calling onFormSubmit:", e);
             }
         }
     };
@@ -150,18 +141,6 @@ const ModelTrainingAccordion = ({
             setTrainError(err.message || "Failed to start model training.");
         } finally {
             setTrainLoading(false);
-            try {
-                onRequestCompleted();
-            } catch (e) {
-                console.error("Error fetching project states:", e);
-            }
-            if (onFormSubmit) {
-                try {
-                    await onFormSubmit();
-                } catch (e) {
-                    console.error("Error calling onFormSubmit:", e);
-                }
-            }
         }
     };
 

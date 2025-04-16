@@ -69,22 +69,6 @@ const Project: React.FC = () => {
 
   const navigate = useNavigate()
 
-  // Function to fetch and update project states
-  const fetchProjectStates = async () => {
-    // Check that project is defined before calling the API.
-    if (!project) return;
-    try {
-      // Make your asynchronous API call. Adjust the object structure as needed.
-      const updatedStates = await getProjectStateVAMEProject({
-        project: project.config.project_path
-      });
-      // Update state with fetched data.
-      setProjectStates(updatedStates.states);
-    } catch (e) {
-      console.error("Error fetching project states:", e);
-    }
-  };
-
   // Function to handle tab submission
   const submitTab = useCallback(async (
     callback: () => Promise<void>,
@@ -266,7 +250,6 @@ const Project: React.FC = () => {
         <ModelTrainingAccordion
           project={project}
           projectStates={projectStates}
-          onRequestCompleted={fetchProjectStates}
           onFormSubmit={async () => submitTab(async () => { }, 'model-training')}
         />
       )
