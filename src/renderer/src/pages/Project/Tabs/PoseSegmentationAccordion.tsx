@@ -14,6 +14,7 @@ import motifVideosGetSchema from "../../../../../schema/motif-videos-get.schema.
 import { segmentVAMEProject } from "../../../context/Projects/api/segmentVAMEProject";
 import { getProjectStateVAMEProject } from "../../../context/Projects/api/getProjectStateVAMEProject";
 import { createMotifVideosVAMEProject } from "../../../context/Projects/api/createMotifVideosVAMEProject";
+import { getSegmentVideosVAMEProject } from "../../../context/Projects/api/getSegmentVideosVAMEProject";
 
 type PoseSegmentationAccordionProps = {
     project: ProjectType;
@@ -48,6 +49,9 @@ const PoseSegmentationAccordion = ({
     const [motifError, setMotifError] = useState<string | null>(null);
     const [isPollingMotif, setIsPollingMotif] = useState(false);
     const [motifState, setMotifState] = useState<string | null>(null);
+    const [getLoading, setGetLoading] = useState(false);
+    const [getError, setGetError] = useState<string | null>(null);
+    const [segmentVideos, setSegmentVideos] = useState<{ filename: string; content: string }[]>([]);
 
     // States from project
     const motif_session = project.states?.motif_videos || {};
@@ -170,6 +174,41 @@ const PoseSegmentationAccordion = ({
             setBlockSubmit(false);
         } finally {
             setMotifLoading(false);
+        }
+    };
+
+    // Update schema with dynamic session options
+    const getVideosSchema = React.useMemo(() => {
+        const sessionNames = project.config?.session_names || [];
+        return {
+            ...motifVideosGetSchema,
+            properties: {
+                ...motifVideosGetSchema.properties,
+                session: {
+                    ...motifVideosGetSchema.properties.session,
+                    enum: sessionNames,
+                    enumNames: sessionNames
+                }
+            }
+        };
+    }, [project.config]);
+
+    const handleGetSegmentVideos = async (formData: any) => {
+        setGetLoading(true);
+        setGetError(null);
+        setBlockSubmit(true);
+        try {
+            const data = await getSegmentVideosVAMEProject({
+                project: project.config.project_path,
+                segmentation_algorithm: formData.segmentation_algorithm,
+                session: formData.session
+            });
+            setSegmentVideos(data.videos);
+        } catch (err: any) {
+            setGetError(err.message || "Failed to fetch videos.");
+        } finally {
+            setGetLoading(false);
+            setBlockSubmit(false);
         }
     };
 
@@ -336,17 +375,31 @@ const PoseSegmentationAccordion = ({
                     </span>
                 </AccordionHeader>
                 <AccordionContent $isOpen={openSteps[2]}>
-                    <div
-                        style={{
-                            margin: "16px 0",
-                            padding: "12px",
-                            background: "#f5f5f5",
-                            borderRadius: 6,
-                            color: "#888",
-                            fontStyle: "italic",
-                        }}
-                    >
-                        [Visualization placeholder — coming soon.]
+                    <div>
+                        <DynamicForm
+                            schema={getVideosSchema as unknown as Schema}
+                            blockSubmission={blockSubmit}
+                            submitText={getLoading ? "Fetching..." : "Get Videos"}
+                            onFormSubmit={handleGetSegmentVideos}
+                        />
+                        {getError && (
+                            <div style={{ color: "red", marginTop: 8 }}>{getError}</div>
+                        )}
+                        {segmentVideos.length > 0 && (
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 240px)", gap: 12, marginTop: 12 }}>
+                                {segmentVideos.map(({ filename, content }) => (
+                                    <div key={filename} style={{ display: "flex", flexDirection: "column" }}>
+                                        <video
+                                            controls
+                                            src={`data:video/mp4;base64,${content}`}
+                                            style={{ width: "100%", borderRadius: 4 }}
+                                        />
+                                        <label style={{ marginTop: 4 }}>{filename}</label>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        <PlaceholderLog step="Visualize Results" />
                     </div>
                 </AccordionContent>
             </Accordion>

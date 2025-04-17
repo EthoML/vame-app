@@ -1,6 +1,7 @@
 from pathlib import Path
 import threading
 import time
+import base64
 from flask_restx import Resource
 from flask import request
 import vame
@@ -34,14 +35,14 @@ class Segment(Resource):
                 kwargs={"config": config, "overwrite": overwrite},
             )
             thread.start()
-            time.sleep(2)  # Give the thread a moment to start
+            time.sleep(2)
             return {"status": "started"}
         except Exception as exception:
             if not_bad_request_exception(exception):
                 api.abort(500, str(exception))
 
 
-@api.route('/motif-videos', methods=['POST'])
+@api.route('/motif-videos', methods=['POST', 'GET'])
 class MotifVideos(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
@@ -57,6 +58,34 @@ class MotifVideos(Resource):
             thread.start()
             time.sleep(2)
             return {"status": "started"}
+        except Exception as exception:
+            if not_bad_request_exception(exception):
+                api.abort(500, str(exception))
+
+    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def get(self):
+        project = request.args.get("project")
+        segmentation_algorithm = request.args.get("segmentation_algorithm")
+        session = request.args.get("session")
+        if not project or not segmentation_algorithm or not session:
+            api.abort(400, "Missing 'project', 'segmentation_algorithm', or 'session'")
+        try:
+            config = vame.read_config(str(Path(project) / "config.yaml"))
+            n_clusters = config.get("n_clusters")
+            model_name = config.get("model_name")
+            sessions = config.get("session_names", [])
+
+            # Validate session exists in project
+            if session not in sessions:
+                api.abort(400, f"Session '{session}' not found in project")
+
+            videos = []
+            dir_path = Path(project) / "results" / session / model_name / f"{segmentation_algorithm}-{n_clusters}/cluster_videos"
+            if dir_path.exists():
+                for file_path in dir_path.glob("*.mp4"):
+                    content = base64.b64encode(file_path.read_bytes()).decode()
+                    videos.append({"filename": file_path.name, "content": content})
+            return {"videos": videos}
         except Exception as exception:
             if not_bad_request_exception(exception):
                 api.abort(500, str(exception))
