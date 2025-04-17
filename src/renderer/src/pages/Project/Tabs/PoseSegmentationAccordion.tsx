@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef, memo } from "react";
 import {
     Accordion,
     AccordionHeader,
@@ -22,6 +22,44 @@ type PoseSegmentationAccordionProps = {
     setBlockSubmit: (value: boolean) => void;
     onFormSubmit: () => Promise<void>;
 };
+
+// Create a separate component for each video
+const VideoPlayer = memo(({ content, filename }: { content: string; filename: string }) => {
+    // Create blob URL from base64 content
+    const blobUrl = useMemo(() => {
+        const binaryString = atob(content);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        const blob = new Blob([bytes], { type: 'video/mp4' });
+        return URL.createObjectURL(blob);
+    }, [content]);
+
+    // Use ref for video element
+    const videoRef = useRef<HTMLVideoElement>(null);
+
+    // Clean up blob URL when component unmounts
+    useEffect(() => {
+        return () => {
+            if (blobUrl) {
+                URL.revokeObjectURL(blobUrl);
+            }
+        };
+    }, [blobUrl]);
+
+    return (
+        <div style={{ display: "flex", flexDirection: "column" }}>
+            <video
+                ref={videoRef}
+                controls
+                src={blobUrl}
+                style={{ width: "100%", borderRadius: 4 }}
+            />
+            <label style={{ marginTop: 4 }}>{filename}</label>
+        </div>
+    );
+});
 
 const PlaceholderLog = ({ step }: { step: string }) => (
     <div
@@ -179,7 +217,11 @@ const PoseSegmentationAccordion = ({
 
     // Update schema with dynamic session options
     const getVideosSchema = React.useMemo(() => {
-        const sessionNames = project.config?.session_names || [];
+        // Extract session names from project config
+        const sessionNames = project.config?.session_names ||
+            (project.config as any)?.session_names ||
+            [];
+
         return {
             ...motifVideosGetSchema,
             properties: {
@@ -388,14 +430,7 @@ const PoseSegmentationAccordion = ({
                         {segmentVideos.length > 0 && (
                             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 240px)", gap: 12, marginTop: 12 }}>
                                 {segmentVideos.map(({ filename, content }) => (
-                                    <div key={filename} style={{ display: "flex", flexDirection: "column" }}>
-                                        <video
-                                            controls
-                                            src={`data:video/mp4;base64,${content}`}
-                                            style={{ width: "100%", borderRadius: 4 }}
-                                        />
-                                        <label style={{ marginTop: 4 }}>{filename}</label>
-                                    </div>
+                                    <VideoPlayer key={filename} filename={filename} content={content} />
                                 ))}
                             </div>
                         )}
