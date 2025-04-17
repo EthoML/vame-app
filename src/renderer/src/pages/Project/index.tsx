@@ -13,17 +13,11 @@ import { Container, HeaderButton, HeaderButtonContainer, ProjectHeader, ProjectI
 
 import ProjectConfiguration from './Tabs/ProjectConfiguration';
 import Preprocessing from './Tabs/Preprocessing';
-import Model from './Tabs/Model';
 import ModelTrainingAccordion from './Tabs/ModelTrainingAccordion';
 import PoseSegmentationAccordion from './Tabs/PoseSegmentationAccordion';
-import Segmentation from './Tabs/Segmentation';
-import MotifVideos from './Tabs/MotifVideos';
-import { CommunityAnalysis } from './Tabs/CommunityAnalysis';
-import CommunityVideos from './Tabs/CommunityVideos';
-import UMAPVisualization from './Tabs/UMAPVisualization';
+import CommunityAnalysisAccordion from './Tabs/CommunityAnalysisAccordion';
 import { MainContainer } from '@renderer/components/Container';
 import { useSettings } from '@renderer/context/Settings';
-import { getProjectStateVAMEProject } from "../../context/Projects/api/getProjectStateVAMEProject";
 
 const Project: React.FC = () => {
 
@@ -34,10 +28,6 @@ const Project: React.FC = () => {
     refresh,
     configureProject,
     runPreprocessing,
-    communityAnalysis,
-    createCommunityVideos,
-    createMotifVideos,
-    createUMAPVisualization
   } = useProjects()
 
   const {
@@ -113,7 +103,7 @@ const Project: React.FC = () => {
   }
 
   // Check if states exist and have expected properties
-  const configuredState = project.states?.update_config || {};
+  const configuredState = (project.states as any)?.update_config || {};
   const preprocessingState = project.states?.preprocessing || {};
   const preprocessingVisualizationState = project.states?.preprocessing_visualization || {};
   const create_trainset = project.states?.create_trainset || {};
@@ -257,68 +247,13 @@ const Project: React.FC = () => {
       complete: community?.execution_state === "success",
       tooltip: "Need Pose Segmentation.",
       content: (
-        <div style={{ padding: 20, background: "#f5f5f5" }}>
-          <h3>Community Analysis Content</h3>
-          <p>This is a placeholder for the CommunityAnalysis component.</p>
-          <p><b>Original props:</b></p>
-          <ul>
-            <li>project: {JSON.stringify(project.config?.project_name || project.config?.Project)}</li>
-            <li>blockSubmission: {String(blockSubmit)}</li>
-            <li>disabled: {String(tabsLock && !segmented)}</li>
-          </ul>
-        </div>
+        <CommunityAnalysisAccordion
+          project={project}
+          blockSubmit={blockSubmit}
+          setBlockSubmit={setBlockSubmit}
+          onFormSubmit={async () => submitTab(async () => { }, 'community-analysis')}
+        />
       )
-      /* Original content:
-      <CommunityAnalysis
-        project={project}
-        blockSubmission={blockSubmit}
-        blockTooltip="Waiting VAME to be ready."
-        onFormSubmit={(data: any) => submitTab(async () => {
-          const projectPath = project.config.project_path
-
-          await communityAnalysis({
-            project: projectPath,
-            cohort: data.cohort,
-            cut_tree: data.cut_tree,
-            show_umap: data.show_umap,
-            parametrization: data.parametrization,
-          })
-        }, "community-videos")}
-      />
-      */
-    },
-    {
-      id: 'community-videos',
-      label: '6b. Community Videos',
-      disabled: tabsLock && (!!community.cohort || community?.execution_state !== "success"),
-      complete: community_videos_created,
-      tooltip: "Need community analysis with cohort false.",
-      content: (
-        <div style={{ padding: 20, background: "#f5f5f5" }}>
-          <h3>Community Videos Content</h3>
-          <p>This is a placeholder for the CommunityVideos component.</p>
-          <p><b>Original props:</b></p>
-          <ul>
-            <li>project: {JSON.stringify(project.config?.project_name || project.config?.Project)}</li>
-            <li>blockSubmission: {String(blockSubmit)}</li>
-            <li>disabled: {String(tabsLock && (!!community.cohort || community?.execution_state !== "success"))}</li>
-          </ul>
-        </div>
-      )
-      /* Original content:
-      <CommunityVideos
-        project={project}
-        blockSubmission={blockSubmit}
-        blockTooltip="Waiting VAME to be ready."
-        onFormSubmit={(data: any) => submitTab(async () => {
-          const projectPath = project.config.project_path
-          await createCommunityVideos({
-            project: projectPath,
-            parametrization: data.parametrization,
-          })
-        }, "community-videos")}
-      />
-      */
     },
     {
       id: 'umap-visualization',
