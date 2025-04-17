@@ -1,0 +1,16 @@
+{
+    "title": "Get Motifs Videos",
+    "type": "object",
+    "properties": {
+        "segmentation_algorithm": {
+            "type": "string",
+            "enum": [
+                "hmm",
+                "kmeans"
+            ]
+        }
+    },
+    "required": [
+        "segmentation_algorithm"
+    ]
+}

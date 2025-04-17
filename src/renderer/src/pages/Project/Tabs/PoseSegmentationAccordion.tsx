@@ -9,10 +9,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import DynamicForm from "@renderer/components/DynamicForm";
 import poseSegmentationSchema from "../../../../../schema/pose-segmentation.schema.json";
+import motifVideosGenerateSchema from "../../../../../schema/motif-videos-generate.schema.json";
+import motifVideosGetSchema from "../../../../../schema/motif-videos-get.schema.json";
 import { segmentVAMEProject } from "../../../context/Projects/api/segmentVAMEProject";
 import { getProjectStateVAMEProject } from "../../../context/Projects/api/getProjectStateVAMEProject";
 import { createMotifVideosVAMEProject } from "../../../context/Projects/api/createMotifVideosVAMEProject";
-import motifVideosSchema from "../../../../../schema/motif-videos.schema.json";
 
 type PoseSegmentationAccordionProps = {
     project: ProjectType;
@@ -271,7 +272,7 @@ const PoseSegmentationAccordion = ({
                 <AccordionContent $isOpen={openSteps[1]}>
                     <div>
                         <DynamicForm
-                            schema={motifVideosSchema as unknown as Schema}
+                            schema={motifVideosGenerateSchema as unknown as Schema}
                             blockSubmission={blockSubmit}
                             submitText={motifLoading ? "Creating..." : "Create Segmented Videos"}
                             onFormSubmit={handleCreateMotifVideos}
