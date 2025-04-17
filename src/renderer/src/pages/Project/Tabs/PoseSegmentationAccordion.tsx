@@ -259,6 +259,11 @@ const PoseSegmentationAccordion = ({
                     onClick={() => handleToggle(1, segmented)}
                 >
                     2. Create Segmented Videos
+                    {motifCompleted && (
+                        <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
+                            ✓
+                        </span>
+                    )}
                     <span style={{ marginLeft: "auto" }}>
                         <FontAwesomeIcon icon={openSteps[1] ? faChevronUp : faChevronDown} />
                     </span>

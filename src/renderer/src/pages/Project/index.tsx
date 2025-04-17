@@ -251,41 +251,8 @@ const Project: React.FC = () => {
       )
     },
     {
-      id: 'motifs-videos',
-      label: '5. Motif Videos',
-      disabled: tabsLock && !segmented,
-      complete: motif_videos_created,
-      tooltip: "Need Pose Segmentation.",
-      content: (
-        <div style={{ padding: 20, background: "#f5f5f5" }}>
-          <h3>Motif Videos Content</h3>
-          <p>This is a placeholder for the MotifVideos component.</p>
-          <p><b>Original props:</b></p>
-          <ul>
-            <li>project: {JSON.stringify(project.config?.project_name || project.config?.Project)}</li>
-            <li>blockSubmission: {String(blockSubmit)}</li>
-            <li>disabled: {String(tabsLock && !segmented)}</li>
-          </ul>
-        </div>
-      )
-      /* Original content:
-      <MotifVideos
-        project={project}
-        blockSubmission={blockSubmit}
-        blockTooltip="Waiting VAME to be ready."
-        onFormSubmit={(data) => submitTab(async () => {
-          const projectPath = project.config.project_path
-          await createMotifVideos({
-            project: projectPath,
-            ...data,
-          })
-        }, "motifs-videos")}
-      />
-      */
-    },
-    {
       id: 'community-analysis',
-      label: '6a. Community Analysis',
+      label: '5. Community Analysis',
       disabled: tabsLock && !segmented,
       complete: community?.execution_state === "success",
       tooltip: "Need Pose Segmentation.",
