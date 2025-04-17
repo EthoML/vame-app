@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import DynamicForm from "@renderer/components/DynamicForm";
 import communitySchema from "../../../../../schema/community.schema.json";
-import communityVideosSchema from "../../../../../schema/community-videos.schema.json";
+import communityVideosGenerateSchema from "../../../../../schema/community-videos-generate.schema.json";
 import motifVideosGetSchema from "../../../../../schema/motif-videos-get.schema.json";
 import { communityAnalysisVAMEProject } from "../../../context/Projects/api/communityAnalysisVAMEProject";
 import { getProjectStateVAMEProject } from "../../../context/Projects/api/getProjectStateVAMEProject";
@@ -351,7 +351,7 @@ const CommunityAnalysisAccordion = ({
                 <AccordionContent $isOpen={openSteps[1]}>
                     <div>
                         <DynamicForm
-                            schema={communityVideosSchema as unknown as Schema}
+                            schema={communityVideosGenerateSchema as unknown as Schema}
                             blockSubmission={blockSubmit}
                             submitText={communityVideosLoading ? "Creating..." : "Create Community Videos"}
                             onFormSubmit={handleCreateCommunityVideos}
