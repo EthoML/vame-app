@@ -40,6 +40,7 @@ def create_app():
         preprocessing,
         model,
         pose_segmentation,
+        community,
     )
 
     api.add_namespace(health_check.api)
@@ -49,5 +50,6 @@ def create_app():
     api.add_namespace(preprocessing.api)
     api.add_namespace(model.api)
     api.add_namespace(pose_segmentation.api)
+    api.add_namespace(community.api)
 
     return app

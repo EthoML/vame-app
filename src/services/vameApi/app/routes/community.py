@@ -15,22 +15,23 @@ from app.utils.not_bad_request_exception import not_bad_request_exception
 class Community(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
-        def background_task(config: dict):
+        def background_task(config: dict, cut_tree: bool):
             vame.community(
                 config=config,
+                cut_tree=cut_tree,
                 save_logs=True,
             )
         try:
             data, project_path = resolve_request_data(request)
             config = vame.read_config(str(Path(project_path) / "config.yaml"))
-            config["n_clusters"] = data["n_clusters"]
+            cut_tree = data["cut_tree"]
             vame.write_config(
                 config_path=str(Path(project_path) / "config.yaml"),
                 config=config,
             )
             thread = threading.Thread(
                 target=background_task,
-                kwargs={"config": config},
+                kwargs={"config": config, "cut_tree": cut_tree},
             )
             thread.start()
             time.sleep(2)
