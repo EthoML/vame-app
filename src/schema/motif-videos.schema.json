@@ -2,12 +2,14 @@
     "title": "Motifs Videos",
     "type": "object",
     "properties": {
-        "parametrization": {
-            "type": "string",
-            "enum": ["hmm", "kmeans"]
+        "overwrite": {
+            "type": "boolean",
+            "title": "Overwrite Existing Videos",
+            "description": "If true, overwrite any existing videos",
+            "default": false
         }
     },
     "required": [
-        "parametrization"
+        "overwrite"
     ]
 }

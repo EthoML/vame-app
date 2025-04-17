@@ -41,7 +41,7 @@ class Segment(Resource):
                 api.abort(500, str(exception))
 
 
-@api.route('/motif_videos', methods=['POST'])
+@api.route('/motif-videos', methods=['POST'])
 class MotifVideos(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):

@@ -7,7 +7,7 @@ type CreateMotifVideosProps = {
 }
 
 export const createMotifVideosVAMEProject = async (data: CreateMotifVideosProps) => {
-    const result = await post<ProjectType>('motif_videos', { ...data })
+    const result = await post<ProjectType>('motif-videos', { ...data })
 
     if (result.success) {
         return result.data
