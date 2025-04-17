@@ -10,7 +10,7 @@ import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import DynamicForm from "@renderer/components/DynamicForm";
 import { createTrainsetVAMEProject } from "../../../context/Projects/api/createTrainsetVAMEProject";
 import { trainVAMEProject } from "../../../context/Projects/api/trainVAMEProject";
-import { getTrainStateVAMEProject } from "../../../context/Projects/api/trainStateVAMEProject";
+import { getProjectStateVAMEProject } from "../../../context/Projects/api/getProjectStateVAMEProject";
 import { evaluateVAMEProject } from "../../../context/Projects/api/evaluateVAMEProject";
 import createTrainsetSchema from '../../../../../schema/create-trainset.schema.json';
 import trainModelSchema from '../../../../../schema/train-model.schema.json';
@@ -78,9 +78,10 @@ const ModelTrainingAccordion = ({
         if (isPolling) {
             interval = setInterval(async () => {
                 try {
-                    const state = await getTrainStateVAMEProject({
+                    const projectStates = await getProjectStateVAMEProject({
                         project: project.config.project_path,
                     });
+                    const state = projectStates.states?.train_model?.execution_state || null;
                     setTrainModelState(state);
                     if (
                         state === "success" ||

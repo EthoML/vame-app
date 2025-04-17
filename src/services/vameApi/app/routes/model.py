@@ -11,7 +11,7 @@ from app.utils.resolve_request_util import resolve_request_data
 from app.utils.not_bad_request_exception import not_bad_request_exception
 
 
-@api.route("/create_trainset", methods=['POST'])
+@api.route("/create-trainset", methods=['POST'])
 class CreateTrainset(Resource):
     @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
@@ -56,21 +56,6 @@ class TrainModel(Resource):
             thread.start()
             time.sleep(2)  # Give the thread a moment to start
             return {"status": "started"}
-        except Exception as exception:
-            if not_bad_request_exception(exception):
-                api.abort(500, str(exception))
-
-
-@api.route('/train_state', methods=['POST'])
-class TrainState(Resource):
-    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
-    def post(self):
-        try:
-            data, project_path = resolve_request_data(request)
-            config = vame.read_config(str(Path(project_path) / "config.yaml"))
-            states = vame.read_states(config=config)
-            train_model_state = states.get("train_model", {}).get("execution_state", "not_found")
-            return dict(train_model=train_model_state)
         except Exception as exception:
             if not_bad_request_exception(exception):
                 api.abort(500, str(exception))

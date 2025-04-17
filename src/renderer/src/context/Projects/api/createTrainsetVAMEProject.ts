@@ -7,7 +7,7 @@ type CreateProjectTrainsetProps = {
 }
 
 export const createTrainsetVAMEProject = async (data: CreateProjectTrainsetProps) => {
-    const result = await post<ProjectType>('create_trainset', { ...data })
+    const result = await post<ProjectType>('create-trainset', { ...data })
 
     if (result.success) {
         return result.data

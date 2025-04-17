@@ -10,7 +10,7 @@ import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import DynamicForm from "@renderer/components/DynamicForm";
 import poseSegmentationSchema from "../../../../../schema/pose-segmentation.schema.json";
 import { segmentVAMEProject } from "../../../context/Projects/api/segmentVAMEProject";
-import { segmentStateVAMEProject } from "../../../context/Projects/api/segmentStateVAMEProject";
+import { getProjectStateVAMEProject } from "../../../context/Projects/api/getProjectStateVAMEProject";
 
 type PoseSegmentationAccordionProps = {
     project: ProjectType;
@@ -56,9 +56,10 @@ const PoseSegmentationAccordion = ({
         if (isPolling) {
             interval = setInterval(async () => {
                 try {
-                    const state = await segmentStateVAMEProject({
+                    const projectState = await getProjectStateVAMEProject({
                         project: project.config.project_path,
                     });
+                    const state = projectState.states?.segment_session?.execution_state || null;
                     setSegmentationState(state);
                     if (
                         state === "success" ||

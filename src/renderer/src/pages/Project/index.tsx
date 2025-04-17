@@ -34,7 +34,6 @@ const Project: React.FC = () => {
     refresh,
     configureProject,
     runPreprocessing,
-    segment,
     communityAnalysis,
     createCommunityVideos,
     createMotifVideos,
