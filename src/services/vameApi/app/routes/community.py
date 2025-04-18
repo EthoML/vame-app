@@ -102,3 +102,34 @@ class CommunityVideos(Resource):
         except Exception as exception:
             if not_bad_request_exception(exception):
                 api.abort(500, str(exception))
+
+
+@api.route("/community-images", methods=["GET"])
+class CommunityImages(Resource):
+    @api.doc(
+        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
+    )
+    def get(self):
+        project_path = request.args.get("project")
+        segmentation_algorithm = request.args.get("segmentation_algorithm")
+        if not project_path or not segmentation_algorithm:
+            api.abort(400, "Missing 'project' or 'segmentation_algorithm'")
+        try:
+            config = vame.read_config(str(Path(project_path) / "config.yaml"))
+            n_clusters = config.get("n_clusters")
+            file_path = (
+                Path(project_path)
+                / "results"
+                / "community_cohort"
+                / f"{segmentation_algorithm}-{n_clusters}"
+                / "tree.png"
+            )
+            if file_path.exists():
+                content = base64.b64encode(file_path.read_bytes()).decode()
+                tree_image = {"filename": file_path.name, "content": content}
+                return {"tree_image": tree_image}
+            else:
+                api.abort(400, f"Image file '{file_path}' not found")
+        except Exception as exception:
+            if not_bad_request_exception(exception):
+                api.abort(500, str(exception))

@@ -403,13 +403,13 @@ const CommunityAnalysisAccordion = ({
                 </AccordionContent>
             </Accordion>
 
-            {/* Accordion 3: Visualize Results */}
+            {/* Accordion 3: Visualize Results - Videos */}
             <Accordion>
                 <AccordionHeader
                     $disabled={!communityVideosCompleted}
                     onClick={() => handleToggle(2, communityVideosCompleted)}
                 >
-                    3. Visualize Results
+                    3. Visualize Results - Videos
                     <span style={{ marginLeft: "auto" }}>
                         <FontAwesomeIcon icon={openSteps[2] ? faChevronUp : faChevronDown} />
                     </span>
