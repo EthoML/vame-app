@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { open } from '@renderer/utils/folders';
 import { post } from '@renderer/utils/requests';
 import { onConnected, onProjectReady } from '@renderer/utils/vame';
+import { formatDatetime } from '@renderer/utils/date';
 
 import { useProjects } from '@renderer/context/Projects';
 
@@ -317,7 +318,7 @@ const Project: React.FC = () => {
             <small>
               <b>Creation Date: </b>
               <small>
-                {project.config.creation_datetime || ""}
+                {project.config.creation_datetime ? formatDatetime(project.config.creation_datetime) : ""}
               </small>
             </small>
           </ProjectInformationCapsule>
