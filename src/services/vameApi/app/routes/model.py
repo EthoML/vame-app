@@ -11,9 +11,11 @@ from app.utils.resolve_request_util import resolve_request_data
 from app.utils.not_bad_request_exception import not_bad_request_exception
 
 
-@api.route("/create-trainset", methods=['POST'])
+@api.route("/create-trainset", methods=["POST"])
 class CreateTrainset(Resource):
-    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    @api.doc(
+        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
+    )
     def post(self):
         try:
             data, project_path = resolve_request_data(request)
@@ -30,9 +32,11 @@ class CreateTrainset(Resource):
                 api.abort(500, str(exception))
 
 
-@api.route('/train', methods=['POST'])
+@api.route("/train", methods=["POST"])
 class TrainModel(Resource):
-    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    @api.doc(
+        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
+    )
     def post(self):
         def background_task(data, project_path, config):
             config["batch_size"] = data["batch_size"]
@@ -52,7 +56,9 @@ class TrainModel(Resource):
         try:
             data, project_path = resolve_request_data(request)
             config = vame.read_config(str(Path(project_path) / "config.yaml"))
-            thread = threading.Thread(target=background_task, args=(data, project_path, config))
+            thread = threading.Thread(
+                target=background_task, args=(data, project_path, config)
+            )
             thread.start()
             time.sleep(2)  # Give the thread a moment to start
             return {"status": "started"}
@@ -61,9 +67,11 @@ class TrainModel(Resource):
                 api.abort(500, str(exception))
 
 
-@api.route('/evaluate', methods=['POST'])
+@api.route("/evaluate", methods=["POST"])
 class EvaluateModel(Resource):
-    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    @api.doc(
+        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
+    )
     def post(self):
         try:
             data, project_path = resolve_request_data(request)
@@ -78,9 +86,11 @@ class EvaluateModel(Resource):
                 api.abort(500, str(exception))
 
 
-@api.route('/model-images', methods=['POST'])
+@api.route("/model-images", methods=["POST"])
 class ModelImages(Resource):
-    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    @api.doc(
+        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
+    )
     def post(self):
         try:
             data, project_path = resolve_request_data(request)
@@ -89,11 +99,19 @@ class ModelImages(Resource):
             images_path = Path(project_path) / "model" / "evaluate"
             images_content = dict()
             if (images_path / f"mse_and_kl_loss_{model_name}.png").exists():
-                with open(images_path / f"mse_and_kl_loss_{model_name}.png", "rb") as image_file:
-                    images_content["mse_and_kl_loss"] = base64.b64encode(image_file.read()).decode("utf-8")
+                with open(
+                    images_path / f"mse_and_kl_loss_{model_name}.png", "rb"
+                ) as image_file:
+                    images_content["mse_and_kl_loss"] = base64.b64encode(
+                        image_file.read()
+                    ).decode("utf-8")
             if (images_path / "future_reconstruction.png").exists():
-                with open(images_path / "future_reconstruction.png", "rb") as image_file:
-                    images_content["future_reconstruction"] = base64.b64encode(image_file.read()).decode("utf-8")
+                with open(
+                    images_path / "future_reconstruction.png", "rb"
+                ) as image_file:
+                    images_content["future_reconstruction"] = base64.b64encode(
+                        image_file.read()
+                    ).decode("utf-8")
 
             return jsonify(images_content)
         except Exception as exception:

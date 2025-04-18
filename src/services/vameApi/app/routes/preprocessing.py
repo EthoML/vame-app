@@ -10,9 +10,11 @@ from app.utils.resolve_request_util import resolve_request_data
 from app.utils.not_bad_request_exception import not_bad_request_exception
 
 
-@api.route('/preprocessing', methods=['POST'])
+@api.route("/preprocessing", methods=["POST"])
 class Preprocess(Resource):
-    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    @api.doc(
+        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
+    )
     def post(self):
         try:
             data, project_path = resolve_request_data(request)
@@ -33,16 +35,18 @@ class Preprocess(Resource):
                 save_to_file=True,
                 show_figure=False,
             )
-            return jsonify(dict(result='success'))
+            return jsonify(dict(result="success"))
 
         except Exception as exception:
             if not_bad_request_exception(exception):
                 api.abort(500, str(exception))
 
 
-@api.route('/preprocessing-images', methods=['POST'])
+@api.route("/preprocessing-images", methods=["POST"])
 class PreprocessingImages(Resource):
-    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    @api.doc(
+        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
+    )
     def post(self):
         try:
             data, project_path = resolve_request_data(request)
@@ -50,14 +54,26 @@ class PreprocessingImages(Resource):
             images_path = Path(project_path) / "reports" / "figures"
             images_content = dict()
             if (images_path / f"{session_name}_preprocessing_timeseries.png").exists():
-                with open(images_path / f"{session_name}_preprocessing_timeseries.png", "rb") as image_file:
-                    images_content["timeseries"] = base64.b64encode(image_file.read()).decode("utf-8")
+                with open(
+                    images_path / f"{session_name}_preprocessing_timeseries.png", "rb"
+                ) as image_file:
+                    images_content["timeseries"] = base64.b64encode(
+                        image_file.read()
+                    ).decode("utf-8")
             if (images_path / f"{session_name}_preprocessing_scatter.png").exists():
-                with open(images_path / f"{session_name}_preprocessing_scatter.png", "rb") as image_file:
-                    images_content["scatter"] = base64.b64encode(image_file.read()).decode("utf-8")
+                with open(
+                    images_path / f"{session_name}_preprocessing_scatter.png", "rb"
+                ) as image_file:
+                    images_content["scatter"] = base64.b64encode(
+                        image_file.read()
+                    ).decode("utf-8")
             if (images_path / f"{session_name}_preprocessing_cloud.png").exists():
-                with open(images_path / f"{session_name}_preprocessing_cloud.png", "rb") as image_file:
-                    images_content["cloud"] = base64.b64encode(image_file.read()).decode("utf-8")
+                with open(
+                    images_path / f"{session_name}_preprocessing_cloud.png", "rb"
+                ) as image_file:
+                    images_content["cloud"] = base64.b64encode(
+                        image_file.read()
+                    ).decode("utf-8")
             return jsonify(images_content)
         except Exception as exception:
             if not_bad_request_exception(exception):

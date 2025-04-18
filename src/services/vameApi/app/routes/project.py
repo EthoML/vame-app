@@ -20,16 +20,18 @@ from app.services.project_service import (
 from app.utils.not_bad_request_exception import not_bad_request_exception
 
 
-@api.route('/projects')
+@api.route("/projects")
 class Projects(Resource):
     def get(self):
         projects = get_projects()
         return jsonify(projects)
 
 
-@api.route('/projects/recent')
+@api.route("/projects/recent")
 class RecentProjects(Resource):
-    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    @api.doc(
+        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
+    )
     def get(self):
         try:
             recent_projects = get_recent_projects()
@@ -39,7 +41,7 @@ class RecentProjects(Resource):
             api.abort(500, str(exception))
 
 
-@api.route('/project_ready')
+@api.route("/project_ready")
 class ProjectReady(Resource):
     def post(self):
         _, project_path = resolve_request_data(request)
@@ -50,9 +52,11 @@ class ProjectReady(Resource):
             api.abort(500, str(exception))
 
 
-@api.route('/project/register')
+@api.route("/project/register")
 class RegisterProject(Resource):
-    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    @api.doc(
+        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
+    )
     def post(self):
         try:
             _, project_path = resolve_request_data(request)
@@ -63,9 +67,11 @@ class RegisterProject(Resource):
             api.abort(500, str(exception))
 
 
-@api.route('/create', methods=['POST'])
+@api.route("/create", methods=["POST"])
 class Create(Resource):
-    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    @api.doc(
+        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
+    )
     def post(self):
         try:
             data = json.loads(request.data) if request.data else {}
@@ -77,9 +83,11 @@ class Create(Resource):
                 api.abort(500, str(exception))
 
 
-@api.route('/delete_project', methods=['POST'])
+@api.route("/delete_project", methods=["POST"])
 class DeleteProject(Resource):
-    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    @api.doc(
+        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
+    )
     def post(self):
         try:
             _, project_path = resolve_request_data(request)
@@ -91,9 +99,11 @@ class DeleteProject(Resource):
                 api.abort(500, str(exception))
 
 
-@api.route('/configure', methods=['POST'])
+@api.route("/configure", methods=["POST"])
 class ConfigureProject(Resource):
-    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    @api.doc(
+        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
+    )
     def post(self):
         try:
             data, project_path = resolve_request_data(request)
@@ -104,9 +114,11 @@ class ConfigureProject(Resource):
                 api.abort(500, str(exception))
 
 
-@api.route('/project/state', methods=['POST'])
+@api.route("/project/state", methods=["POST"])
 class StateProject(Resource):
-    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    @api.doc(
+        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
+    )
     def post(self):
         try:
             data, project_path = resolve_request_data(request)
@@ -118,9 +130,11 @@ class StateProject(Resource):
                 api.abort(500, str(exception))
 
 
-@api.route('/load')
+@api.route("/load")
 class Load(Resource):
-    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    @api.doc(
+        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
+    )
     def post(self):
         _, project_path = resolve_request_data(request)
         try:

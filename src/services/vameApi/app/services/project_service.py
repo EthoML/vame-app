@@ -12,7 +12,7 @@ from app.utils.get_project_path import get_project_path
 def get_projects():
     projects = [
         str(project)
-        for project in VAME_PROJECTS_DIRECTORY.glob('*')
+        for project in VAME_PROJECTS_DIRECTORY.glob("*")
         if (project.is_dir() and (project / "config.yaml").exists())
     ]
     return projects
@@ -28,7 +28,11 @@ def get_recent_projects():
     recent_projects = states.get("recent_projects", [])
 
     # Filter those that no longer exist
-    recent_projects = [str(project) for project in recent_projects if (VAME_PROJECTS_DIRECTORY / project).exists()]
+    recent_projects = [
+        str(project)
+        for project in recent_projects
+        if (VAME_PROJECTS_DIRECTORY / project).exists()
+    ]
     states["recent_projects"] = recent_projects
 
     with open(GLOBAL_STATES_FILE, "r+") as f:
@@ -102,7 +106,7 @@ def create_project(data):
     config_path, config_dict = vame.init_new_project(
         project_name=project_name,
         working_directory=str(VAME_PROJECTS_DIRECTORY),
-        **data
+        **data,
     )
 
     # Backend fix: wait until all .nc files exist and are non-empty
@@ -183,9 +187,8 @@ def load_project(project_path: Path):
         mtime = _get_project_mtime(path_obj)
         cache_entry = _PROJECT_CACHE.get(cache_key)
         if cache_entry:
-            if (
-                cache_entry["mtime"] == mtime
-                and (now - cache_entry["timestamp"] < _CACHE_TTL)
+            if cache_entry["mtime"] == mtime and (
+                now - cache_entry["timestamp"] < _CACHE_TTL
             ):
                 print(f"[CACHE] Serving cached project for {cache_key}")
                 return cache_entry["data"]
@@ -224,7 +227,9 @@ def load_project(project_path: Path):
             config = None
 
         # Get all files in the original data directory
-        videos_paths = [str(p.resolve()) for p in (path_obj / "data" / "raw").glob("*.mp4")]
+        videos_paths = [
+            str(p.resolve()) for p in (path_obj / "data" / "raw").glob("*.mp4")
+        ]
         pes_paths = [str(p.resolve()) for p in (path_obj / "data" / "raw").glob("*.nc")]
 
         # Defensive: check for required config keys and pes_paths
@@ -271,7 +276,7 @@ def load_project(project_path: Path):
 
         images = dict(
             evaluation=[],  # get_evaluation_images(project_path),
-            visualization=visualization
+            visualization=visualization,
         )
 
         # Create the videos dictionary dynamically - TODO
@@ -280,7 +285,7 @@ def load_project(project_path: Path):
                 param: {}  # get_motif_videos(project_path, f"{param}-{n_clusters}")
                 for param in segmentation_algorithms
             }
-            for category in ['motif', 'community']
+            for category in ["motif", "community"]
         }
 
         has_latent_vector_files = False
@@ -289,29 +294,38 @@ def load_project(project_path: Path):
         #         map(lambda video: (get_video_results_path(video, project_path) / f"latent_vector_{video}.npy").exists(), config["session_names"])
         #     )
 
-        has_communities = (path_obj / 'cohort_community_label.npy').exists()
+        has_communities = (path_obj / "cohort_community_label.npy").exists()
 
         # Check if motif videos were created for each parametrization
         motif_videos_created = {
-            param: all(map(lambda videos: len(videos) > 0, videos["motif"][param].values()))
+            param: all(
+                map(lambda videos: len(videos) > 0, videos["motif"][param].values())
+            )
             for param in segmentation_algorithms
         }
 
         # Check if community videos were created for each parametrization
         community_videos_created = {
-            param: all(map(lambda videos: len(videos) > 0, videos["community"][param].values()))
+            param: all(
+                map(lambda videos: len(videos) > 0, videos["community"][param].values())
+            )
             for param in segmentation_algorithms
         }
 
         # Check if UMAPs were created for each parametrization
         umaps_created = {
-            param: any(map(lambda videos: len(videos) > 0, images["visualization"][param].values()))
+            param: any(
+                map(
+                    lambda videos: len(videos) > 0,
+                    images["visualization"][param].values(),
+                )
+            )
             for param in segmentation_algorithms
         }
 
         # Provide project workflow status
         workflow = dict(
-            organized=(path_obj / 'data' / 'train').exists(),
+            organized=(path_obj / "data" / "train").exists(),
             modeled=len(images["evaluation"]) > 0,
             segmented=has_latent_vector_files,
             motif_videos_created=any(motif_videos_created.values()),
@@ -323,14 +337,11 @@ def load_project(project_path: Path):
         result = dict(
             project=str(config_path.parent),
             config=config,
-            assets=dict(
-                images=images,
-                videos=videos
-            ),
+            assets=dict(images=images, videos=videos),
             videos=videos_paths,
             pes_paths=pes_paths,
             workflow=workflow,
-            states=states
+            states=states,
         )
         _PROJECT_CACHE[cache_key] = {
             "data": result,
@@ -340,6 +351,4 @@ def load_project(project_path: Path):
         return result
     except Exception as exception:
         print(f"Exception loading project at {project_path}: {exception}")
-        return {
-            "error": f"Failed to load project at {project_path}: {exception}"
-        }
+        return {"error": f"Failed to load project at {project_path}: {exception}"}

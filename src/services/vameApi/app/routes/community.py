@@ -11,9 +11,11 @@ from app.utils.resolve_request_util import resolve_request_data
 from app.utils.not_bad_request_exception import not_bad_request_exception
 
 
-@api.route('/community', methods=['POST'])
+@api.route("/community", methods=["POST"])
 class Community(Resource):
-    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    @api.doc(
+        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
+    )
     def post(self):
         def background_task(config: dict, cut_tree: bool):
             vame.community(
@@ -21,6 +23,7 @@ class Community(Resource):
                 cut_tree=cut_tree,
                 save_logs=True,
             )
+
         try:
             data, project_path = resolve_request_data(request)
             config = vame.read_config(str(Path(project_path) / "config.yaml"))
@@ -41,15 +44,18 @@ class Community(Resource):
                 api.abort(500, str(exception))
 
 
-@api.route('/community-videos', methods=['POST'])
+@api.route("/community-videos", methods=["POST", "GET"])
 class CommunityVideos(Resource):
-    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    @api.doc(
+        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
+    )
     def post(self):
         def background_task(config: dict):
             vame.community_videos(
                 config=config,
                 save_logs=True,
             )
+
         try:
             data, project_path = resolve_request_data(request)
             config = vame.read_config(str(Path(project_path) / "config.yaml"))
@@ -57,6 +63,42 @@ class CommunityVideos(Resource):
             thread.start()
             time.sleep(2)
             return {"status": "started"}
+        except Exception as exception:
+            if not_bad_request_exception(exception):
+                api.abort(500, str(exception))
+
+    @api.doc(
+        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
+    )
+    def get(self):
+        project_path = request.args.get("project")
+        segmentation_algorithm = request.args.get("segmentation_algorithm")
+        session = request.args.get("session")
+        if not project_path or not segmentation_algorithm or not session:
+            api.abort(400, "Missing 'project', 'segmentation_algorithm', or 'session'")
+        try:
+            config = vame.read_config(str(Path(project_path) / "config.yaml"))
+            n_clusters = config.get("n_clusters")
+            model_name = config.get("model_name")
+            sessions = config.get("session_names", [])
+
+            # Validate session exists in project
+            if session not in sessions:
+                api.abort(400, f"Session '{session}' not found in project")
+
+            videos = []
+            dir_path = (
+                Path(project_path)
+                / "results"
+                / session
+                / model_name
+                / f"{segmentation_algorithm}-{n_clusters}/community_videos"
+            )
+            if dir_path.exists():
+                for file_path in dir_path.glob("*.mp4"):
+                    content = base64.b64encode(file_path.read_bytes()).decode()
+                    videos.append({"filename": file_path.name, "content": content})
+            return {"videos": videos}
         except Exception as exception:
             if not_bad_request_exception(exception):
                 api.abort(500, str(exception))

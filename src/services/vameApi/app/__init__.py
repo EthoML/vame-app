@@ -1,5 +1,6 @@
 import matplotlib
-matplotlib.use('agg')
+
+matplotlib.use("agg")
 
 from flask import Flask
 from flask_cors import CORS
@@ -12,25 +13,30 @@ from app.config import VAME_APP_DIRECTORY
 def create_app():
     app = Flask("VAME API", os.path.abspath(VAME_APP_DIRECTORY))
     CORS(app)
-    app.config['CORS_HEADERS'] = 'Content-Type'
+    app.config["CORS_HEADERS"] = "Content-Type"
 
-    dictConfig({
-        'version': 1,
-        'formatters': {'default': {
-            'format': '%(message)s',
-        }},
-        'handlers': {'wsgi': {
-            'class': 'logging.StreamHandler',
-            'stream': 'ext://sys.stdout',
-            'formatter': 'default'
-        }},
-        'root': {
-            'level': 'INFO',
-            'handlers': ['wsgi']
+    dictConfig(
+        {
+            "version": 1,
+            "formatters": {
+                "default": {
+                    "format": "%(message)s",
+                }
+            },
+            "handlers": {
+                "wsgi": {
+                    "class": "logging.StreamHandler",
+                    "stream": "ext://sys.stdout",
+                    "formatter": "default",
+                }
+            },
+            "root": {"level": "INFO", "handlers": ["wsgi"]},
         }
-    })
+    )
 
-    api = Api(app, version='2.0', title='VAME API', description="The REST API for VAME.")
+    api = Api(
+        app, version="2.0", title="VAME API", description="The REST API for VAME."
+    )
 
     from app.routes import (
         project,

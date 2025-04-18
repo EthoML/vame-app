@@ -14,7 +14,7 @@ import motifVideosGetSchema from "../../../../../schema/motif-videos-get.schema.
 import { communityAnalysisVAMEProject } from "../../../context/Projects/api/communityAnalysisVAMEProject";
 import { getProjectStateVAMEProject } from "../../../context/Projects/api/getProjectStateVAMEProject";
 import { createCommunityVideosVAMEProject } from "../../../context/Projects/api/createCommunityVideosVAMEProject";
-import { getSegmentVideosVAMEProject } from "../../../context/Projects/api/getSegmentVideosVAMEProject";
+import { getCommunityVideosVAMEProject } from "../../../context/Projects/api/getCommunityVideosVAMEProject";
 
 type CommunityAnalysisAccordionProps = {
     project: ProjectType;
@@ -238,7 +238,7 @@ const CommunityAnalysisAccordion = ({
         setGetError(null);
         setBlockSubmit(true);
         try {
-            const data = await getSegmentVideosVAMEProject({
+            const data = await getCommunityVideosVAMEProject({
                 project: project.config.project_path,
                 segmentation_algorithm: formData.segmentation_algorithm,
                 session: formData.session

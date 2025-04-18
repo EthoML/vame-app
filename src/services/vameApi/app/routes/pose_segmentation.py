@@ -11,9 +11,11 @@ from app.utils.resolve_request_util import resolve_request_data
 from app.utils.not_bad_request_exception import not_bad_request_exception
 
 
-@api.route('/segment', methods=['POST'])
+@api.route("/segment", methods=["POST"])
 class Segment(Resource):
-    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    @api.doc(
+        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
+    )
     def post(self):
         def background_task(config: dict, overwrite: bool):
             vame.segment_session(
@@ -21,6 +23,7 @@ class Segment(Resource):
                 overwrite=overwrite,
                 save_logs=True,
             )
+
         try:
             data, project_path = resolve_request_data(request)
             config = vame.read_config(str(Path(project_path) / "config.yaml"))
@@ -42,15 +45,18 @@ class Segment(Resource):
                 api.abort(500, str(exception))
 
 
-@api.route('/motif-videos', methods=['POST', 'GET'])
+@api.route("/motif-videos", methods=["POST", "GET"])
 class MotifVideos(Resource):
-    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    @api.doc(
+        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
+    )
     def post(self):
         def background_task(config: dict):
             vame.motif_videos(
                 config=config,
                 save_logs=True,
             )
+
         try:
             data, project_path = resolve_request_data(request)
             config = vame.read_config(str(Path(project_path) / "config.yaml"))
@@ -62,7 +68,9 @@ class MotifVideos(Resource):
             if not_bad_request_exception(exception):
                 api.abort(500, str(exception))
 
-    @api.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    @api.doc(
+        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
+    )
     def get(self):
         project = request.args.get("project")
         segmentation_algorithm = request.args.get("segmentation_algorithm")
@@ -80,7 +88,13 @@ class MotifVideos(Resource):
                 api.abort(400, f"Session '{session}' not found in project")
 
             videos = []
-            dir_path = Path(project) / "results" / session / model_name / f"{segmentation_algorithm}-{n_clusters}/cluster_videos"
+            dir_path = (
+                Path(project)
+                / "results"
+                / session
+                / model_name
+                / f"{segmentation_algorithm}-{n_clusters}/cluster_videos"
+            )
             if dir_path.exists():
                 for file_path in dir_path.glob("*.mp4"):
                     content = base64.b64encode(file_path.read_bytes()).decode()
