@@ -15,6 +15,7 @@ import { communityAnalysisVAMEProject } from "../../../context/Projects/api/comm
 import { getProjectStateVAMEProject } from "../../../context/Projects/api/getProjectStateVAMEProject";
 import { createCommunityVideosVAMEProject } from "../../../context/Projects/api/createCommunityVideosVAMEProject";
 import { getCommunityVideosVAMEProject } from "../../../context/Projects/api/getCommunityVideosVAMEProject";
+import { getCommunityImagesVAMEProject } from "../../../context/Projects/api/getCommunityImagesVAMEProject";
 
 type CommunityAnalysisAccordionProps = {
     project: ProjectType;
@@ -82,7 +83,7 @@ const CommunityAnalysisAccordion = ({
     setBlockSubmit,
     onFormSubmit,
 }: CommunityAnalysisAccordionProps) => {
-    const [openSteps, setOpenSteps] = useState([false, false, false]);
+    const [openSteps, setOpenSteps] = useState([false, false, false, false]);
     const [communityVideosLoading, setCommunityVideosLoading] = useState(false);
     const [communityVideosError, setCommunityVideosError] = useState<string | null>(null);
     const [isPollingCommunityVideos, setIsPollingCommunityVideos] = useState(false);
@@ -90,6 +91,9 @@ const CommunityAnalysisAccordion = ({
     const [getLoading, setGetLoading] = useState(false);
     const [getError, setGetError] = useState<string | null>(null);
     const [communityVideos, setCommunityVideos] = useState<{ filename: string; content: string }[]>([]);
+    const [communityImageLoading, setCommunityImageLoading] = useState(false);
+    const [communityImageError, setCommunityImageError] = useState<string | null>(null);
+    const [communityImage, setCommunityImage] = useState<{ filename: string; content: string } | null>(null);
 
     // States from project
     const community_videos_session = project.states?.community_videos || {};
@@ -216,6 +220,15 @@ const CommunityAnalysisAccordion = ({
     };
 
     // Update schema with dynamic session options
+    const getImagesSchema = {
+        title: "Get Community Image",
+        type: "object",
+        properties: {
+            segmentation_algorithm: motifVideosGetSchema.properties.segmentation_algorithm
+        },
+        required: ["segmentation_algorithm"]
+    };
+
     const getVideosSchema = React.useMemo(() => {
         // Extract session names from project config
         const sessionNames = (project.config as any)?.session_names || [];
@@ -232,6 +245,24 @@ const CommunityAnalysisAccordion = ({
             }
         };
     }, [project.config]);
+
+    const handleGetCommunityImages = async (formData: any) => {
+        setCommunityImageLoading(true);
+        setCommunityImageError(null);
+        setBlockSubmit(true);
+        try {
+            const data = await getCommunityImagesVAMEProject({
+                project: project.config.project_path,
+                segmentation_algorithm: formData.segmentation_algorithm
+            });
+            setCommunityImage(data.tree_image);
+        } catch (err: any) {
+            setCommunityImageError(err.message || "Failed to fetch image.");
+        } finally {
+            setCommunityImageLoading(false);
+            setBlockSubmit(false);
+        }
+    };
 
     const handleGetCommunityVideos = async (formData: any) => {
         setGetLoading(true);
@@ -433,6 +464,44 @@ const CommunityAnalysisAccordion = ({
                             </div>
                         )}
                         <PlaceholderLog step="Visualize Results" />
+                    </div>
+                </AccordionContent>
+            </Accordion>
+            {/* Accordion 4: Visualize Results - Images */}
+            <Accordion>
+                <AccordionHeader
+                    $disabled={!communityVideosCompleted}
+                    onClick={() => handleToggle(3, communityVideosCompleted)}
+                >
+                    4. Visualize Results - Images
+                    <span style={{ marginLeft: "auto" }}>
+                        <FontAwesomeIcon icon={openSteps[3] ? faChevronUp : faChevronDown} />
+                    </span>
+                </AccordionHeader>
+                <AccordionContent $isOpen={openSteps[3]}>
+                    <div>
+                        <DynamicForm
+                            schema={getImagesSchema as unknown as Schema}
+                            blockSubmission={blockSubmit}
+                            submitText={communityImageLoading ? "Fetching..." : "Get Image"}
+                            onFormSubmit={handleGetCommunityImages}
+                        />
+                        {communityImageError && (
+                            <div style={{ color: "red", marginTop: 8 }}>{communityImageError}</div>
+                        )}
+                        {communityImage && (
+                            <div style={{ marginTop: 12 }}>
+                                <img
+                                    src={`data:image/png;base64,${communityImage.content}`}
+                                    alt={communityImage.filename}
+                                    style={{ maxWidth: "100%", borderRadius: 4 }}
+                                />
+                                <label style={{ display: "block", marginTop: 4 }}>
+                                    {communityImage.filename}
+                                </label>
+                            </div>
+                        )}
+                        <PlaceholderLog step="Visualize Results - Images" />
                     </div>
                 </AccordionContent>
             </Accordion>
