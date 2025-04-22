@@ -18,12 +18,7 @@ class Report(Resource):
     )
     def post(self):
         def background_task(config: dict):
-            vame.visualization.generate_reports(
-                config=config,
-                save_to_file=True,
-                show_figure=False,
-                save_logs=True,
-            )
+            vame.visualization.generate_reports(config=config)
 
         try:
             data, project_path = resolve_request_data(request)

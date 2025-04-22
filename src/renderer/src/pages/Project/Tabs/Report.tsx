@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Accordion, AccordionHeader, AccordionContent } from '@renderer/components/DynamicForm/styles';
 import { PaddedTab } from '@renderer/components/Tabs/styles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { TabProps } from './types';
+import DynamicForm from '@renderer/components/DynamicForm';
+import { generateReportVAMEProject } from '../../../context/Projects/api/generateReportVAMEProject';
+import { getProjectStateVAMEProject } from '../../../context/Projects/api/getProjectStateVAMEProject';
 
 const Report: React.FC<TabProps> = ({
     project,
@@ -12,6 +15,11 @@ const Report: React.FC<TabProps> = ({
     blockTooltip,
 }) => {
     const [openSteps, setOpenSteps] = useState([false, false, false]);
+
+    const [reportLoading, setReportLoading] = useState(false);
+    const [reportError, setReportError] = useState<string | null>(null);
+    const [isPollingReport, setIsPollingReport] = useState(false);
+    const [reportState, setReportState] = useState<string | null>(null);
 
     const handleToggle = (idx: number) => {
         setOpenSteps((prev) => {
@@ -27,6 +35,49 @@ const Report: React.FC<TabProps> = ({
     void blockSubmission;
     void blockTooltip;
 
+    const handleGenerateReport = async () => {
+        setReportLoading(true);
+        setReportError(null);
+        try {
+            await generateReportVAMEProject({ project: project.config.project_path });
+            setIsPollingReport(true);
+        } catch (err: any) {
+            setReportError(err.message || 'Failed to start report generation.');
+        } finally {
+            setReportLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        let interval: NodeJS.Timeout | null = null;
+        if (isPollingReport) {
+            interval = setInterval(async () => {
+                try {
+                    const state = (
+                        await getProjectStateVAMEProject({ project: project.config.project_path })
+                    ).states?.generate_reports?.execution_state || null;
+                    setReportState(state);
+                    if (
+                        state === 'success' ||
+                        state === 'failed' ||
+                        state === 'aborted' ||
+                        state === 'not_found'
+                    ) {
+                        if (interval) clearInterval(interval);
+                        setIsPollingReport(false);
+                        await onFormSubmit({});
+                        setOpenSteps([false, false, false]);
+                    }
+                } catch {
+                    if (interval) clearInterval(interval);
+                }
+            }, 3000);
+        }
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [isPollingReport, project.config.project_path, onFormSubmit]);
+
     return (
         <PaddedTab>
             {/* Accordion 1: Generate Report */}
@@ -38,9 +89,51 @@ const Report: React.FC<TabProps> = ({
                     </span>
                 </AccordionHeader>
                 <AccordionContent $isOpen={openSteps[0]}>
-                    <div style={{ padding: 20 }}>
-                        Report generation placeholder content.
-                    </div>
+                    <>
+                        <DynamicForm
+                            schema={{ title: 'Generate Report', type: 'object', properties: {}, required: [] }}
+                            blockSubmission={blockSubmission || reportLoading || isPollingReport}
+                            submitText={reportLoading ? 'Generating...' : 'Generate Report'}
+                            onFormSubmit={handleGenerateReport}
+                        />
+                        {reportError && (
+                            <div style={{ color: 'red', marginTop: 8 }}>{reportError}</div>
+                        )}
+                        {(isPollingReport || reportState) && (
+                            <div style={{ marginTop: 8 }}>
+                                {isPollingReport && (
+                                    <span style={{ color: '#888' }}>
+                                        Polling report state…
+                                    </span>
+                                )}
+                                {reportState === 'running' && (
+                                    <span style={{ color: '#007bff', marginLeft: 8 }}>
+                                        State: <b>Running</b>
+                                    </span>
+                                )}
+                                {reportState === 'success' && (
+                                    <span style={{ color: 'green', marginLeft: 8 }}>
+                                        State: <b>Success</b> — Report generated successfully.
+                                    </span>
+                                )}
+                                {reportState === 'failed' && (
+                                    <span style={{ color: 'red', marginLeft: 8 }}>
+                                        State: <b>Failed</b> — Report generation failed.
+                                    </span>
+                                )}
+                                {reportState === 'aborted' && (
+                                    <span style={{ color: 'orange', marginLeft: 8 }}>
+                                        State: <b>Aborted</b> — Report was aborted.
+                                    </span>
+                                )}
+                                {reportState === 'not_found' && (
+                                    <span style={{ color: '#888', marginLeft: 8 }}>
+                                        State: <b>Not Found</b> — No report generation state found.
+                                    </span>
+                                )}
+                            </div>
+                        )}
+                    </>
                 </AccordionContent>
             </Accordion>
 
