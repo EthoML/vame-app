@@ -145,32 +145,32 @@ const Report: React.FC<TabProps> = ({
                 </AccordionContent>
             </Accordion>
 
-            {/* Accordion 2: Visualize UMAP Report */}
+            {/* Accordion 2: Visualize Motif/Community Report */}
             <Accordion>
                 <AccordionHeader $disabled={false} onClick={() => handleToggle(1)}>
-                    2. Visualize UMAP Report
+                    2. Visualize Motif/Community Report
                     <span style={{ marginLeft: 'auto' }}>
                         <FontAwesomeIcon icon={openSteps[1] ? faChevronUp : faChevronDown} />
                     </span>
                 </AccordionHeader>
                 <AccordionContent $isOpen={openSteps[1]}>
                     <div style={{ padding: 20 }}>
-                        UMAP report visualization placeholder content.
+                        Motif/Community report visualization placeholder content.
                     </div>
                 </AccordionContent>
             </Accordion>
 
-            {/* Accordion 3: Visualize Motif/Community Report */}
+            {/* Accordion 3. Visualize UMAP Report */}
             <Accordion>
                 <AccordionHeader $disabled={false} onClick={() => handleToggle(2)}>
-                    3. Visualize Motif/Community Report
+                    3. Visualize UMAP Report
                     <span style={{ marginLeft: 'auto' }}>
                         <FontAwesomeIcon icon={openSteps[2] ? faChevronUp : faChevronDown} />
                     </span>
                 </AccordionHeader>
                 <AccordionContent $isOpen={openSteps[2]}>
                     <div style={{ padding: 20 }}>
-                        Motif/Community report visualization placeholder content.
+                        UMAP report visualization placeholder content.
                     </div>
                 </AccordionContent>
             </Accordion>
