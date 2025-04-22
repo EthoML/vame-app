@@ -126,6 +126,8 @@ const Project: React.FC = () => {
   const motif_videos_created = motif_videos.execution_state === "success" && project.workflow?.motif_videos_created;
   const community_videos_created = community_videos.execution_state === "success" && project.workflow?.community_videos_created;
   const umaps_created = visualize_umap.execution_state === "success" && project.workflow?.umaps_created;
+  const report_session = project.states?.generate_reports || {};
+  const reportCompleted = report_session.execution_state === "success";
 
   // Create tabs with original properties but placeholder content
   const tabs = [
@@ -260,7 +262,7 @@ const Project: React.FC = () => {
     {
       id: 'report',
       label: '6. Report',
-      complete: umaps_created,
+      complete: reportCompleted,
       disabled: tabsLock && !segmented,
       tooltip: "Need segmentation.",
       content: (
