@@ -19,6 +19,7 @@ import PoseSegmentationAccordion from './Tabs/PoseSegmentationAccordion';
 import CommunityAnalysisAccordion from './Tabs/CommunityAnalysisAccordion';
 import { MainContainer } from '@renderer/components/Container';
 import { useSettings } from '@renderer/context/Settings';
+import Report from './Tabs/Report';
 
 const Project: React.FC = () => {
 
@@ -257,37 +258,19 @@ const Project: React.FC = () => {
       )
     },
     {
-      id: 'umap-visualization',
-      label: '7. UMAP Visualization',
+      id: 'report',
+      label: '6. Report',
       complete: umaps_created,
       disabled: tabsLock && !segmented,
       tooltip: "Need segmentation.",
       content: (
-        <div style={{ padding: 20, background: "#f5f5f5" }}>
-          <h3>UMAP Visualization Content</h3>
-          <p>This is a placeholder for the UMAPVisualization component.</p>
-          <p><b>Original props:</b></p>
-          <ul>
-            <li>project: {JSON.stringify(project.config?.project_name || project.config?.Project)}</li>
-            <li>blockSubmission: {String(blockSubmit)}</li>
-            <li>disabled: {String(tabsLock && !segmented)}</li>
-          </ul>
-        </div>
+        <Report
+          project={project}
+          blockSubmission={blockSubmit}
+          blockTooltip="Waiting VAME to be ready."
+          onFormSubmit={async () => submitTab(async () => { }, 'report')}
+        />
       )
-      /* Original content:
-      <UMAPVisualization
-        project={project}
-        blockSubmission={blockSubmit}
-        blockTooltip="Waiting VAME to be ready."
-        onFormSubmit={(data) => submitTab(async () => {
-          const projectPath = project.config.project_path
-          await createUMAPVisualization({
-            project: projectPath,
-            ...data
-          })
-        }, "umap-visualization")}
-      />
-      */
     },
   ];
 
