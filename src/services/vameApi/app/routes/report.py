@@ -18,7 +18,7 @@ class Report(Resource):
     )
     def post(self):
         def background_task(config: dict):
-            vame.visualization.visualize_umap(
+            vame.visualization.generate_reports(
                 config=config,
                 save_to_file=True,
                 show_figure=False,

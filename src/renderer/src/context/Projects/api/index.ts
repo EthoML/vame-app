@@ -19,6 +19,9 @@ export * from "./createCommunityVideosVAMEProject"
 
 export * from "./createMotifVideosVAMEProject"
 
+export * from "./generateReportVAMEProject"
+export * from "./getProjectStateVAMEProject"
+
 // community analises
 
 // community videos

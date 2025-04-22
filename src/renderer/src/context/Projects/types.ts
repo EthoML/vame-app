@@ -25,6 +25,7 @@ export type ProjectStates = {
   community: any;
   community_videos: any;
   visualize_umap: any;
+  generate_reports: any; // Added for report generation state
 };
 
 export interface Project {
