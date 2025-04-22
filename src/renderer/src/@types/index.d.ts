@@ -49,6 +49,10 @@ declare global {
       execution_state?: string;
       [key: string]: unknown
     };
+    generate_reports: {
+      execution_state?: string;
+      [key: string]: unknown
+    };
   };
 
   export type ProjectType = {

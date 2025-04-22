@@ -21,6 +21,9 @@ const Report: React.FC<TabProps> = ({
     const [isPollingReport, setIsPollingReport] = useState(false);
     const [reportState, setReportState] = useState<string | null>(null);
 
+    const reportSession = project.states?.generate_reports || {};
+    const reportCompleted = reportSession.execution_state === 'success';
+
     const handleToggle = (idx: number) => {
         setOpenSteps((prev) => {
             const next = [...prev];
@@ -84,6 +87,11 @@ const Report: React.FC<TabProps> = ({
             <Accordion>
                 <AccordionHeader $disabled={false} onClick={() => handleToggle(0)}>
                     1. Generate Report
+                    {reportCompleted && (
+                        <span style={{ color: 'green', marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
+                            ✓
+                        </span>
+                    )}
                     <span style={{ marginLeft: 'auto' }}>
                         <FontAwesomeIcon icon={openSteps[0] ? faChevronUp : faChevronDown} />
                     </span>
