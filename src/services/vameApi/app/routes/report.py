@@ -61,3 +61,44 @@ class Report(Resource):
         except Exception as exception:
             if not_bad_request_exception(exception):
                 api.abort(500, str(exception))
+
+
+@api.route("/umap", methods=["GET"])
+class Umap(Resource):
+    @api.doc(
+        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
+    )
+    def get(self):
+        project_path = request.args.get("project")
+        session = request.args.get("session")
+        segmentation_algorithm = request.args.get("segmentation_algorithm")
+        if not project_path or not segmentation_algorithm:
+            api.abort(400, "Missing 'project' or 'segmentation_algorithm'")
+        try:
+            config = vame.read_config(str(Path(project_path) / "config.yaml"))
+            n_clusters = config.get("n_clusters")
+            model_name = config.get("model_name")
+            base_path = Path(project_path) / "reports" / "umap"
+            images = dict()
+            # No label
+            file_path = base_path / f"umap_{session}_{model_name}_{segmentation_algorithm}-{n_clusters}.png"
+            if file_path.exists():
+                content = base64.b64encode(file_path.read_bytes()).decode()
+                images["no_label"] = {"filename": file_path.name, "content": content}
+            # Motif
+            file_path = base_path / f"umap_{session}_{model_name}_{segmentation_algorithm}-{n_clusters}_motif.png"
+            if file_path.exists():
+                content = base64.b64encode(file_path.read_bytes()).decode()
+                images["motif"] = {"filename": file_path.name, "content": content}
+            # Community
+            file_path = base_path / f"umap_{session}_{model_name}_{segmentation_algorithm}-{n_clusters}_community.png"
+            if file_path.exists():
+                content = base64.b64encode(file_path.read_bytes()).decode()
+                images["community"] = {"filename": file_path.name, "content": content}
+            # Check if any images were found
+            if not images:
+                api.abort(400, f"Image files not found in '{base_path}'")
+            return {"umap_images": images}
+        except Exception as exception:
+            if not_bad_request_exception(exception):
+                api.abort(500, str(exception))
