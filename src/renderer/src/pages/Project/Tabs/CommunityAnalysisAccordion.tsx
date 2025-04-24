@@ -287,7 +287,7 @@ const CommunityAnalysisAccordion = ({
                     $disabled={false}
                     onClick={() => handleToggle(0, true)}
                 >
-                    1. Run Community Analysis
+                    5.1 Run Community Analysis
                     {communityAnalysisCompleted && (
                         <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
                             ✓
@@ -357,7 +357,7 @@ const CommunityAnalysisAccordion = ({
                     $disabled={!communityAnalysisCompleted}
                     onClick={() => handleToggle(1, communityAnalysisCompleted)}
                 >
-                    2. Create Community Videos
+                    5.2 Create Community Videos
                     {communityVideosCompleted && (
                         <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
                             ✓
@@ -430,7 +430,7 @@ const CommunityAnalysisAccordion = ({
                     $disabled={!communityVideosCompleted}
                     onClick={() => handleToggle(2, communityVideosCompleted)}
                 >
-                    3. Visualize Results - Videos
+                    5.3 Visualize Results - Videos
                     <span style={{ marginLeft: "auto" }}>
                         <FontAwesomeIcon icon={openSteps[2] ? faChevronUp : faChevronDown} />
                     </span>
@@ -462,7 +462,7 @@ const CommunityAnalysisAccordion = ({
                     $disabled={!communityVideosCompleted}
                     onClick={() => handleToggle(3, communityVideosCompleted)}
                 >
-                    4. Visualize Results - Images
+                    5.4 Visualize Results - Images
                     <span style={{ marginLeft: "auto" }}>
                         <FontAwesomeIcon icon={openSteps[3] ? faChevronUp : faChevronDown} />
                     </span>

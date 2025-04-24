@@ -163,7 +163,7 @@ const Report: React.FC<TabProps> = ({
             {/* Accordion 1: Generate Report */}
             <Accordion>
                 <AccordionHeader $disabled={false} onClick={() => handleToggle(0)}>
-                    1. Generate Report
+                    5.1 Generate Report
                     {reportCompleted && (
                         <span style={{ color: 'green', marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">✓</span>
                     )}
@@ -202,7 +202,7 @@ const Report: React.FC<TabProps> = ({
             {/* Accordion 2: Visualize Motif/Community Report */}
             <Accordion>
                 <AccordionHeader $disabled={!reportCompleted} onClick={() => handleToggle(1)}>
-                    2. Visualize Motif/Community Report
+                    5.2 Visualize Motif/Community Report
                     <span style={{ marginLeft: 'auto' }}>
                         <FontAwesomeIcon icon={openSteps[1] ? faChevronUp : faChevronDown} />
                     </span>
@@ -231,7 +231,7 @@ const Report: React.FC<TabProps> = ({
             {/* Accordion 3: Visualize UMAP Report */}
             <Accordion>
                 <AccordionHeader $disabled={!reportCompleted} onClick={() => handleToggle(2)}>
-                    3. Visualize UMAP Report
+                    5.3 Visualize UMAP Report
                     <span style={{ marginLeft: 'auto' }}>
                         <FontAwesomeIcon icon={openSteps[2] ? faChevronUp : faChevronDown} />
                     </span>

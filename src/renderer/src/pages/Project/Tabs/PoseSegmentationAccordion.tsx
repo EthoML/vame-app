@@ -257,7 +257,7 @@ const PoseSegmentationAccordion = ({
                     $disabled={false}
                     onClick={() => handleToggle(0, true)}
                 >
-                    1. Run Segmentation
+                    4.1 Run Segmentation
                     {segmented && (
                         <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
                             ✓
@@ -327,7 +327,7 @@ const PoseSegmentationAccordion = ({
                     $disabled={!segmented}
                     onClick={() => handleToggle(1, segmented)}
                 >
-                    2. Create Segmented Videos
+                    4.2 Create Segmented Videos
                     {motifCompleted && (
                         <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
                             ✓
@@ -400,7 +400,7 @@ const PoseSegmentationAccordion = ({
                     $disabled={!motifCompleted}
                     onClick={() => handleToggle(2, motifCompleted)}
                 >
-                    3. Visualize Results
+                    4.3 Visualize Results
                     <span style={{ marginLeft: "auto" }}>
                         <FontAwesomeIcon icon={openSteps[2] ? faChevronUp : faChevronDown} />
                     </span>

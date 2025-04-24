@@ -125,7 +125,7 @@ const Preprocessing = ({
           <AccordionHeader
             onClick={() => setPreprocessingOpen((v) => !v)}
           >
-            1. Run Preprocessing
+            2.1 Run Preprocessing
             {projectPreprocessed && (
               <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
                 ✓
@@ -164,7 +164,7 @@ const Preprocessing = ({
               if (projectPreprocessed) setVisualizeOpen((v) => !v);
             }}
           >
-            2. Visualize Preprocessing Results
+            2.2 Visualize Preprocessing Results
             {projectPreprocessed && (
               <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
                 ✓

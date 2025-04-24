@@ -176,7 +176,7 @@ const ModelTrainingAccordion = ({
                     $disabled={false}
                     onClick={() => handleToggle(0, true)}
                 >
-                    1. Create Training Set
+                    3.1 Create Training Set
                     {trainsetCreated && (
                         <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
                             ✓
@@ -212,7 +212,7 @@ const ModelTrainingAccordion = ({
                     $disabled={!trainsetCreated}
                     onClick={() => handleToggle(1, true)}
                 >
-                    2. Train Model
+                    3.2 Train Model
                     {modelCreated && (
                         <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
                             ✓
@@ -279,7 +279,7 @@ const ModelTrainingAccordion = ({
                     $disabled={!modelCreated}
                     onClick={() => handleToggle(2, modelCreated)}
                 >
-                    3. Evaluate Model
+                    3.3 Evaluate Model
                     {modelEvaluated && (
                         <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
                             ✓
@@ -315,7 +315,7 @@ const ModelTrainingAccordion = ({
                     $disabled={!modelEvaluated}
                     onClick={() => handleToggle(3, modelEvaluated)}
                 >
-                    4. Visualize Model Results
+                    3.4 Visualize Model Results
                     <span style={{ marginLeft: "auto" }}>
                         <FontAwesomeIcon icon={openSteps[3] ? faChevronUp : faChevronDown} />
                     </span>
