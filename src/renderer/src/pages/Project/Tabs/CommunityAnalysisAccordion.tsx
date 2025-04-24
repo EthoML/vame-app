@@ -63,21 +63,6 @@ const VideoPlayer = memo(({ content, filename }: { content: string; filename: st
     );
 });
 
-const PlaceholderLog = ({ step }: { step: string }) => (
-    <div
-        style={{
-            margin: "16px 0",
-            padding: "12px",
-            background: "#f5f5f5",
-            borderRadius: 6,
-            color: "#888",
-            fontStyle: "italic",
-        }}
-    >
-        [Log placeholder for "{step}" step]
-    </div>
-);
-
 const CommunityAnalysisAccordion = ({
     project,
     blockSubmit,
@@ -319,6 +304,9 @@ const CommunityAnalysisAccordion = ({
                             blockSubmission={blockSubmit}
                             submitText={communityLoading ? "Running..." : "Run Community Analysis"}
                             onFormSubmit={handleRunCommunityAnalysis}
+                            showLogsButton={true}
+                            logName={["community"]}
+                            projectPath={project.config.project_path}
                         />
                         {communityError && (
                             <div style={{ color: "red", marginTop: 8 }}>{communityError}</div>
@@ -360,7 +348,6 @@ const CommunityAnalysisAccordion = ({
                         {communityAnalysisCompleted && (
                             <div style={{ color: "green", marginTop: 8 }}>Community analysis completed successfully.</div>
                         )}
-                        <PlaceholderLog step="Run Community Analysis" />
                     </div>
                 </AccordionContent>
             </Accordion>
@@ -387,6 +374,9 @@ const CommunityAnalysisAccordion = ({
                             blockSubmission={blockSubmit}
                             submitText={communityVideosLoading ? "Creating..." : "Create Community Videos"}
                             onFormSubmit={handleCreateCommunityVideos}
+                            showLogsButton={true}
+                            logName={["community_videos"]}
+                            projectPath={project.config.project_path}
                         />
                         {communityVideosError && (
                             <div style={{ color: "red", marginTop: 8 }}>{communityVideosError}</div>
@@ -430,7 +420,6 @@ const CommunityAnalysisAccordion = ({
                                 Videos created successfully.
                             </div>
                         )}
-                        <PlaceholderLog step="Create Community Videos" />
                     </div>
                 </AccordionContent>
             </Accordion>
@@ -464,7 +453,6 @@ const CommunityAnalysisAccordion = ({
                                 ))}
                             </div>
                         )}
-                        <PlaceholderLog step="Visualize Results" />
                     </div>
                 </AccordionContent>
             </Accordion>
@@ -502,7 +490,6 @@ const CommunityAnalysisAccordion = ({
                                 </label>
                             </div>
                         )}
-                        <PlaceholderLog step="Visualize Results - Images" />
                     </div>
                 </AccordionContent>
             </Accordion>

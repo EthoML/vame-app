@@ -61,21 +61,6 @@ const VideoPlayer = memo(({ content, filename }: { content: string; filename: st
     );
 });
 
-const PlaceholderLog = ({ step }: { step: string }) => (
-    <div
-        style={{
-            margin: "16px 0",
-            padding: "12px",
-            background: "#f5f5f5",
-            borderRadius: 6,
-            color: "#888",
-            fontStyle: "italic",
-        }}
-    >
-        [Log placeholder for "{step}" step]
-    </div>
-);
-
 const PoseSegmentationAccordion = ({
     project,
     blockSubmit,
@@ -289,6 +274,9 @@ const PoseSegmentationAccordion = ({
                             blockSubmission={blockSubmit}
                             submitText={segmentationLoading ? "Running..." : "Run Segmentation"}
                             onFormSubmit={handleRunSegmentation}
+                            showLogsButton={true}
+                            logName={["pose_segmentation"]}
+                            projectPath={project.config.project_path}
                         />
                         {segmentationError && (
                             <div style={{ color: "red", marginTop: 8 }}>{segmentationError}</div>
@@ -330,7 +318,6 @@ const PoseSegmentationAccordion = ({
                         {segmented && (
                             <div style={{ color: "green", marginTop: 8 }}>Segmentation completed successfully.</div>
                         )}
-                        <PlaceholderLog step="Run Segmentation" />
                     </div>
                 </AccordionContent>
             </Accordion>
@@ -357,6 +344,9 @@ const PoseSegmentationAccordion = ({
                             blockSubmission={blockSubmit}
                             submitText={motifLoading ? "Creating..." : "Create Segmented Videos"}
                             onFormSubmit={handleCreateMotifVideos}
+                            showLogsButton={true}
+                            logName={["motif_videos"]}
+                            projectPath={project.config.project_path}
                         />
                         {motifError && (
                             <div style={{ color: "red", marginTop: 8 }}>{motifError}</div>
@@ -400,7 +390,6 @@ const PoseSegmentationAccordion = ({
                                 Videos created successfully.
                             </div>
                         )}
-                        <PlaceholderLog step="Create Segmented Videos" />
                     </div>
                 </AccordionContent>
             </Accordion>
@@ -434,7 +423,6 @@ const PoseSegmentationAccordion = ({
                                 ))}
                             </div>
                         )}
-                        <PlaceholderLog step="Visualize Results" />
                     </div>
                 </AccordionContent>
             </Accordion>
