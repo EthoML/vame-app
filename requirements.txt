@@ -4,4 +4,5 @@ flask-restx==1.3.0
 numpy==1.26.4
 pyinstaller==6.13.0
 pyinstaller-hooks-contrib==2025.3
-vame-py==0.9.0
+# vame-py==0.9.0
+git+https://github.com/EthoML/VAME.git@dev#egg=vame-py
