@@ -7,7 +7,8 @@ import { TabProps } from './types';
 import DynamicForm from '@renderer/components/DynamicForm';
 import { generateReportVAMEProject } from '../../../context/Projects/api/generateReportVAMEProject';
 import { getProjectStateVAMEProject } from '../../../context/Projects/api/getProjectStateVAMEProject';
-import motifVideosGetSchema from "../../../../../schema/motif-videos-get.schema.json";
+import reportImagesGetSchema from "../../../../../schema/report-get-images.schema.json";
+import umapImagesGetSchema from "../../../../../schema/umap-get-images.schema.json";
 import { getReportVAMEProject } from '../../../context/Projects/api/getReportVAMEProject';
 import { getUmapVAMEProject } from '../../../context/Projects/api/getUmapVAMEProject';
 
@@ -88,15 +89,15 @@ const Report: React.FC<TabProps> = ({
         return () => { if (interval) clearInterval(interval); };
     }, [isPollingReport, project.config.project_path, onFormSubmit]);
 
-    // Schema for motif/community image GET
+    // Schema for Report image GET
     const getReportSchema = useMemo(() => {
         const sessionNames = (project.config as any)?.session_names || [];
         return {
-            ...motifVideosGetSchema,
+            ...reportImagesGetSchema,
             properties: {
-                segmentation_algorithm: motifVideosGetSchema.properties.segmentation_algorithm,
+                segmentation_algorithm: reportImagesGetSchema.properties.segmentation_algorithm,
                 session: {
-                    ...motifVideosGetSchema.properties.session,
+                    ...reportImagesGetSchema.properties.session,
                     enum: sessionNames,
                     enumNames: sessionNames,
                 },
@@ -126,11 +127,11 @@ const Report: React.FC<TabProps> = ({
     const getUmapSchema = useMemo(() => {
         const sessionNames = (project.config as any)?.session_names || [];
         return {
-            ...motifVideosGetSchema,
+            ...umapImagesGetSchema,
             properties: {
-                segmentation_algorithm: motifVideosGetSchema.properties.segmentation_algorithm,
+                segmentation_algorithm: umapImagesGetSchema.properties.segmentation_algorithm,
                 session: {
-                    ...motifVideosGetSchema.properties.session,
+                    ...umapImagesGetSchema.properties.session,
                     enum: sessionNames,
                     enumNames: sessionNames,
                 },
