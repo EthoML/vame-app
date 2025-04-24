@@ -37,7 +37,7 @@ const Project: React.FC = () => {
 
   const [project, setProject] = useState<ProjectType | undefined>()
   const [blockSubmit, setBlockSubmit] = useState(true);
-  const [selectedTab, setSelectedTab] = useState<string>("project-initialization");
+  const [selectedTab, setSelectedTab] = useState<string>("input-data");
 
   const navigate = useNavigate()
 
@@ -105,7 +105,6 @@ const Project: React.FC = () => {
   }
 
   // Check if states exist and have expected properties
-  const configuredState = (project.states as any)?.update_config || {};
   const preprocessingState = project.states?.preprocessing || {};
   const preprocessingVisualizationState = project.states?.preprocessing_visualization || {};
   const create_trainset = project.states?.create_trainset || {};
@@ -116,7 +115,6 @@ const Project: React.FC = () => {
   const community = project.states?.community || {};
   const community_videos = project.states?.community_videos || {};
 
-  const projectConfigured = configuredState.execution_state === "success";
   const projectPreprocessed = preprocessingState.execution_state === "success" && preprocessingVisualizationState.execution_state === "success";
   const trainsetCreated = create_trainset.execution_state === "success";
   const modelCreated = train_model.execution_state === "success";
@@ -129,9 +127,9 @@ const Project: React.FC = () => {
 
   const tabs = [
     {
-      id: 'project-initialization',
-      label: '1. Project Initialization',
-      complete: projectConfigured,
+      id: 'input-data',
+      label: '1. Input Data',
+      complete: true,
       content: (() => {
         try {
           return (
@@ -160,7 +158,7 @@ const Project: React.FC = () => {
     {
       id: 'preprocessing',
       label: '2. Preprocessing',
-      disabled: tabsLock && !projectConfigured,
+      disabled: false,
       complete: projectPreprocessed,
       tooltip: "Finish project configuration first.",
       content: (() => {
