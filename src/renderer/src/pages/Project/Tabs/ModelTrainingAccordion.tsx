@@ -17,21 +17,6 @@ import trainModelSchema from '../../../../../schema/train-model.schema.json';
 import evaluateModelSchema from '../../../../../schema/evaluate-model.schema.json';
 import ModelVisualizationSection from "./ModelVisualizationSection";
 
-const PlaceholderLog = ({ step }: { step: string }) => (
-    <div
-        style={{
-            margin: "16px 0",
-            padding: "12px",
-            background: "#f5f5f5",
-            borderRadius: 6,
-            color: "#888",
-            fontStyle: "italic",
-        }}
-    >
-        [Log placeholder for "{step}" step]
-    </div>
-);
-
 type ModelTrainingAccordionProps = {
     project: ProjectType;
     onFormSubmit: () => Promise<void>;
@@ -208,6 +193,9 @@ const ModelTrainingAccordion = ({
                             blockSubmission={blockSubmit}
                             submitText={createTrainsetLoading ? "Creating..." : "Create Training Set"}
                             onFormSubmit={handleCreateTrainset}
+                            showLogsButton={true}
+                            logName={["create_trainset"]}
+                            projectPath={project.config.project_path}
                         />
                         {createTrainsetError && (
                             <div style={{ color: "red", marginTop: 8 }}>{createTrainsetError}</div>
@@ -215,7 +203,6 @@ const ModelTrainingAccordion = ({
                         {trainsetCreated && (
                             <div style={{ color: "green", marginTop: 8 }}>Training set created successfully.</div>
                         )}
-                        <PlaceholderLog step="Create Training Set" />
                     </div>
                 </AccordionContent>
             </Accordion>
@@ -242,6 +229,9 @@ const ModelTrainingAccordion = ({
                             blockSubmission={blockSubmit}
                             submitText={trainLoading ? "Training..." : "Train Model"}
                             onFormSubmit={handleTrainModel}
+                            showLogsButton={true}
+                            logName={["train_model"]}
+                            projectPath={project.config.project_path}
                         />
                         {trainError && (
                             <div style={{ color: "red", marginTop: 8 }}>{trainError}</div>
@@ -280,7 +270,6 @@ const ModelTrainingAccordion = ({
                                 )}
                             </div>
                         )}
-                        <PlaceholderLog step="Train Model" />
                     </div>
                 </AccordionContent>
             </Accordion>
@@ -307,6 +296,9 @@ const ModelTrainingAccordion = ({
                             blockSubmission={blockSubmit}
                             submitText={"Evaluate Model"}
                             onFormSubmit={handleEvaluateModel}
+                            showLogsButton={true}
+                            logName={["evaluate_model"]}
+                            projectPath={project.config.project_path}
                         />
                         {evaluateError && (
                             <div style={{ color: "red", marginTop: 8 }}>{evaluateError}</div>
@@ -314,7 +306,6 @@ const ModelTrainingAccordion = ({
                         {modelEvaluated && (
                             <div style={{ color: "green", marginTop: 8 }}>Model evaluated successfully.</div>
                         )}
-                        <PlaceholderLog step="Evaluate Model" />
                     </div>
                 </AccordionContent>
             </Accordion>

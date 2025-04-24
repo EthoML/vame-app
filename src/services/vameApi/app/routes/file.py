@@ -29,10 +29,8 @@ class ProjectLog(Resource):
         }
     )
     def get(self, log_name):
-
         project_path = request.args.get("project")
         project_path = Path(project_path)
-
         try:
             if log_name:
                 return log_file(project_path, log_name)
@@ -40,6 +38,3 @@ class ProjectLog(Resource):
                 return "missing log_name", 400
         except:
             return f"{log_name} log not found.", 404
-
-
-# Add other file-related routes here
