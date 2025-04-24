@@ -18,6 +18,7 @@ import PoseSegmentationAccordion from './Tabs/PoseSegmentationAccordion';
 import CommunityAnalysisAccordion from './Tabs/CommunityAnalysisAccordion';
 import { MainContainer } from '@renderer/components/Container';
 import { useSettings } from '@renderer/context/Settings';
+import CheckRawData from './Tabs/CheckRawData';
 import Report from './Tabs/Report';
 
 const Project: React.FC = () => {
@@ -134,13 +135,10 @@ const Project: React.FC = () => {
         try {
           return (
             <div style={{ padding: 20, background: "#f5f5f5" }}>
-              <h3>Project Initialization Content (Fallback)</h3>
-              <p>Project initialization content goes here.</p>
-              <p><b>Original props:</b></p>
-              <ul>
-                <li>project: {JSON.stringify(project.config?.Project)}</li>
-                <li>blockSubmission: {String(blockSubmit)}</li>
-              </ul>
+              <CheckRawData
+                projectPath={project.config.project_path}
+                sessionNames={(project.config as any)?.session_names || []}
+              />
             </div>
           );
         } catch (error) {
