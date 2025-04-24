@@ -111,17 +111,13 @@ const Project: React.FC = () => {
   const train_model = project.states?.train_model || {};
   const evaluate_model = project.states?.evaluate_model || {};
   const segment_session = project.states?.segment_session || {};
-  const motif_videos = project.states?.motif_videos || {};
   const community = project.states?.community || {};
-  const community_videos = project.states?.community_videos || {};
 
   const projectPreprocessed = preprocessingState.execution_state === "success" && preprocessingVisualizationState.execution_state === "success";
   const trainsetCreated = create_trainset.execution_state === "success";
   const modelCreated = train_model.execution_state === "success";
   const modelEvaluated = evaluate_model.execution_state === "success";
   const segmented = segment_session.execution_state === "success";
-  const motif_videos_created = motif_videos.execution_state === "success" && project.workflow?.motif_videos_created;
-  const community_videos_created = community_videos.execution_state === "success" && project.workflow?.community_videos_created;
   const report_session = project.states?.generate_reports || {};
   const reportCompleted = report_session.execution_state === "success";
 
