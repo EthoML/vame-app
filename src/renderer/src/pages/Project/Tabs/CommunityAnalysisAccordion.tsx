@@ -10,7 +10,8 @@ import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import DynamicForm from "@renderer/components/DynamicForm";
 import communitySchema from "../../../../../schema/community.schema.json";
 import communityVideosGenerateSchema from "../../../../../schema/community-videos-generate.schema.json";
-import motifVideosGetSchema from "../../../../../schema/motif-videos-get.schema.json";
+import communityVideosGetSchema from "../../../../../schema/community-videos-get.schema.json";
+import communityImagesGetSchema from "../../../../../schema/community-images-get.schema.json";
 import { communityAnalysisVAMEProject } from "../../../context/Projects/api/communityAnalysisVAMEProject";
 import { getProjectStateVAMEProject } from "../../../context/Projects/api/getProjectStateVAMEProject";
 import { createCommunityVideosVAMEProject } from "../../../context/Projects/api/createCommunityVideosVAMEProject";
@@ -224,7 +225,7 @@ const CommunityAnalysisAccordion = ({
         title: "Get Community Image",
         type: "object",
         properties: {
-            segmentation_algorithm: motifVideosGetSchema.properties.segmentation_algorithm
+            segmentation_algorithm: communityImagesGetSchema.properties.segmentation_algorithm
         },
         required: ["segmentation_algorithm"]
     };
@@ -234,11 +235,11 @@ const CommunityAnalysisAccordion = ({
         const sessionNames = (project.config as any)?.session_names || [];
 
         return {
-            ...motifVideosGetSchema,
+            ...communityVideosGetSchema,
             properties: {
-                ...motifVideosGetSchema.properties,
+                ...communityVideosGetSchema.properties,
                 session: {
-                    ...motifVideosGetSchema.properties.session,
+                    ...communityVideosGetSchema.properties.session,
                     enum: sessionNames,
                     enumNames: sessionNames
                 }

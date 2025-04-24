@@ -1,13 +1,22 @@
 {
-    "title": "Community Videos",
+    "title": "Get Community Videos",
     "type": "object",
     "properties": {
-        "parametrization": {
+        "segmentation_algorithm": {
             "type": "string",
-            "enum": ["hmm", "kmeans"]
+            "enum": [
+                "hmm",
+                "kmeans"
+            ]
+        },
+        "session": {
+            "type": "string",
+            "title": "Session",
+            "description": "Select the session to retrieve videos from"
         }
     },
     "required": [
-        "parametrization"
+        "segmentation_algorithm",
+        "session"
     ]
 }
