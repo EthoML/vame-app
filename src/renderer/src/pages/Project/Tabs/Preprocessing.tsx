@@ -33,7 +33,7 @@ const Preprocessing = ({
   blockTooltip,
 }: TabProps) => {
   // Accordion open/close state
-  const [isPreprocessingOpen, setPreprocessingOpen] = useState(true)
+  const [isPreprocessingOpen, setPreprocessingOpen] = useState(false)
   const [isVisualizeOpen, setVisualizeOpen] = useState(false)
 
   // Check if project is preprocessed
@@ -66,12 +66,6 @@ const Preprocessing = ({
     } catch (err) {
       console.error("Error setting enum values:", err)
     }
-
-    // // Set up operations with safety checks
-    // const operations = ["Create Training Set"]
-    // if (project?.config && !project.config.egocentric_data) {
-    //   operations.unshift("Align Data")
-    // }
 
     // Safely handle egocentric_data property
     try {
