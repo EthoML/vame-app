@@ -53,32 +53,6 @@ The app can be tested on the sample input data found [here](https://ethoml.githu
 ### Python
 You will need to have [miniconda](https://docs.conda.io/en/latest/miniconda.html) installed on your machine OR [pyenv](https://github.com/pyenv/pyenv).
 
-#### with pyenv:
-
-```bash
-pyenv local
-```
-
-```bash
-python -m venv venv
-```
-
-Unix system (linux or macos):
-```bash
-source ./venv/bin/activate
-```
-
-Windows:
-```sh
-.\venv\Scripts\activate.bat
-```
-
-This will install all the necessary Python dependencies for the project.
-
-```bash
-python -m pip install -r requirements.txt
-```
-
 #### with conda:
 Create the Conda environment for the project by running the following command:
 
