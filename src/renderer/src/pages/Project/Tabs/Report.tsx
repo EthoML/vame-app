@@ -177,6 +177,9 @@ const Report: React.FC<TabProps> = ({
                         blockSubmission={blockSubmission || reportLoading || isPollingReport}
                         submitText={reportLoading ? 'Generating...' : 'Generate Report'}
                         onFormSubmit={handleGenerateReport}
+                        showLogsButton={true}
+                        logName={["report"]}
+                        projectPath={project.config.project_path}
                     />
                     {reportError && <div style={{ color: 'red', marginTop: 8 }}>{reportError}</div>}
                     {(isPollingReport || reportState) && (
