@@ -124,6 +124,18 @@ export const Button = styled.button`
   }
 `;
 
+export const LogsButton = styled(Button)`
+  width: 100px;
+  background-color: #000000;
+  border: 2px solid #333333;
+  margin-left: 10px;
+
+  &:hover,
+  &:focus {
+    background-color: #333333;
+  }
+`;
+
 export const ArrayItems = styled.div`
   display: flex;
   flex-direction: column;

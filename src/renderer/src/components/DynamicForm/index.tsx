@@ -1,10 +1,12 @@
-import React from "react"
+import React, { useState } from "react"
 import { FormProvider, useForm } from "react-hook-form"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faTerminal } from "@fortawesome/free-solid-svg-icons"
+import TerminalModal from "../TerminalModal"
 import { extractDefaultValues } from "@renderer/utils/extractDefaultValues"
-import { Button, InputGroup, InputLabel, FormLayout, FormScrollContent, FormFooter } from './styles';
+import { Button, LogsButton, InputGroup, InputLabel, FormLayout, FormScrollContent, FormFooter } from './styles';
 import DynamicInput from "./DynamicInput"
 import { header } from "@renderer/utils/text";
-import { isEmpty } from "@renderer/utils/objectIsEmpty";
 
 export interface DynamicFormProps {
   schema: Schema
@@ -12,6 +14,9 @@ export interface DynamicFormProps {
   onFormSubmit: <T = unknown>(data: T) => void
   blockSubmission?: boolean
   submitText: string
+  showLogsButton?: boolean
+  logName?: string | string[]
+  projectPath?: string
 }
 
 const DynamicForm: React.FC<DynamicFormProps> = ({
@@ -20,7 +25,11 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
   blockSubmission,
   initialValues,
   submitText = "Submit",
+  showLogsButton = false,
+  logName,
+  projectPath,
 }) => {
+  const [logsOpen, setLogsOpen] = useState(false)
 
   const defaultValues = {
     ...extractDefaultValues(schema),
@@ -63,7 +72,20 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
         </FormScrollContent>
         <FormFooter>
           <Button type="submit" disabled={blockSubmission || readOnly}>{submitText}</Button>
+          {showLogsButton && (
+            <LogsButton type="button" onClick={() => setLogsOpen(true)}>
+              Logs <FontAwesomeIcon icon={faTerminal} />
+            </LogsButton>
+          )}
         </FormFooter>
+        {showLogsButton && (
+          <TerminalModal
+            isOpen={logsOpen}
+            onClose={() => setLogsOpen(false)}
+            logName={logName || ''}
+            projectPath={projectPath || ''}
+          />
+        )}
       </FormLayout>
     </FormProvider>
   );
