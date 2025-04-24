@@ -28,7 +28,7 @@ class Preprocess(Resource):
                 run_outlier_cleaning=data["run_outlier_cleaning"],
                 run_savgol_filtering=data["run_savgol_filtering"],
                 run_rescaling=data["run_rescaling"],
-                save_logs=False,
+                save_logs=True,
             )
             vame.visualization.preprocessing.preprocessing_visualization(
                 config=config,

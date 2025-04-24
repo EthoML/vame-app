@@ -1,7 +1,6 @@
 import {
   createVAMEProject,
   deleteVAMEProject,
-  configureVAMEProject,
   preprocessingVAMEProject,
   preprocessingVisualization,
   createTrainsetVAMEProject,
@@ -24,7 +23,6 @@ export type ProjectStates = {
   motif_videos: any;
   community: any;
   community_videos: any;
-  visualize_umap: any;
   generate_reports: any; // Added for report generation state
 };
 
@@ -48,7 +46,6 @@ export type IProjectContext = {
 
   createProject: typeof createVAMEProject
   deleteProject: typeof deleteVAMEProject
-  configureProject: typeof configureVAMEProject
 
   runPreprocessing: typeof preprocessingVAMEProject
   getPreprocessingVisualization: typeof preprocessingVisualization

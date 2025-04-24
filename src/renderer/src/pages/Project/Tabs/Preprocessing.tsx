@@ -1,7 +1,6 @@
 import { useState } from "react"
 
 import DynamicForm from "../../../components/DynamicForm"
-import TerminalModal from "../../../components/TerminalModal"
 import {
   Accordion,
   AccordionHeader,
@@ -9,12 +8,11 @@ import {
 } from "@renderer/components/DynamicForm/styles"
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faTerminal, faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons"
+import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons"
 import { TabProps } from "./types"
 
 import preprocessingSchema from '../../../../../schema/preprocessing.schema.json'
 import { PaddedTab } from "@renderer/components/Tabs/styles"
-import { ControlButton } from "@renderer/pages/Home/styles"
 import Tippy from "@tippyjs/react"
 
 // Error boundary component to catch rendering errors
@@ -33,7 +31,7 @@ const Preprocessing = ({
   blockTooltip,
 }: TabProps) => {
   // Accordion open/close state
-  const [isPreprocessingOpen, setPreprocessingOpen] = useState(true)
+  const [isPreprocessingOpen, setPreprocessingOpen] = useState(false)
   const [isVisualizeOpen, setVisualizeOpen] = useState(false)
 
   // Check if project is preprocessed
@@ -66,12 +64,6 @@ const Preprocessing = ({
     } catch (err) {
       console.error("Error setting enum values:", err)
     }
-
-    // // Set up operations with safety checks
-    // const operations = ["Create Training Set"]
-    // if (project?.config && !project.config.egocentric_data) {
-    //   operations.unshift("Align Data")
-    // }
 
     // Safely handle egocentric_data property
     try {
@@ -144,29 +136,6 @@ const Preprocessing = ({
             </span>
           </AccordionHeader>
           <AccordionContent $isOpen={isPreprocessingOpen}>
-            <div
-              style={{
-                marginBottom: "20px",
-                background: "transparent",
-                padding: "12px 16px",
-                borderRadius: "6px",
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              Open logs:{" "}
-              <ControlButton onClick={() => setTerminal(true)} style={{ marginLeft: 8 }}>
-                <FontAwesomeIcon icon={faTerminal} />
-              </ControlButton>
-            </div>
-
-            <TerminalModal
-              projectPath={project.config.project_path}
-              logName={["egocentric_alignment", "create_trainset"]}
-              isOpen={terminal}
-              onClose={() => setTerminal(false)}
-            />
-
             <Tippy
               content={blockTooltip}
               placement="bottom"
@@ -180,6 +149,9 @@ const Preprocessing = ({
                   blockSubmission={blockSubmission}
                   submitText="Run Preprocessing"
                   onFormSubmit={handleFormSubmit}
+                  showLogsButton={true}
+                  logName={["preprocessing"]}
+                  projectPath={project.config.project_path}
                 />
               </>
             </Tippy>

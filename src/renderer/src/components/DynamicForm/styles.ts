@@ -1,6 +1,27 @@
 import styled from "styled-components";
 import ButtonComponent from "@renderer/components/Button"
 
+// Styled input component with constrained width
+export const StyledInput = styled.input`
+  width: 350px;
+  max-width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+`;
+
+// Styled select component with constrained width
+export const StyledSelect = styled.select`
+  width: 350px;
+  max-width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  background-color: #fff;
+`;
+
 // --- Layout for the whole form ---
 export const FormLayout = styled.form`
   display: flex;
@@ -103,7 +124,7 @@ export const InputLabel = styled.label<InputLabelProps>`
 
 export const Button = styled.button`
   padding: 10px;
-  width: 100%;
+  width: 400px;
   background-color: #0056b3;
   color: white;
   border: 2px solid #007bff;
@@ -121,6 +142,18 @@ export const Button = styled.button`
   &[disabled] {
     pointer-events: none;
     opacity: 0.5;
+  }
+`;
+
+export const LogsButton = styled(Button)`
+  width: 100px;
+  background-color: #000000;
+  border: 2px solid #333333;
+  margin-left: 10px;
+
+  &:hover,
+  &:focus {
+    background-color: #333333;
   }
 `;
 

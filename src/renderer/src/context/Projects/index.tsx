@@ -15,7 +15,6 @@ import {
 import {
   createVAMEProject,
   deleteVAMEProject,
-  configureVAMEProject,
   preprocessingVAMEProject,
   preprocessingVisualization,
   createTrainsetVAMEProject,
@@ -150,12 +149,6 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
     return res
   }, [])
 
-  const configureProject = useCallback(async (data) => {
-    const res = await configureVAMEProject(data)
-    await refresh()
-    return res
-  }, [])
-
   const createTrainset = useCallback(async (data) => {
     const res = await createTrainsetVAMEProject(data)
     await refresh()
@@ -249,7 +242,6 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
     getAssetsPath,
     createProject,
     deleteProject,
-    configureProject,
     runPreprocessing,
     getPreprocessingVisualization,
     createTrainset,

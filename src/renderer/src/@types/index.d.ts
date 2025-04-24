@@ -45,10 +45,6 @@ declare global {
       execution_state?: string;
       [key: string]: unknown
     };
-    visualize_umap: {
-      execution_state?: string;
-      [key: string]: unknown
-    };
     generate_reports: {
       execution_state?: string;
       [key: string]: unknown
@@ -103,7 +99,6 @@ declare global {
       noise: boolean;
       num_features: number;
       num_points: number;
-      parametrization: string;
       pose_confidence: number;
       prediction_decoder: number;
       prediction_steps: number;

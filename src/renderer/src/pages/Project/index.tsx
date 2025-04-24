@@ -12,13 +12,13 @@ import Tabs from '@renderer/components/Tabs';
 import Header from '@renderer/components/Header';
 import { Container, HeaderButton, HeaderButtonContainer, ProjectHeader, ProjectInformation, ProjectInformationCapsule } from './styles';
 
-import ProjectConfiguration from './Tabs/ProjectConfiguration';
 import Preprocessing from './Tabs/Preprocessing';
 import ModelTrainingAccordion from './Tabs/ModelTrainingAccordion';
 import PoseSegmentationAccordion from './Tabs/PoseSegmentationAccordion';
 import CommunityAnalysisAccordion from './Tabs/CommunityAnalysisAccordion';
 import { MainContainer } from '@renderer/components/Container';
 import { useSettings } from '@renderer/context/Settings';
+import RawDataTab from './Tabs/RawDataTab';
 import Report from './Tabs/Report';
 
 const Project: React.FC = () => {
@@ -28,7 +28,6 @@ const Project: React.FC = () => {
   const {
     getProject,
     refresh,
-    configureProject,
     runPreprocessing,
   } = useProjects()
 
@@ -38,7 +37,7 @@ const Project: React.FC = () => {
 
   const [project, setProject] = useState<ProjectType | undefined>()
   const [blockSubmit, setBlockSubmit] = useState(true);
-  const [selectedTab, setSelectedTab] = useState<string>("project-configuration");
+  const [selectedTab, setSelectedTab] = useState<string>("input-data");
 
   const navigate = useNavigate()
 
@@ -72,8 +71,9 @@ const Project: React.FC = () => {
       onConnected(async () => {
         post('project/register', { project: projectPath }).then(res => {
           console.log("[DEBUG] post('project/register') result:", res);
-          if (res.success)
-            setProject(getProject(projectPath))
+          if (res.success) {
+            setProject(getProject(projectPath) as ProjectType);
+          }
         })
       })
 
@@ -105,53 +105,33 @@ const Project: React.FC = () => {
   }
 
   // Check if states exist and have expected properties
-  const configuredState = (project.states as any)?.update_config || {};
   const preprocessingState = project.states?.preprocessing || {};
   const preprocessingVisualizationState = project.states?.preprocessing_visualization || {};
   const create_trainset = project.states?.create_trainset || {};
   const train_model = project.states?.train_model || {};
   const evaluate_model = project.states?.evaluate_model || {};
   const segment_session = project.states?.segment_session || {};
-  const motif_videos = project.states?.motif_videos || {};
   const community = project.states?.community || {};
-  const community_videos = project.states?.community_videos || {};
-  const visualize_umap = project.states?.visualize_umap || {};
 
-  const projectConfigured = configuredState.execution_state === "success";
   const projectPreprocessed = preprocessingState.execution_state === "success" && preprocessingVisualizationState.execution_state === "success";
   const trainsetCreated = create_trainset.execution_state === "success";
   const modelCreated = train_model.execution_state === "success";
   const modelEvaluated = evaluate_model.execution_state === "success";
   const segmented = segment_session.execution_state === "success";
-  const motif_videos_created = motif_videos.execution_state === "success" && project.workflow?.motif_videos_created;
-  const community_videos_created = community_videos.execution_state === "success" && project.workflow?.community_videos_created;
-  const umaps_created = visualize_umap.execution_state === "success" && project.workflow?.umaps_created;
   const report_session = project.states?.generate_reports || {};
   const reportCompleted = report_session.execution_state === "success";
 
-  // Create tabs with original properties but placeholder content
   const tabs = [
     {
-      id: 'project-configuration',
-      label: '1. Project Configuration',
-      complete: projectConfigured,
+      id: 'input-data',
+      label: '1. Input Data',
+      complete: true,
       content: (() => {
         try {
           return (
-            <ProjectConfiguration
-              project={project}
-              blockSubmission={blockSubmit}
-              blockTooltip="Waiting VAME to be ready."
-              onFormSubmit={async (formData) => submitTab(async () => {
-                const { advanced_options, ...mainProperties } = formData as any
-                await configureProject(
-                  {
-                    config: { ...mainProperties, ...advanced_options },
-                    project: project.config.project_path
-                  }).catch(e => alert(e))
-              },
-                'preprocessing')
-              }
+            <RawDataTab
+              projectPath={project.config.project_path}
+              sessionNames={(project.config as any)?.session_names || []}
             />
           );
         } catch (error) {
@@ -174,7 +154,7 @@ const Project: React.FC = () => {
     {
       id: 'preprocessing',
       label: '2. Preprocessing',
-      disabled: tabsLock && !projectConfigured,
+      disabled: false,
       complete: projectPreprocessed,
       tooltip: "Finish project configuration first.",
       content: (() => {

@@ -1,8 +1,6 @@
 export * from "./createVAMEProject"
 export * from "./deleteVAMEProject"
 
-export * from "./configureVAMEProject"
-
 export * from "./preprocessingVAMEProject"
 export * from "./preprocessingVisualization"
 

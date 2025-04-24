@@ -25,6 +25,7 @@ export const TabContent = styled.div`
   display: flex;
   position: relative;
   overflow: auto;
+  min-height: 0;
 `;
 
 interface TabPaneProps extends ButtonHTMLAttributes<HTMLButtonElement> {
