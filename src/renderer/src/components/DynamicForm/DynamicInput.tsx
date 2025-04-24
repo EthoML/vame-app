@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import FileInput from "./FileSelector";
 import ArrayInput from "./ArrayInput";
-import { Accordion, AccordionContent, AccordionHeader, InputGroup, InputLabel } from './styles';
+import { Accordion, AccordionContent, AccordionHeader, InputGroup, InputLabel, StyledInput, StyledSelect } from './styles';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 
@@ -43,7 +43,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   if (type === "enum") {
     const enumProperty = property as EnumProperty
     return (
-      <select
+      <StyledSelect
         {...register(itemKey, { required, disabled: readOnly })}
         multiple={enumProperty.multiple}
       >
@@ -52,13 +52,13 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
             {option}
           </option>
         ))}
-      </select>
+      </StyledSelect>
     );
   }
 
   if (type === 'boolean') {
     return (
-      <input
+      <StyledInput
         type='checkbox'
         {...register(itemKey, {
           disabled: readOnly
@@ -72,7 +72,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
     const isInteger = numberProperty.type === 'integer';
 
     return (
-      <input
+      <StyledInput
         type="number"
         max={numberProperty?.maximum}
         min={numberProperty?.minimum}
@@ -139,7 +139,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   }
 
   return (
-    <input
+    <StyledInput
       type={"text"}
       {...register(itemKey, { required })}
       readOnly={readOnly}
