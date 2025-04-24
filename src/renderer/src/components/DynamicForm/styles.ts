@@ -103,7 +103,7 @@ export const InputLabel = styled.label<InputLabelProps>`
 
 export const Button = styled.button`
   padding: 10px;
-  width: 100%;
+  width: 400px;
   background-color: #0056b3;
   color: white;
   border: 2px solid #007bff;
