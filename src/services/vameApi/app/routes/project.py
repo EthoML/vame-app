@@ -1,8 +1,9 @@
 from pathlib import Path
 import json
-import vame
 from flask_restx import Resource
 from flask import request, jsonify
+import vame
+import xarray as xr
 
 from . import api
 from app.utils.resolve_request_util import resolve_request_data
@@ -143,3 +144,27 @@ class Load(Resource):
         except Exception as exception:
             print(exception)
             api.abort(500, str(exception))
+
+
+@api.route("/project/raw-data", methods=["GET"])
+class RawData(Resource):
+    @api.doc(
+        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
+    )
+    def get(self):
+        project_path = request.args.get("project")
+        session = request.args.get("session")
+        try:
+            config = vame.read_config(str(Path(project_path) / "config.yaml"))
+            session_names = config.get("session_names", [])
+            if session not in session_names:
+                api.abort(400, f"Session '{session}' not found in project '{project_path}'")
+            file_path = Path(project_path) / "data" / "raw" / f"{session}.nc"
+            ds = xr.open_dataset(file_path)
+            html = ds._repr_html_()
+            return jsonify(html=html)
+        except FileNotFoundError:
+            api.abort(404, f"File not found: '{file_path}'")
+        except Exception as exception:
+            if not_bad_request_exception(exception):
+                api.abort(500, str(exception))
