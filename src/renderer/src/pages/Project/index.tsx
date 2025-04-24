@@ -12,7 +12,6 @@ import Tabs from '@renderer/components/Tabs';
 import Header from '@renderer/components/Header';
 import { Container, HeaderButton, HeaderButtonContainer, ProjectHeader, ProjectInformation, ProjectInformationCapsule } from './styles';
 
-import ProjectConfiguration from './Tabs/ProjectConfiguration';
 import Preprocessing from './Tabs/Preprocessing';
 import ModelTrainingAccordion from './Tabs/ModelTrainingAccordion';
 import PoseSegmentationAccordion from './Tabs/PoseSegmentationAccordion';
@@ -28,7 +27,6 @@ const Project: React.FC = () => {
   const {
     getProject,
     refresh,
-    configureProject,
     runPreprocessing,
   } = useProjects()
 
@@ -38,7 +36,7 @@ const Project: React.FC = () => {
 
   const [project, setProject] = useState<ProjectType | undefined>()
   const [blockSubmit, setBlockSubmit] = useState(true);
-  const [selectedTab, setSelectedTab] = useState<string>("project-configuration");
+  const [selectedTab, setSelectedTab] = useState<string>("project-initialization");
 
   const navigate = useNavigate()
 
@@ -115,7 +113,6 @@ const Project: React.FC = () => {
   const motif_videos = project.states?.motif_videos || {};
   const community = project.states?.community || {};
   const community_videos = project.states?.community_videos || {};
-  const visualize_umap = project.states?.visualize_umap || {};
 
   const projectConfigured = configuredState.execution_state === "success";
   const projectPreprocessed = preprocessingState.execution_state === "success" && preprocessingVisualizationState.execution_state === "success";
@@ -125,34 +122,26 @@ const Project: React.FC = () => {
   const segmented = segment_session.execution_state === "success";
   const motif_videos_created = motif_videos.execution_state === "success" && project.workflow?.motif_videos_created;
   const community_videos_created = community_videos.execution_state === "success" && project.workflow?.community_videos_created;
-  const umaps_created = visualize_umap.execution_state === "success" && project.workflow?.umaps_created;
   const report_session = project.states?.generate_reports || {};
   const reportCompleted = report_session.execution_state === "success";
 
-  // Create tabs with original properties but placeholder content
   const tabs = [
     {
-      id: 'project-configuration',
-      label: '1. Project Configuration',
+      id: 'project-initialization',
+      label: '1. Project Initialization',
       complete: projectConfigured,
       content: (() => {
         try {
           return (
-            <ProjectConfiguration
-              project={project}
-              blockSubmission={blockSubmit}
-              blockTooltip="Waiting VAME to be ready."
-              onFormSubmit={async (formData) => submitTab(async () => {
-                const { advanced_options, ...mainProperties } = formData as any
-                await configureProject(
-                  {
-                    config: { ...mainProperties, ...advanced_options },
-                    project: project.config.project_path
-                  }).catch(e => alert(e))
-              },
-                'preprocessing')
-              }
-            />
+            <div style={{ padding: 20, background: "#f5f5f5" }}>
+              <h3>Project Initialization Content (Fallback)</h3>
+              <p>Project initialization content goes here.</p>
+              <p><b>Original props:</b></p>
+              <ul>
+                <li>project: {JSON.stringify(project.config?.Project)}</li>
+                <li>blockSubmission: {String(blockSubmit)}</li>
+              </ul>
+            </div>
           );
         } catch (error) {
           console.error("Error rendering ProjectConfiguration:", error);
