@@ -9,6 +9,7 @@ import { generateReportVAMEProject } from '../../../context/Projects/api/generat
 import { getProjectStateVAMEProject } from '../../../context/Projects/api/getProjectStateVAMEProject';
 import motifVideosGetSchema from "../../../../../schema/motif-videos-get.schema.json";
 import { getReportVAMEProject } from '../../../context/Projects/api/getReportVAMEProject';
+import { getUmapVAMEProject } from '../../../context/Projects/api/getUmapVAMEProject';
 
 const Report: React.FC<TabProps> = ({
     project,
@@ -18,14 +19,26 @@ const Report: React.FC<TabProps> = ({
 }) => {
     const [openSteps, setOpenSteps] = useState([false, false, false]);
 
+    // Generate Report states
     const [reportLoading, setReportLoading] = useState(false);
     const [reportError, setReportError] = useState<string | null>(null);
     const [isPollingReport, setIsPollingReport] = useState(false);
     const [reportState, setReportState] = useState<string | null>(null);
 
+    // Motif/Community image states
     const [reportImageLoading, setReportImageLoading] = useState(false);
     const [reportGetError, setReportGetError] = useState<string | null>(null);
     const [reportImage, setReportImage] = useState<{ filename: string; content: string } | null>(null);
+
+    // UMAP image states
+    const [umapLoading, setUmapLoading] = useState(false);
+    const [umapError, setUmapError] = useState<string | null>(null);
+    const [umapImages, setUmapImages] = useState<{
+        no_label?: { filename: string; content: string };
+        motif?: { filename: string; content: string };
+        community?: { filename: string; content: string };
+    } | null>(null);
+    const [umapTab, setUmapTab] = useState<'no_label' | 'motif' | 'community'>('no_label');
 
     const reportSession = project.states?.generate_reports || {};
     const reportCompleted = reportSession.execution_state === 'success';
@@ -38,12 +51,7 @@ const Report: React.FC<TabProps> = ({
         });
     };
 
-    // prevent unused variable warnings for placeholder component
-    void project;
-    void onFormSubmit;
-    void blockSubmission;
-    void blockTooltip;
-
+    // 1. Generate Report
     const handleGenerateReport = async () => {
         setReportLoading(true);
         setReportError(null);
@@ -66,12 +74,7 @@ const Report: React.FC<TabProps> = ({
                         await getProjectStateVAMEProject({ project: project.config.project_path })
                     ).states?.generate_reports?.execution_state || null;
                     setReportState(state);
-                    if (
-                        state === 'success' ||
-                        state === 'failed' ||
-                        state === 'aborted' ||
-                        state === 'not_found'
-                    ) {
+                    if (['success', 'failed', 'aborted', 'not_found'].includes(state!)) {
                         if (interval) clearInterval(interval);
                         setIsPollingReport(false);
                         await onFormSubmit({});
@@ -82,11 +85,10 @@ const Report: React.FC<TabProps> = ({
                 }
             }, 3000);
         }
-        return () => {
-            if (interval) clearInterval(interval);
-        };
+        return () => { if (interval) clearInterval(interval); };
     }, [isPollingReport, project.config.project_path, onFormSubmit]);
 
+    // Schema for motif/community image GET
     const getReportSchema = useMemo(() => {
         const sessionNames = (project.config as any)?.session_names || [];
         return {
@@ -102,6 +104,7 @@ const Report: React.FC<TabProps> = ({
         };
     }, [project.config]);
 
+    // Handler for motif/community GET
     const handleGetReport = async (formData: any) => {
         setReportImageLoading(true);
         setReportGetError(null);
@@ -119,6 +122,41 @@ const Report: React.FC<TabProps> = ({
         }
     };
 
+    // Schema for UMAP GET
+    const getUmapSchema = useMemo(() => {
+        const sessionNames = (project.config as any)?.session_names || [];
+        return {
+            ...motifVideosGetSchema,
+            properties: {
+                segmentation_algorithm: motifVideosGetSchema.properties.segmentation_algorithm,
+                session: {
+                    ...motifVideosGetSchema.properties.session,
+                    enum: sessionNames,
+                    enumNames: sessionNames,
+                },
+            },
+        };
+    }, [project.config]);
+
+    // Handler for UMAP GET
+    const handleGetUmap = async (formData: any) => {
+        setUmapLoading(true);
+        setUmapError(null);
+        setUmapImages(null);
+        try {
+            const images = await getUmapVAMEProject({
+                project: project.config.project_path,
+                segmentation_algorithm: formData.segmentation_algorithm,
+                session: formData.session,
+            });
+            setUmapImages(images);
+        } catch (err: any) {
+            setUmapError(err.message || 'Failed to fetch UMAP images.');
+        } finally {
+            setUmapLoading(false);
+        }
+    };
+
     return (
         <PaddedTab>
             {/* Accordion 1: Generate Report */}
@@ -126,60 +164,34 @@ const Report: React.FC<TabProps> = ({
                 <AccordionHeader $disabled={false} onClick={() => handleToggle(0)}>
                     1. Generate Report
                     {reportCompleted && (
-                        <span style={{ color: 'green', marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
-                            ✓
-                        </span>
+                        <span style={{ color: 'green', marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">✓</span>
                     )}
                     <span style={{ marginLeft: 'auto' }}>
                         <FontAwesomeIcon icon={openSteps[0] ? faChevronUp : faChevronDown} />
                     </span>
                 </AccordionHeader>
                 <AccordionContent $isOpen={openSteps[0]}>
-                    <>
-                        <DynamicForm
-                            schema={{ title: 'Generate Report', type: 'object', properties: {}, required: [] }}
-                            blockSubmission={blockSubmission || reportLoading || isPollingReport}
-                            submitText={reportLoading ? 'Generating...' : 'Generate Report'}
-                            onFormSubmit={handleGenerateReport}
-                        />
-                        {reportError && (
-                            <div style={{ color: 'red', marginTop: 8 }}>{reportError}</div>
-                        )}
-                        {(isPollingReport || reportState) && (
-                            <div style={{ marginTop: 8 }}>
-                                {isPollingReport && (
-                                    <span style={{ color: '#888' }}>
-                                        Polling report state…
-                                    </span>
-                                )}
-                                {reportState === 'running' && (
-                                    <span style={{ color: '#007bff', marginLeft: 8 }}>
-                                        State: <b>Running</b>
-                                    </span>
-                                )}
-                                {reportState === 'success' && (
-                                    <span style={{ color: 'green', marginLeft: 8 }}>
-                                        State: <b>Success</b> — Report generated successfully.
-                                    </span>
-                                )}
-                                {reportState === 'failed' && (
-                                    <span style={{ color: 'red', marginLeft: 8 }}>
-                                        State: <b>Failed</b> — Report generation failed.
-                                    </span>
-                                )}
-                                {reportState === 'aborted' && (
-                                    <span style={{ color: 'orange', marginLeft: 8 }}>
-                                        State: <b>Aborted</b> — Report was aborted.
-                                    </span>
-                                )}
-                                {reportState === 'not_found' && (
-                                    <span style={{ color: '#888', marginLeft: 8 }}>
-                                        State: <b>Not Found</b> — No report generation state found.
-                                    </span>
-                                )}
-                            </div>
-                        )}
-                    </>
+                    <DynamicForm
+                        schema={{ title: 'Generate Report', type: 'object', properties: {}, required: [] }}
+                        blockSubmission={blockSubmission || reportLoading || isPollingReport}
+                        submitText={reportLoading ? 'Generating...' : 'Generate Report'}
+                        onFormSubmit={handleGenerateReport}
+                    />
+                    {reportError && <div style={{ color: 'red', marginTop: 8 }}>{reportError}</div>}
+                    {(isPollingReport || reportState) && (
+                        <div style={{ marginTop: 8 }}>
+                            {isPollingReport && <span style={{ color: '#888' }}>Polling report state…</span>}
+                            {['running', 'success', 'failed', 'aborted', 'not_found'].map(s =>
+                                reportState === s && <span key={s} style={{
+                                    color: s === 'success' ? 'green' : s === 'running' ? '#007bff' : s === 'aborted' ? 'orange' : 'red',
+                                    marginLeft: 8
+                                }}>
+                                    State: <b>{s.charAt(0).toUpperCase() + s.slice(1)}</b>
+                                    {s === 'success' ? ' — Report generated successfully.' : ''}
+                                </span>
+                            )}
+                        </div>
+                    )}
                 </AccordionContent>
             </Accordion>
 
@@ -192,44 +204,83 @@ const Report: React.FC<TabProps> = ({
                     </span>
                 </AccordionHeader>
                 <AccordionContent $isOpen={openSteps[1]}>
-                    <>
-                        <DynamicForm
-                            schema={getReportSchema as unknown as Schema}
-                            blockSubmission={blockSubmission || reportImageLoading}
-                            submitText={reportImageLoading ? "Fetching..." : "Get Image"}
-                            onFormSubmit={handleGetReport}
-                        />
-                        {reportGetError && (
-                            <div style={{ color: 'red', marginTop: 8 }}>{reportGetError}</div>
-                        )}
-                        {reportImage && (
-                            <div style={{ marginTop: 12 }}>
-                                <img
-                                    src={`data:image/png;base64,${reportImage.content}`}
-                                    alt={reportImage.filename}
-                                    style={{ maxWidth: "100%", borderRadius: 4 }}
-                                />
-                                <label style={{ display: "block", marginTop: 4 }}>
-                                    {reportImage.filename}
-                                </label>
-                            </div>
-                        )}
-                    </>
+                    <DynamicForm
+                        schema={getReportSchema as unknown as Schema}
+                        blockSubmission={blockSubmission || reportImageLoading}
+                        submitText={reportImageLoading ? "Fetching..." : "Get Image"}
+                        onFormSubmit={handleGetReport}
+                    />
+                    {reportGetError && <div style={{ color: 'red', marginTop: 8 }}>{reportGetError}</div>}
+                    {reportImage && (
+                        <div style={{ marginTop: 12 }}>
+                            <img
+                                src={`data:image/png;base64,${reportImage.content}`}
+                                alt={reportImage.filename}
+                                style={{ maxWidth: "100%", borderRadius: 4 }}
+                            />
+                            <label style={{ display: "block", marginTop: 4 }}>{reportImage.filename}</label>
+                        </div>
+                    )}
                 </AccordionContent>
             </Accordion>
 
-            {/* Accordion 3. Visualize UMAP Report */}
+            {/* Accordion 3: Visualize UMAP Report */}
             <Accordion>
-                <AccordionHeader $disabled={false} onClick={() => handleToggle(2)}>
+                <AccordionHeader $disabled={!reportCompleted} onClick={() => handleToggle(2)}>
                     3. Visualize UMAP Report
                     <span style={{ marginLeft: 'auto' }}>
                         <FontAwesomeIcon icon={openSteps[2] ? faChevronUp : faChevronDown} />
                     </span>
                 </AccordionHeader>
                 <AccordionContent $isOpen={openSteps[2]}>
-                    <div style={{ padding: 20 }}>
-                        UMAP report visualization placeholder content.
-                    </div>
+                    <DynamicForm
+                        schema={getUmapSchema as unknown as Schema}
+                        blockSubmission={blockSubmission || umapLoading}
+                        submitText={umapLoading ? "Fetching..." : "Get Images"}
+                        onFormSubmit={handleGetUmap}
+                    />
+                    {umapError && <div style={{ color: 'red', marginTop: 8 }}>{umapError}</div>}
+                    {umapImages && (
+                        <div style={{ marginTop: 12 }}>
+                            <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+                                {(['no_label', 'motif', 'community'] as const).map(tab => (
+                                    <button
+                                        key={tab}
+                                        onClick={() => setUmapTab(tab)}
+                                        style={{
+                                            padding: '6px 16px',
+                                            borderBottom: umapTab === tab ? '2px solid #1976d2' : '2px solid transparent',
+                                            background: 'none',
+                                            fontWeight: umapTab === tab ? 600 : 400,
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        {tab === 'no_label' ? 'No Labels' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                                    </button>
+                                ))}
+                            </div>
+                            <div style={{
+                                minHeight: 220,
+                                width: '100%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                background: '#f8f9fa',
+                                borderRadius: 6,
+                                overflow: 'auto'
+                            }}>
+                                {umapImages[umapTab] ? (
+                                    <img
+                                        src={`data:image/png;base64,${umapImages[umapTab]!.content}`}
+                                        alt={umapImages[umapTab]!.filename}
+                                        style={{ width: '100%', height: 'auto', objectFit: 'contain' }}
+                                    />
+                                ) : (
+                                    <span style={{ color: '#888' }}>No image available for {umapTab}.</span>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </AccordionContent>
             </Accordion>
         </PaddedTab>
