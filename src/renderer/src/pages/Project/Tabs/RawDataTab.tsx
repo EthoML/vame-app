@@ -27,44 +27,45 @@ const RawDataTab: React.FC<RawDataTabProps> = ({ projectPath, sessionNames }) =>
         required: ['session'],
     }), [sessionNames]);
 
-    const handleFormSubmit = (formData: any) => {
-        (async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                const url =
-                    '/project/raw-data?project=' +
-                    encodeURIComponent(projectPath) +
-                    '&session=' +
-                    encodeURIComponent(formData.session);
-                const resp = await get<{ html: string }>(url);
-                if (!resp.success) {
-                    throw new Error(resp.error);
-                }
-                setRawHtml(resp.data.html);
-            } catch (err: any) {
-                setError(err.message || 'Failed to fetch raw data.');
-            } finally {
-                setLoading(false);
+    const handleFormSubmit = async (formData: any) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const url =
+                '/project/raw-data?project=' +
+                encodeURIComponent(projectPath) +
+                '&session=' +
+                encodeURIComponent(formData.session);
+            const resp = await get<{ html: string }>(url);
+            if (!resp.success) {
+                throw new Error(resp.error);
             }
-        })();
+            setRawHtml(resp.data.html);
+        } catch (err: any) {
+            setError(err.message || 'Failed to fetch raw data.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
-        <PaddedTab>
-            <DynamicForm
-                schema={schema}
-                blockSubmission={loading}
-                submitText={loading ? 'Loading...' : 'Check Input Data'}
-                onFormSubmit={handleFormSubmit}
-            />
-            {error && <div style={{ color: 'red', marginTop: 8 }}>{error}</div>}
-            {rawHtml && (
-                <div
-                    style={{ marginTop: 12 }}
-                    dangerouslySetInnerHTML={{ __html: rawHtml }}
-                />
-            )}
+        <PaddedTab style={{ height: '100%', minHeight: 0 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
+                <div style={{ flex: '0 0 auto' }}>
+                    <DynamicForm
+                        schema={schema}
+                        blockSubmission={loading}
+                        submitText={loading ? 'Loading...' : 'Check Input Data'}
+                        onFormSubmit={handleFormSubmit}
+                    />
+                </div>
+                <div style={{ flex: '1 1 auto', overflowY: 'auto', marginTop: 8 }}>
+                    {error && <div style={{ color: 'red' }}>{error}</div>}
+                    {rawHtml && (
+                        <div dangerouslySetInnerHTML={{ __html: rawHtml }} />
+                    )}
+                </div>
+            </div>
         </PaddedTab>
     );
 };
