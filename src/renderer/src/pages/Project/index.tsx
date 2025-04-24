@@ -18,7 +18,7 @@ import PoseSegmentationAccordion from './Tabs/PoseSegmentationAccordion';
 import CommunityAnalysisAccordion from './Tabs/CommunityAnalysisAccordion';
 import { MainContainer } from '@renderer/components/Container';
 import { useSettings } from '@renderer/context/Settings';
-import CheckRawData from './Tabs/CheckRawData';
+import RawDataTab from './Tabs/RawDataTab';
 import Report from './Tabs/Report';
 
 const Project: React.FC = () => {
@@ -71,8 +71,9 @@ const Project: React.FC = () => {
       onConnected(async () => {
         post('project/register', { project: projectPath }).then(res => {
           console.log("[DEBUG] post('project/register') result:", res);
-          if (res.success)
-            setProject(getProject(projectPath))
+          if (res.success) {
+            setProject(getProject(projectPath) as ProjectType);
+          }
         })
       })
 
@@ -134,12 +135,10 @@ const Project: React.FC = () => {
       content: (() => {
         try {
           return (
-            <div style={{ padding: 20, background: "#f5f5f5" }}>
-              <CheckRawData
-                projectPath={project.config.project_path}
-                sessionNames={(project.config as any)?.session_names || []}
-              />
-            </div>
+            <RawDataTab
+              projectPath={project.config.project_path}
+              sessionNames={(project.config as any)?.session_names || []}
+            />
           );
         } catch (error) {
           console.error("Error rendering ProjectConfiguration:", error);

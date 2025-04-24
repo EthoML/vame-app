@@ -161,7 +161,6 @@ class RawData(Resource):
                 api.abort(400, f"Session '{session}' not found in project '{project_path}'")
             file_path = Path(project_path) / "data" / "raw" / f"{session}.nc"
             ds = xr.open_dataset(file_path)
-            print(ds)
             html = ds._repr_html_()
             return jsonify(html=html)
         except FileNotFoundError:
