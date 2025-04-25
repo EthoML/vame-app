@@ -57,7 +57,7 @@ You will need to have [miniconda](https://docs.conda.io/en/latest/miniconda.html
 Create the Conda environment for the project by running the following command:
 
 ```bash
-conda env create -f environment.yml
+conda env create -f environment-<os>.yml
 ```
 This will install all the necessary Python dependencies for the project.
 
