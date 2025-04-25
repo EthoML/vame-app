@@ -4,10 +4,16 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin()]
+    plugins: [externalizeDepsPlugin()],
+    build: {
+      sourcemap: false
+    }
   },
   preload: {
-    plugins: [externalizeDepsPlugin()]
+    plugins: [externalizeDepsPlugin()],
+    build: {
+      sourcemap: false
+    }
   },
   renderer: {
     resolve: {
@@ -15,6 +21,23 @@ export default defineConfig({
         '@renderer': resolve('src/renderer/src')
       }
     },
-    plugins: [react()]
+    plugins: [react()],
+    build: {
+      sourcemap: false
+    },
+    cacheDir: '.vite',
+    optimizeDeps: {
+      include: [
+        'react',
+        'react-dom',
+        'styled-components',
+        'react-router-dom',
+        'react-hook-form',
+        '@fortawesome/react-fontawesome',
+        '@fortawesome/fontawesome-svg-core',
+        '@fortawesome/free-solid-svg-icons',
+        '@tippyjs/react'
+      ]
+    }
   }
 })
