@@ -11,7 +11,7 @@ from app.config import VAME_APP_DIRECTORY
 
 
 def create_app():
-    app = Flask("VAME API", os.path.abspath(VAME_APP_DIRECTORY))
+    app = Flask("VAME API", instance_path=os.path.abspath(VAME_APP_DIRECTORY))
     CORS(app)
     app.config["CORS_HEADERS"] = "Content-Type"
 
