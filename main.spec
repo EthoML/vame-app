@@ -4,11 +4,19 @@ from PyInstaller.utils.hooks import collect_all
 datas = []
 binaries = []
 hiddenimports = []
-tmp_ret = collect_all('numpy.core')
-datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 
-tmp_ret = collect_all('imageio_ffmpeg')
-datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
+for pkg in (
+        "numpy",
+        "imageio_ffmpeg",
+        "hdmf",
+        "pynwb",
+        "ndx_pose",
+        "xarray",
+):
+    d, b, h = collect_all(pkg)
+    datas += d
+    binaries += b
+    hiddenimports += h
 
 a = Analysis(
     ['src/services/vameApi/main.py'],

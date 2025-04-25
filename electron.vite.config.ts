@@ -21,7 +21,7 @@ export default defineConfig({
         '@renderer': resolve('src/renderer/src')
       }
     },
-    plugins: [react(), externalizeDepsPlugin()],
+    plugins: [react()],
     build: {
       sourcemap: false
     },
