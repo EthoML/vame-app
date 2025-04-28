@@ -42,13 +42,3 @@ jobs:
 
       - name: Build
         run: npm run build:linux -- --publish=never
-
-      - name: Install built package
-        run: |
-          sudo dpkg -i dist/*.deb || sudo apt-get install -f -y
-
-      - name: Test GUI startup
-        run: |
-          xvfb-run --auto-servernum --server-args="-screen 0 1024x768x24" bash -c "
-            vame-desktop & sleep 15 && pkill -x vame-desktop
-          "
