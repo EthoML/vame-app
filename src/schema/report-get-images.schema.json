@@ -1,0 +1,22 @@
+{
+    "title": "Get Report Images",
+    "type": "object",
+    "properties": {
+        "segmentation_algorithm": {
+            "type": "string",
+            "enum": [
+                "hmm",
+                "kmeans"
+            ]
+        },
+        "session": {
+            "type": "string",
+            "title": "Session",
+            "description": "Select the session to retrieve report images from"
+        }
+    },
+    "required": [
+        "segmentation_algorithm",
+        "session"
+    ]
+}

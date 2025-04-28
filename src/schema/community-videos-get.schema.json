@@ -1,0 +1,22 @@
+{
+    "title": "Get Community Videos",
+    "type": "object",
+    "properties": {
+        "segmentation_algorithm": {
+            "type": "string",
+            "enum": [
+                "hmm",
+                "kmeans"
+            ]
+        },
+        "session": {
+            "type": "string",
+            "title": "Session",
+            "description": "Select the session to retrieve videos from"
+        }
+    },
+    "required": [
+        "segmentation_algorithm",
+        "session"
+    ]
+}

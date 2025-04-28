@@ -47,25 +47,37 @@ app.whenReady().then(() => {
 
   folderHandler()
 
-  if (is.dev) {
-    backend = runChildProcess("python", [join(__dirname, "..", "..", "src", "services", "vameApi", "main.py")])
+  const separateBackend = process.env.VAME_SEPARATE_BACKEND === "true";
+
+  if (is.dev && !separateBackend) {
+    backend = runChildProcess("python", [join(__dirname, "..", "..", "src", "services", "vameApi", "main.py")]);
 
     backend?.stdout.on("data", (data) => {
       if (data?.toString().includes("Flask server started at")) {
-        console.log(`[electron]: Python server is active...`)
+        console.log(`[electron]: Python server is active...`);
         if (!mainWindow)
-          mainWindow = createWindow()
+          mainWindow = createWindow();
       }
     });
+    backend?.stderr.on("data", (data) => {
+      console.error(`[electron python error]:`, data.toString());
+    });
+  } else if (is.dev && separateBackend) {
+    // In dev-separate mode, do not start the backend, just connect to it
+    console.log("[electron]: Running in dev-separate mode, not starting Python backend. Expecting Flask server to be running separately.");
+    if (!mainWindow) mainWindow = createWindow();
   } else {
-    backend = runChildProcess(resolve(join(process.resourcesPath, "python", "main", "main")))
+    backend = runChildProcess(resolve(join(process.resourcesPath, "python", "main", "main")));
 
     backend?.stdout.on("data", (data) => {
       if (data?.toString().includes("Flask server started at")) {
-        console.log(`[electron]: Python server is active...`)
+        console.log(`[electron]: Python server is active...`);
         if (!mainWindow)
-          mainWindow = createWindow()
+          mainWindow = createWindow();
       }
+    });
+    backend?.stderr.on("data", (data) => {
+      console.error(`[electron python error]:`, data.toString());
     });
   }
 

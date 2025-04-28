@@ -16,14 +16,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Set up Conda environment
+        uses: conda-incubator/setup-miniconda@v3
         with:
-          python-version: "3.11"
-
-      - name: install python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          environment-file: environment-mac-arm.yml
+          activate-environment: vame-desktop
+          auto-activate-base: false
 
       - uses: actions/setup-node@v4
         with:

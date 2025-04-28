@@ -14,11 +14,11 @@ const Home: React.FC = () => {
   const { projects, recentProjects, refresh, deleteProject } = useProjects()
   const navigate = useNavigate()
 
-  const onEdit = useCallback((project: Project) => {
+  const onEdit = useCallback((project: ProjectType) => {
     navigate(`project?path=${project.config.project_path}`)
   }, [])
 
-  const onDelete = useCallback(async (project: Project) => {
+  const onDelete = useCallback(async (project: ProjectType) => {
     try {
       await deleteProject(project.config.project_path)
     } catch (e) {
@@ -39,7 +39,7 @@ const Home: React.FC = () => {
         </Tippy>
       </Header>
 
-      <SubHeader title="Recents:"/>
+      <SubHeader title="Recents:" />
 
       {recentProjects && recentProjects?.length > 0 ? (
         <ProjectsList
@@ -51,7 +51,7 @@ const Home: React.FC = () => {
         <p>No recent projects found in the VAME Desktop output directory.</p>
       )}
 
-      <SubHeader title="All projects:"/>
+      <SubHeader title="All projects:" />
 
       {projects && projects?.length > 0 ? (
         <ProjectsList

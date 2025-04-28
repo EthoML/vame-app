@@ -3,11 +3,11 @@ import { post } from "@renderer/utils/requests"
 
 type CreateUMAPVisualizationProps = {
     project: string
-    [key:string]: any
+    [key: string]: any
 }
 
 export const createUMAPVisualizationVAMEProject = async (data: CreateUMAPVisualizationProps) => {
-    const result = await post<Project>('visualization', { ...data})
+    const result = await post<ProjectType>('visualization', { ...data })
 
     if (result.success) {
         return result.data

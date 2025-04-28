@@ -8,28 +8,40 @@
             "description": "Name of the project. No spaces allowed.",
             "allow-spaces": false
         },
-        "videos": {
-            "title": "Videos",
+        "source_software": {
             "type": "string",
-            "description": "A set of labeled videos",
+            "title": "Source Software",
+            "description": "Pose estimation software used to generate the data",
+            "enum": [
+                "DeepLabCut",
+                "SLEAP",
+                "LightningPose"
+            ]
+        },
+        "pes_paths": {
+            "type": "string",
             "format": "file",
-            "accept": "video/*",
+            "description": "Pose estimation data files. Supported formats: CSV, SLP, H5.",
+            "title": "Pose Estimation Files",
+            "accept": [
+                ".csv",
+                ".slp",
+                ".h5"
+            ],
             "multiple": true
         },
-        "csvs": {
+        "videos": {
+            "title": "Video Files (Optional)",
             "type": "string",
+            "description": "Labeled videos corresponding to the pose estimation files",
             "format": "file",
-            "description": "A set of pose estimation data. NOTE: CSV file name needs to match video file name.",
-            "title": "CSV Files",
-            "accept": [
-                ".csv"
-            ],
+            "accept": "video/*",
             "multiple": true
         }
     },
     "required": [
         "name",
-        "videos",
+        "source_software",
         "csvs"
     ]
 }

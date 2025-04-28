@@ -15,8 +15,8 @@ import {
 import {
   createVAMEProject,
   deleteVAMEProject,
-  configureVAMEProject,
-  alignVAMEProject,
+  preprocessingVAMEProject,
+  preprocessingVisualization,
   createTrainsetVAMEProject,
   trainVAMEProject,
   evaluateVAMEProject,
@@ -36,8 +36,8 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
   const [loadingProjects, setLoadingProjects] = useState<boolean>(true);
   const [loadingPaths, setLoadingPaths] = useState<boolean>(true);
 
-  const [projects, setProjects] = useState<Project[]>([])
-  const [recentProjects, setRecentProjects] = useState<Project[]>([])
+  const [projects, setProjects] = useState<ProjectType[]>([])
+  const [recentProjects, setRecentProjects] = useState<ProjectType[]>([])
 
   // deal with paths
   const [paths, setPaths] = useState<string[]>([]);
@@ -55,9 +55,9 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
         setPaths(projectsPath.data)
         setRecentPaths(recentProjectsPath.data)
       } else {
-        if(!projectsPath.success){
+        if (!projectsPath.success) {
           throw new Error(projectsPath.error)
-        } else if (!recentProjectsPath.success){
+        } else if (!recentProjectsPath.success) {
           throw new Error(recentProjectsPath.error)
         }
       }
@@ -77,11 +77,11 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
 
     setLoadingProjects(true)
     const promisesProjects = paths.map(async (path) => {
-      return await post<Omit<Project, "created_at">>('load', { project: path })
+      return await post<Omit<ProjectType, "creation_datetime">>('load', { project: path })
     })
 
     const promisesRecents = recentPaths.map(async (path) => {
-      return await post<Omit<Project, "created_at">>('load', { project: path })
+      return await post<Omit<ProjectType, "creation_datetime">>('load', { project: path })
     })
     try {
       const data = await Promise.allSettled(promisesProjects)
@@ -90,33 +90,42 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
       setProjects(data.map(icpResponse => {
         if (icpResponse.status === "fulfilled") {
           if (icpResponse.value.success) {
-            const { Project, project_path } = icpResponse.value.data.config
-            const created_at = new Date(project_path.split(`${Project}-`)[1]).toLocaleDateString()
-            const project = { ...icpResponse.value.data, created_at }
-            return project
+            const projectData = icpResponse.value.data;
+            if (projectData.error) {
+              // Return a project object with error info
+              return { error: projectData.error };
+            }
+            const { Project, project_path } = projectData.config;
+            const creation_datetime = new Date(project_path.split(`${Project}-`)[1]).toLocaleDateString();
+            const project = { ...projectData, creation_datetime };
+            return project;
           }
         }
-        return
-      }).filter(p => !!p) as Project[])
+        return;
+      }).filter(p => !!p) as ProjectType[]);
 
       setRecentProjects(data2.map(icpResponse => {
         if (icpResponse.status === "fulfilled") {
           if (icpResponse.value.success) {
-            const { Project, project_path } = icpResponse.value.data.config
-            const created_at = new Date(project_path.split(`${Project}-`)[1]).toLocaleDateString()
-            const project = { ...icpResponse.value.data, created_at }
-            return project
+            const projectData = icpResponse.value.data;
+            if (projectData.error) {
+              return { error: projectData.error };
+            }
+            const { Project, project_path } = projectData.config;
+            const creation_datetime = new Date(project_path.split(`${Project}-`)[1]).toLocaleDateString();
+            const project = { ...projectData, creation_datetime };
+            return project;
           }
         }
-        return
-      }).filter(p => !!p) as Project[])
+        return;
+      }).filter(p => !!p) as ProjectType[]);
 
     } catch (error) {
       window.alert("Something went wrong loading projects.")
     } finally {
       setLoadingProjects(false)
     }
-  }, [paths,recentPaths])
+  }, [paths, recentPaths])
 
   const refresh = useCallback(loadProjectsPaths, [])
 
@@ -136,18 +145,6 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
 
   const deleteProject = useCallback(async (data: string) => {
     const res = await deleteVAMEProject(data)
-    await refresh()
-    return res
-  }, [])
-
-  const configureProject = useCallback(async (data) => {
-    const res = await configureVAMEProject(data)
-    await refresh()
-    return res
-  }, [])
-
-  const align = useCallback(async (data) => {
-    const res = await alignVAMEProject(data)
     await refresh()
     return res
   }, [])
@@ -206,6 +203,17 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
     return res
   }, [])
 
+  const runPreprocessing = useCallback(async (data) => {
+    const res = await preprocessingVAMEProject(data)
+    await refresh()
+    return res
+  }, [])
+
+  const getPreprocessingVisualization = useCallback(async (data) => {
+    const res = await preprocessingVisualization(data)
+    return res
+  }, [])
+
   const getProject = useCallback((path: string) => {
     return projects.find(p => p.config.project_path === path)
   }, [projects])
@@ -232,28 +240,18 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
     refresh,
     getProject,
     getAssetsPath,
-
     createProject,
     deleteProject,
-
-    configureProject,
-
-    align,
+    runPreprocessing,
+    getPreprocessingVisualization,
     createTrainset,
-
     train,
     evaluate,
-
     segment,
-
     createMotifVideos,
-
     communityAnalysis,
-
     createCommunityVideos,
-
     createMotifCommunityVideos,
-
     createUMAPVisualization
   }
 

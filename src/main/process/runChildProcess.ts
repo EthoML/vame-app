@@ -6,7 +6,10 @@ export function runChildProcess(exec: string, path?: string[]) {
 
   const child = spawn(exec, path, {
     env: {
-      PATH: process.env.PATH
+      ...process.env,
+      PATH: process.env.PATH,
+      PYTHONFAULTHANDLER: "1",
+      PYTHONUNBUFFERED: "1"
     }
   });
 
@@ -21,7 +24,8 @@ export function runChildProcess(exec: string, path?: string[]) {
   });
 
   child.stderr.on('data', (data) => {
-    console.log(`[${exec} error]:`, data.toString());
+    // Print each chunk immediately to avoid truncation
+    process.stderr.write(`[${exec} error]: ${data.toString()}`);
     stderrChunks = stderrChunks.concat(data);
   });
 
