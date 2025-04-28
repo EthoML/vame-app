@@ -50,7 +50,7 @@ jobs:
         run: |
           BASE_VERSION=$(node -p "require('./package.json').version")
           if [[ "${{ github.ref_name }}" == "dev" ]]; then
-            echo "VERSION=${BASE_VERSION}-dev.${{ github.run_number }}" >> $GITHUB_ENV
+            echo "VERSION=${BASE_VERSION}-dev" >> $GITHUB_ENV
           else
             echo "VERSION=${BASE_VERSION}" >> $GITHUB_ENV
           fi
