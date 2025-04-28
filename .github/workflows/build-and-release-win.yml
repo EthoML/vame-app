@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - dev
 
 permissions:
   actions: write
@@ -36,7 +37,18 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Set version based on branch
+        id: set-version
+        run: |
+          BASE_VERSION=$(node -p "require('./package.json').version")
+          if [[ "${{ github.ref_name }}" == "dev" ]]; then
+            echo "VERSION=${BASE_VERSION}-dev.${{ github.run_number }}" >> $GITHUB_ENV
+          else
+            echo "VERSION=${BASE_VERSION}" >> $GITHUB_ENV
+          fi
+          echo "Using version: $VERSION"
+
       - name: Build and publish for Windows
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run build:win -- --publish=always
+        run: npm run build:win -- --publish=always --config.extraMetadata.version=${{ env.VERSION }}
