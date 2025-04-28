@@ -16,10 +16,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -32,10 +28,12 @@ jobs:
             libxss1 libnss3-dev gcc-multilib g++-multilib curl \
             gperf bison python3-dbusmock openjdk-8-jre xvfb
 
-      - name: install python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt --no-cache-dir
+      - name: Set up Conda environment
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          environment-file: environment-linux.yml
+          activate-environment: vame-desktop
+          auto-activate-base: false
 
       - name: Install dependencies
         run: npm install
