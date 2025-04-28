@@ -5,5 +5,5 @@ numpy==1.26.4
 portalocker==3.1.1
 pyinstaller==6.13.0
 pyinstaller-hooks-contrib==2025.3
-# vame-py==0.9.0
-git+https://github.com/EthoML/VAME.git@dev#egg=vame-py
+vame-py==0.10.0
+# git+https://github.com/EthoML/VAME.git@dev#egg=vame-py
