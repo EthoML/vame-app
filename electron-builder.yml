@@ -40,10 +40,6 @@ linux:
     - deb
   maintainer: electronjs.org
   category: Utility
-  deb:
-    fpm:
-      args:
-        - --deb-no-default-config-files
 npmRebuild: false
 publish:
   provider: github
