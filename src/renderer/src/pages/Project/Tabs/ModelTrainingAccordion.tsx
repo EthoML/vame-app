@@ -316,6 +316,11 @@ const ModelTrainingAccordion = ({
                     onClick={() => handleToggle(3, modelEvaluated)}
                 >
                     3.4 Visualize Model Results
+                    {modelEvaluated && (
+                        <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
+                            ✓
+                        </span>
+                    )}
                     <span style={{ marginLeft: "auto" }}>
                         <FontAwesomeIcon icon={openSteps[3] ? faChevronUp : faChevronDown} />
                     </span>
