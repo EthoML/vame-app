@@ -117,7 +117,7 @@ const CommunityAnalysisAccordion = ({
                             console.error("Error calling onFormSubmit:", e);
                         }
                         setBlockSubmit(false);
-                        setOpenSteps([false, false, false]);
+                        setOpenSteps([false, false, false, false]);
                     }
                 } catch (err) {
                     console.error("Error during polling:", err);
@@ -155,7 +155,7 @@ const CommunityAnalysisAccordion = ({
                             console.error("Error calling onFormSubmit:", e);
                         }
                         setBlockSubmit(false);
-                        setOpenSteps([false, false, false]);
+                        setOpenSteps([false, false, false, false]);
                     }
                 } catch (err) {
                     console.error("Error during polling videos:", err);
@@ -459,8 +459,8 @@ const CommunityAnalysisAccordion = ({
             {/* Accordion 4: Visualize Results - Images */}
             <Accordion>
                 <AccordionHeader
-                    $disabled={!communityVideosCompleted}
-                    onClick={() => handleToggle(3, communityVideosCompleted)}
+                    $disabled={!communityAnalysisCompleted}
+                    onClick={() => handleToggle(3, communityAnalysisCompleted)}
                 >
                     5.4 Visualize Results - Images
                     <span style={{ marginLeft: "auto" }}>
