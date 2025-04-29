@@ -431,6 +431,11 @@ const CommunityAnalysisAccordion = ({
                     onClick={() => handleToggle(2, communityVideosCompleted)}
                 >
                     5.3 Visualize Results - Videos
+                    {communityVideosCompleted && (
+                        <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
+                            ✓
+                        </span>
+                    )}
                     <span style={{ marginLeft: "auto" }}>
                         <FontAwesomeIcon icon={openSteps[2] ? faChevronUp : faChevronDown} />
                     </span>
@@ -463,6 +468,11 @@ const CommunityAnalysisAccordion = ({
                     onClick={() => handleToggle(3, communityAnalysisCompleted)}
                 >
                     5.4 Visualize Results - Images
+                    {communityAnalysisCompleted && (
+                        <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
+                            ✓
+                        </span>
+                    )}
                     <span style={{ marginLeft: "auto" }}>
                         <FontAwesomeIcon icon={openSteps[3] ? faChevronUp : faChevronDown} />
                     </span>

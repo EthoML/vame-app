@@ -203,9 +203,7 @@ const PoseSegmentationAccordion = ({
     // Update schema with dynamic session options
     const getVideosSchema = React.useMemo(() => {
         // Extract session names from project config
-        const sessionNames = project.config?.session_names ||
-            (project.config as any)?.session_names ||
-            [];
+        const sessionNames = (project.config as any)?.session_names || [];
 
         return {
             ...motifVideosGetSchema,
@@ -401,6 +399,11 @@ const PoseSegmentationAccordion = ({
                     onClick={() => handleToggle(2, motifCompleted)}
                 >
                     4.3 Visualize Results
+                    {motifCompleted && (
+                        <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
+                            ✓
+                        </span>
+                    )}
                     <span style={{ marginLeft: "auto" }}>
                         <FontAwesomeIcon icon={openSteps[2] ? faChevronUp : faChevronDown} />
                     </span>
