@@ -18,6 +18,8 @@ for pkg in (
     binaries += b
     hiddenimports += h
 
+hiddenimports += ["matplotlib.backends.backend_pdf"]
+
 a = Analysis(
     ['src/services/vameApi/main.py'],
     pathex=[],
