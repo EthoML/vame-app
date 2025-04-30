@@ -136,11 +136,19 @@ def delete_project(project_path):
         path_obj = project_path
     else:
         path_obj = Path(project_path)
+
     if path_obj.exists():
         import shutil
 
-        shutil.rmtree(str(path_obj), ignore_errors=True)
-        return dict(project=str(path_obj), deleted=True)
+        # Check if the path is a symlink
+        if path_obj.is_symlink():
+            # If it's a symlink, just remove the symlink itself
+            path_obj.unlink()
+            return dict(project=str(path_obj), deleted=True)
+        else:
+            # If it's a regular directory, remove it and its contents
+            shutil.rmtree(str(path_obj), ignore_errors=True)
+            return dict(project=str(path_obj), deleted=True)
 
     return dict(project=str(path_obj), deleted=False)
 
