@@ -1,15 +1,39 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFileCirclePlus, faFileImport, faGear, faHome } from '@fortawesome/free-solid-svg-icons';
+import { faFileCirclePlus, faFileImport, faGear, faHome, faMicrochip } from '@fortawesome/free-solid-svg-icons';
 
 import Tippy from '@tippyjs/react';
 import { NavbarButton, NavbarContainer, NavbarHeader, NavbarSection } from './styles';
+import { get } from '../../utils/requests';
 
 const Navbar: React.FC = () => {
+    const [hasGpu, setHasGpu] = useState<boolean>(false);
+    const [gpuDevice, setGpuDevice] = useState<string | null>(null);
+    const navigate = useNavigate();
 
-    const navigate = useNavigate()
+    useEffect(() => {
+        const checkGpuStatus = async () => {
+            try {
+                const response = await get<{ has_gpu: boolean; device: string | null }>('/gpu-check');
+                if (response.success) {
+                    setHasGpu(response.data.has_gpu);
+                    setGpuDevice(response.data.device);
+                } else {
+                    console.error('Failed to check GPU status:', response.error);
+                    setHasGpu(false);
+                    setGpuDevice(null);
+                }
+            } catch (error) {
+                console.error('Failed to check GPU status:', error);
+                setHasGpu(false);
+                setGpuDevice(null);
+            }
+        };
+
+        checkGpuStatus();
+    }, []);
 
     const upload = useCallback(async () => {
         const fileInput = document.createElement('input')
@@ -81,11 +105,21 @@ const Navbar: React.FC = () => {
                         </span>
                     </Tippy>
                 </Link>
+                <Tippy content={<span>{hasGpu ? `GPU: ${gpuDevice}` : 'No GPU detected'}</span>}>
+                    <span>
+                        <NavbarButton
+                            style={{
+                                background: hasGpu ? '#28a745' : '#dc3545',
+                                cursor: 'default'
+                            }}
+                        >
+                            <FontAwesomeIcon icon={faMicrochip} />
+                        </NavbarButton>
+                    </span>
+                </Tippy>
             </NavbarSection>
         </NavbarContainer>
     );
 }
 
 export default Navbar;
-
-

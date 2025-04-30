@@ -48,6 +48,7 @@ def create_app():
         pose_segmentation,
         community,
         report,
+        gpu_check,
     )
 
     api.add_namespace(health_check.api)
@@ -59,5 +60,6 @@ def create_app():
     api.add_namespace(pose_segmentation.api)
     api.add_namespace(community.api)
     api.add_namespace(report.api)
+    api.add_namespace(gpu_check.api)
 
     return app
