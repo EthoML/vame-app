@@ -43,17 +43,36 @@ const Navbar: React.FC = () => {
 
         const promise = new Promise((resolve, reject) => {
             fileInput.onchange = async (ev) => {
-                // @ts-ignore
-                const files = Array.from(ev.target.files);
-                // @ts-ignore
-                const configPath = files.length > 0 ? files.find((file) => file.name === 'config.yaml')?.path : null
-                if (!configPath) {
+                // Define a type for the file object with the properties we need
+                interface FileWithPath extends File {
+                    path: string;
+                }
+
+                // @ts-ignore - Cast to our custom type that includes path
+                const files = Array.from(ev.target.files) as FileWithPath[];
+
+                // Find the config.yaml file
+                const configFile = files.length > 0 ? files.find((file: FileWithPath) => file.name === 'config.yaml') : null
+
+                // Check if config file exists
+                if (!configFile) {
                     const mainError = "No config.yaml file found in the selected directory."
                     window.alert(`${mainError} \n\nPlease select a valid VAME project.`)
                     return reject(mainError)
                 }
 
-                resolve(configPath)
+                // Extract the directory path (parent folder of config.yaml)
+                const configPath = configFile.path
+                if (!configPath) {
+                    const mainError = "Could not determine the path of config.yaml."
+                    window.alert(`${mainError} \n\nPlease try again or select a different project.`)
+                    return reject(mainError)
+                }
+
+                // Get the directory by removing everything after the last slash
+                const projectPath = configPath.substring(0, configPath.lastIndexOf('/'))
+
+                resolve(projectPath)
             }
         })
 
