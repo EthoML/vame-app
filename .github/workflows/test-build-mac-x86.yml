@@ -2,8 +2,10 @@ name: Test build — Mac Intel
 run-name: ${{ github.actor }} is building for MacOS.
 
 on:
-  pull_request:
-    branches: [ main ]
+  push:
+    branches-ignore:
+      - main
+      - dev
 
 jobs:
   test-on-mac:

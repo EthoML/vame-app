@@ -2,8 +2,10 @@ name: Test build — Linux
 run-name: ${{ github.actor }} is building for Linux.
 
 on:
-  pull_request:
-    branches: [main]
+  push:
+    branches-ignore:
+      - main
+      - dev
 
 jobs:
   test-on-linux:
