@@ -268,7 +268,7 @@ const ModelTrainingAccordion = ({
                     </span>
                 </AccordionHeader>
                 <AccordionContent $isOpen={openSteps[3]}>
-                    <ModelVisualizationSection project={project} />
+                    <ModelVisualizationSection project={project} enabled={modelEvaluated} />
                 </AccordionContent>
             </Accordion>
         </PaddedTab>

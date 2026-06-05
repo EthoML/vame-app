@@ -16,6 +16,7 @@ import { PaddedTab } from "@renderer/components/Tabs/styles"
 import Tippy from "@tippyjs/react"
 import { StepBadge, ErrorNote } from "@renderer/components/StepStatus"
 import SegmentedControl from "@renderer/components/SegmentedControl"
+import ZoomableImage from "@renderer/components/ZoomableImage"
 
 // Error boundary component to catch rendering errors
 const ErrorFallback = ({ error }: { error: Error }) => (
@@ -289,14 +290,15 @@ const VisualizationSection = ({ project }: { project: any }) => {
 
       <div
         style={{
+          position: "relative",
           height: "60vh",
           width: "100%",
           background: "var(--color-surface-sunken)",
           border: "1px solid var(--color-border)",
           borderRadius: 6,
-          overflow: "auto",
+          overflow: "hidden",
           display: "flex",
-          alignItems: loading || !images?.[activeTab] ? "center" : "flex-start",
+          alignItems: "center",
           justifyContent: "center",
         }}
       >
@@ -306,10 +308,9 @@ const VisualizationSection = ({ project }: { project: any }) => {
             Loading {selectedSession}…
           </span>
         ) : images?.[activeTab] ? (
-          <img
+          <ZoomableImage
             src={images[activeTab]!}
             alt={`${activeTab} visualization for ${selectedSession}`}
-            style={{ width: "100%", height: "auto", objectFit: "contain", display: "block" }}
           />
         ) : (
           <span style={{ color: "var(--color-text-muted)", fontSize: "var(--text-sm)" }}>

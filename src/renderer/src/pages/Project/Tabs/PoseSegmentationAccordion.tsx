@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef, memo } from "react";
+import React, { useState, useEffect } from "react";
 import {
     Accordion,
     AccordionHeader,
@@ -16,6 +16,9 @@ import { getProjectStateVAMEProject } from "../../../context/Projects/api/getPro
 import { createMotifVideosVAMEProject } from "../../../context/Projects/api/createMotifVideosVAMEProject";
 import { getSegmentVideosVAMEProject } from "../../../context/Projects/api/getSegmentVideosVAMEProject";
 import { StepBadge, StepStateLine, ErrorNote, SuccessNote } from "@renderer/components/StepStatus";
+import ResultVideoViewer from "@renderer/components/ResultVideoViewer";
+
+const ALGO_OPTIONS = motifVideosGetSchema.properties.segmentation_algorithm.enum as string[];
 
 type PoseSegmentationAccordionProps = {
     project: ProjectType;
@@ -23,44 +26,6 @@ type PoseSegmentationAccordionProps = {
     setBlockSubmit: (value: boolean) => void;
     onFormSubmit: () => Promise<void>;
 };
-
-// Create a separate component for each video
-const VideoPlayer = memo(({ content, filename }: { content: string; filename: string }) => {
-    // Create blob URL from base64 content
-    const blobUrl = useMemo(() => {
-        const binaryString = atob(content);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-        }
-        const blob = new Blob([bytes], { type: 'video/mp4' });
-        return URL.createObjectURL(blob);
-    }, [content]);
-
-    // Use ref for video element
-    const videoRef = useRef<HTMLVideoElement>(null);
-
-    // Clean up blob URL when component unmounts
-    useEffect(() => {
-        return () => {
-            if (blobUrl) {
-                URL.revokeObjectURL(blobUrl);
-            }
-        };
-    }, [blobUrl]);
-
-    return (
-        <div style={{ display: "flex", flexDirection: "column" }}>
-            <video
-                ref={videoRef}
-                controls
-                src={blobUrl}
-                style={{ width: "100%", borderRadius: 4 }}
-            />
-            <label style={{ marginTop: 4 }}>{filename}</label>
-        </div>
-    );
-});
 
 const PoseSegmentationAccordion = ({
     project,
@@ -73,9 +38,8 @@ const PoseSegmentationAccordion = ({
     const [motifError, setMotifError] = useState<string | null>(null);
     const [isPollingMotif, setIsPollingMotif] = useState(false);
     const [motifState, setMotifState] = useState<string | null>(null);
-    const [getLoading, setGetLoading] = useState(false);
-    const [getError, setGetError] = useState<string | null>(null);
-    const [segmentVideos, setSegmentVideos] = useState<{ filename: string; content: string }[]>([]);
+
+    const sessionNames: string[] = (project.config as any)?.session_names || [];
 
     // States from project
     const motif_session = project.states?.motif_videos || {};
@@ -201,43 +165,6 @@ const PoseSegmentationAccordion = ({
         }
     };
 
-    // Update schema with dynamic session options
-    const getVideosSchema = React.useMemo(() => {
-        // Extract session names from project config
-        const sessionNames = (project.config as any)?.session_names || [];
-
-        return {
-            ...motifVideosGetSchema,
-            properties: {
-                ...motifVideosGetSchema.properties,
-                session: {
-                    ...motifVideosGetSchema.properties.session,
-                    enum: sessionNames,
-                    enumNames: sessionNames
-                }
-            }
-        };
-    }, [project.config]);
-
-    const handleGetSegmentVideos = async (formData: any) => {
-        setGetLoading(true);
-        setGetError(null);
-        setBlockSubmit(true);
-        try {
-            const data = await getSegmentVideosVAMEProject({
-                project: project.config.project_path,
-                segmentation_algorithm: formData.segmentation_algorithm,
-                session: formData.session
-            });
-            setSegmentVideos(data.videos);
-        } catch (err: any) {
-            setGetError(err.message || "Failed to fetch videos.");
-        } finally {
-            setGetLoading(false);
-            setBlockSubmit(false);
-        }
-    };
-
     // Toggle handler for accordions
     const handleToggle = (idx: number, enabled: boolean) => {
         if (!enabled) return;
@@ -322,22 +249,20 @@ const PoseSegmentationAccordion = ({
                     </span>
                 </AccordionHeader>
                 <AccordionContent $isOpen={openSteps[2]}>
-                    <div>
-                        <DynamicForm
-                            schema={getVideosSchema as unknown as Schema}
-                            blockSubmission={blockSubmit}
-                            submitText={getLoading ? "Fetching..." : "Get Videos"}
-                            onFormSubmit={handleGetSegmentVideos}
-                        />
-                        {getError && <ErrorNote>{getError}</ErrorNote>}
-                        {segmentVideos.length > 0 && (
-                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 240px)", gap: 12, marginTop: 12 }}>
-                                {segmentVideos.map(({ filename, content }) => (
-                                    <VideoPlayer key={filename} filename={filename} content={content} />
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                    <ResultVideoViewer
+                        open={openSteps[2]}
+                        algoOptions={ALGO_OPTIONS}
+                        sessionOptions={sessionNames}
+                        emptyText="No segmented videos available for this selection."
+                        load={async ({ segmentation_algorithm, session }) => {
+                            const data = await getSegmentVideosVAMEProject({
+                                project: project.config.project_path,
+                                segmentation_algorithm: segmentation_algorithm!,
+                                session: session!,
+                            });
+                            return data.videos;
+                        }}
+                    />
                 </AccordionContent>
             </Accordion>
         </PaddedTab>

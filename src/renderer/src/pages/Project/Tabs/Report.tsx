@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Accordion, AccordionHeader, AccordionContent } from '@renderer/components/DynamicForm/styles';
 import { PaddedTab } from '@renderer/components/Tabs/styles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -8,16 +8,23 @@ import DynamicForm from '@renderer/components/DynamicForm';
 import { generateReportVAMEProject } from '../../../context/Projects/api/generateReportVAMEProject';
 import { getProjectStateVAMEProject } from '../../../context/Projects/api/getProjectStateVAMEProject';
 import reportImagesGetSchema from "../../../../../schema/report-get-images.schema.json";
-import umapImagesGetSchema from "../../../../../schema/umap-get-images.schema.json";
 import { getReportVAMEProject } from '../../../context/Projects/api/getReportVAMEProject';
 import { getUmapVAMEProject } from '../../../context/Projects/api/getUmapVAMEProject';
 import { StepBadge, StepStateLine, ErrorNote } from '@renderer/components/StepStatus';
+import ResultImageViewer from '@renderer/components/ResultImageViewer';
+
+const ALGO_OPTIONS = reportImagesGetSchema.properties.segmentation_algorithm.enum as string[];
+
+const UMAP_VIEWS = [
+    { value: 'no_label', label: 'No labels' },
+    { value: 'motif', label: 'Motif' },
+    { value: 'community', label: 'Community' },
+];
 
 const Report: React.FC<TabProps> = ({
     project,
     onFormSubmit,
     blockSubmission,
-    blockTooltip,
 }) => {
     const [openSteps, setOpenSteps] = useState([false, false, false]);
 
@@ -27,21 +34,7 @@ const Report: React.FC<TabProps> = ({
     const [isPollingReport, setIsPollingReport] = useState(false);
     const [reportState, setReportState] = useState<string | null>(null);
 
-    // Motif/Community image states
-    const [reportImageLoading, setReportImageLoading] = useState(false);
-    const [reportGetError, setReportGetError] = useState<string | null>(null);
-    const [reportImage, setReportImage] = useState<{ filename: string; content: string } | null>(null);
-
-    // UMAP image states
-    const [umapLoading, setUmapLoading] = useState(false);
-    const [umapError, setUmapError] = useState<string | null>(null);
-    const [umapImages, setUmapImages] = useState<{
-        no_label?: { filename: string; content: string };
-        motif?: { filename: string; content: string };
-        community?: { filename: string; content: string };
-    } | null>(null);
-    const [umapTab, setUmapTab] = useState<'no_label' | 'motif' | 'community'>('no_label');
-
+    const sessionNames: string[] = (project.config as any)?.session_names || [];
     const reportSession = project.states?.generate_reports || {};
     const reportCompleted = reportSession.execution_state === 'success';
 
@@ -90,75 +83,6 @@ const Report: React.FC<TabProps> = ({
         return () => { if (interval) clearInterval(interval); };
     }, [isPollingReport, project.config.project_path, onFormSubmit]);
 
-    // Schema for Report image GET
-    const getReportSchema = useMemo(() => {
-        const sessionNames = (project.config as any)?.session_names || [];
-        return {
-            ...reportImagesGetSchema,
-            properties: {
-                segmentation_algorithm: reportImagesGetSchema.properties.segmentation_algorithm,
-                session: {
-                    ...reportImagesGetSchema.properties.session,
-                    enum: sessionNames,
-                    enumNames: sessionNames,
-                },
-            },
-        };
-    }, [project.config]);
-
-    // Handler for motif/community GET
-    const handleGetReport = async (formData: any) => {
-        setReportImageLoading(true);
-        setReportGetError(null);
-        try {
-            const image = await getReportVAMEProject({
-                project: project.config.project_path,
-                segmentation_algorithm: formData.segmentation_algorithm,
-                session: formData.session,
-            });
-            setReportImage(image);
-        } catch (err: any) {
-            setReportGetError(err.message || 'Failed to fetch report image.');
-        } finally {
-            setReportImageLoading(false);
-        }
-    };
-
-    // Schema for UMAP GET
-    const getUmapSchema = useMemo(() => {
-        const sessionNames = (project.config as any)?.session_names || [];
-        return {
-            ...umapImagesGetSchema,
-            properties: {
-                segmentation_algorithm: umapImagesGetSchema.properties.segmentation_algorithm,
-                session: {
-                    ...umapImagesGetSchema.properties.session,
-                    enum: sessionNames,
-                    enumNames: sessionNames,
-                },
-            },
-        };
-    }, [project.config]);
-
-    // Handler for UMAP GET
-    const handleGetUmap = async (formData: any) => {
-        setUmapLoading(true);
-        setUmapError(null);
-        setUmapImages(null);
-        try {
-            const images = await getUmapVAMEProject({
-                project: project.config.project_path,
-                segmentation_algorithm: formData.segmentation_algorithm,
-                session: formData.session,
-            });
-            setUmapImages(images);
-        } catch (err: any) {
-            setUmapError(err.message || 'Failed to fetch UMAP images.');
-        } finally {
-            setUmapLoading(false);
-        }
-    };
-
     return (
         <PaddedTab>
             {/* Accordion 1: Generate Report */}
@@ -194,23 +118,21 @@ const Report: React.FC<TabProps> = ({
                     </span>
                 </AccordionHeader>
                 <AccordionContent $isOpen={openSteps[1]}>
-                    <DynamicForm
-                        schema={getReportSchema as unknown as Schema}
-                        blockSubmission={blockSubmission || reportImageLoading}
-                        submitText={reportImageLoading ? "Fetching..." : "Get Image"}
-                        onFormSubmit={handleGetReport}
+                    <ResultImageViewer
+                        open={openSteps[1]}
+                        algoOptions={ALGO_OPTIONS}
+                        sessionOptions={sessionNames}
+                        altPrefix="Motif / community report"
+                        emptyText="No report image available for this selection."
+                        load={async ({ segmentation_algorithm, session }) => {
+                            const img = await getReportVAMEProject({
+                                project: project.config.project_path,
+                                segmentation_algorithm: segmentation_algorithm!,
+                                session: session!,
+                            });
+                            return img ? `data:image/png;base64,${img.content}` : null;
+                        }}
                     />
-                    {reportGetError && <ErrorNote>{reportGetError}</ErrorNote>}
-                    {reportImage && (
-                        <div style={{ marginTop: 12 }}>
-                            <img
-                                src={`data:image/png;base64,${reportImage.content}`}
-                                alt={reportImage.filename}
-                                style={{ maxWidth: "100%", borderRadius: 4 }}
-                            />
-                            <label style={{ display: "block", marginTop: 4 }}>{reportImage.filename}</label>
-                        </div>
-                    )}
                 </AccordionContent>
             </Accordion>
 
@@ -223,55 +145,26 @@ const Report: React.FC<TabProps> = ({
                     </span>
                 </AccordionHeader>
                 <AccordionContent $isOpen={openSteps[2]}>
-                    <DynamicForm
-                        schema={getUmapSchema as unknown as Schema}
-                        blockSubmission={blockSubmission || umapLoading}
-                        submitText={umapLoading ? "Fetching..." : "Get Images"}
-                        onFormSubmit={handleGetUmap}
+                    <ResultImageViewer
+                        open={openSteps[2]}
+                        algoOptions={ALGO_OPTIONS}
+                        sessionOptions={sessionNames}
+                        views={UMAP_VIEWS}
+                        altPrefix="UMAP"
+                        emptyText="No UMAP image available for this selection."
+                        load={async ({ segmentation_algorithm, session }) => {
+                            const imgs = await getUmapVAMEProject({
+                                project: project.config.project_path,
+                                segmentation_algorithm: segmentation_algorithm!,
+                                session: session!,
+                            });
+                            return {
+                                no_label: imgs?.no_label ? `data:image/png;base64,${imgs.no_label.content}` : null,
+                                motif: imgs?.motif ? `data:image/png;base64,${imgs.motif.content}` : null,
+                                community: imgs?.community ? `data:image/png;base64,${imgs.community.content}` : null,
+                            };
+                        }}
                     />
-                    {umapError && <ErrorNote>{umapError}</ErrorNote>}
-                    {umapImages && (
-                        <div style={{ marginTop: 12 }}>
-                            <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
-                                {(['no_label', 'motif', 'community'] as const).map(tab => (
-                                    <button
-                                        key={tab}
-                                        onClick={() => setUmapTab(tab)}
-                                        style={{
-                                            padding: '6px 16px',
-                                            borderBottom: umapTab === tab ? '2px solid var(--color-accent)' : '2px solid transparent',
-                                            background: 'none',
-                                            color: umapTab === tab ? 'var(--color-accent)' : 'var(--color-text)',
-                                            fontWeight: umapTab === tab ? 600 : 400,
-                                            cursor: 'pointer'
-                                        }}
-                                    >
-                                        {tab === 'no_label' ? 'No Labels' : tab.charAt(0).toUpperCase() + tab.slice(1)}
-                                    </button>
-                                ))}
-                            </div>
-                            <div style={{
-                                minHeight: 220,
-                                width: '100%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                background: 'var(--color-surface-sunken)',
-                                borderRadius: 6,
-                                overflow: 'auto'
-                            }}>
-                                {umapImages[umapTab] ? (
-                                    <img
-                                        src={`data:image/png;base64,${umapImages[umapTab]!.content}`}
-                                        alt={umapImages[umapTab]!.filename}
-                                        style={{ width: '100%', height: 'auto', objectFit: 'contain' }}
-                                    />
-                                ) : (
-                                    <span style={{ color: 'var(--color-text-muted)' }}>No image available for {umapTab}.</span>
-                                )}
-                            </div>
-                        </div>
-                    )}
                 </AccordionContent>
             </Accordion>
         </PaddedTab>

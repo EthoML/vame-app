@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef, memo } from "react";
+import React, { useState, useEffect } from "react";
 import {
     Accordion,
     AccordionHeader,
@@ -10,7 +10,6 @@ import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import DynamicForm from "@renderer/components/DynamicForm";
 import communitySchema from "../../../../../schema/community.schema.json";
 import communityVideosGenerateSchema from "../../../../../schema/community-videos-generate.schema.json";
-import communityVideosGetSchema from "../../../../../schema/community-videos-get.schema.json";
 import communityImagesGetSchema from "../../../../../schema/community-images-get.schema.json";
 import { communityAnalysisVAMEProject } from "../../../context/Projects/api/communityAnalysisVAMEProject";
 import { getProjectStateVAMEProject } from "../../../context/Projects/api/getProjectStateVAMEProject";
@@ -18,6 +17,10 @@ import { createCommunityVideosVAMEProject } from "../../../context/Projects/api/
 import { getCommunityVideosVAMEProject } from "../../../context/Projects/api/getCommunityVideosVAMEProject";
 import { getCommunityImagesVAMEProject } from "../../../context/Projects/api/getCommunityImagesVAMEProject";
 import { StepBadge, StepStateLine, ErrorNote, SuccessNote } from "@renderer/components/StepStatus";
+import ResultImageViewer from "@renderer/components/ResultImageViewer";
+import ResultVideoViewer from "@renderer/components/ResultVideoViewer";
+
+const ALGO_OPTIONS = communityImagesGetSchema.properties.segmentation_algorithm.enum as string[];
 
 type CommunityAnalysisAccordionProps = {
     project: ProjectType;
@@ -25,44 +28,6 @@ type CommunityAnalysisAccordionProps = {
     setBlockSubmit: (value: boolean) => void;
     onFormSubmit: () => Promise<void>;
 };
-
-// Create a separate component for each video
-const VideoPlayer = memo(({ content, filename }: { content: string; filename: string }) => {
-    // Create blob URL from base64 content
-    const blobUrl = useMemo(() => {
-        const binaryString = atob(content);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-        }
-        const blob = new Blob([bytes], { type: 'video/mp4' });
-        return URL.createObjectURL(blob);
-    }, [content]);
-
-    // Use ref for video element
-    const videoRef = useRef<HTMLVideoElement>(null);
-
-    // Clean up blob URL when component unmounts
-    useEffect(() => {
-        return () => {
-            if (blobUrl) {
-                URL.revokeObjectURL(blobUrl);
-            }
-        };
-    }, [blobUrl]);
-
-    return (
-        <div style={{ display: "flex", flexDirection: "column" }}>
-            <video
-                ref={videoRef}
-                controls
-                src={blobUrl}
-                style={{ width: "100%", borderRadius: 4 }}
-            />
-            <label style={{ marginTop: 4 }}>{filename}</label>
-        </div>
-    );
-});
 
 const CommunityAnalysisAccordion = ({
     project,
@@ -75,12 +40,8 @@ const CommunityAnalysisAccordion = ({
     const [communityVideosError, setCommunityVideosError] = useState<string | null>(null);
     const [isPollingCommunityVideos, setIsPollingCommunityVideos] = useState(false);
     const [communityVideosState, setCommunityVideosState] = useState<string | null>(null);
-    const [getLoading, setGetLoading] = useState(false);
-    const [getError, setGetError] = useState<string | null>(null);
-    const [communityVideos, setCommunityVideos] = useState<{ filename: string; content: string }[]>([]);
-    const [communityImageLoading, setCommunityImageLoading] = useState(false);
-    const [communityImageError, setCommunityImageError] = useState<string | null>(null);
-    const [communityImage, setCommunityImage] = useState<{ filename: string; content: string } | null>(null);
+
+    const sessionNames: string[] = (project.config as any)?.session_names || [];
 
     // States from project
     const community_videos_session = project.states?.community_videos || {};
@@ -206,70 +167,6 @@ const CommunityAnalysisAccordion = ({
         }
     };
 
-    // Update schema with dynamic session options
-    const getImagesSchema = {
-        title: "Get Community Image",
-        type: "object",
-        properties: {
-            segmentation_algorithm: communityImagesGetSchema.properties.segmentation_algorithm
-        },
-        required: ["segmentation_algorithm"]
-    };
-
-    const getVideosSchema = React.useMemo(() => {
-        // Extract session names from project config
-        const sessionNames = (project.config as any)?.session_names || [];
-
-        return {
-            ...communityVideosGetSchema,
-            properties: {
-                ...communityVideosGetSchema.properties,
-                session: {
-                    ...communityVideosGetSchema.properties.session,
-                    enum: sessionNames,
-                    enumNames: sessionNames
-                }
-            }
-        };
-    }, [project.config]);
-
-    const handleGetCommunityImages = async (formData: any) => {
-        setCommunityImageLoading(true);
-        setCommunityImageError(null);
-        setBlockSubmit(true);
-        try {
-            const data = await getCommunityImagesVAMEProject({
-                project: project.config.project_path,
-                segmentation_algorithm: formData.segmentation_algorithm
-            });
-            setCommunityImage(data.tree_image);
-        } catch (err: any) {
-            setCommunityImageError(err.message || "Failed to fetch image.");
-        } finally {
-            setCommunityImageLoading(false);
-            setBlockSubmit(false);
-        }
-    };
-
-    const handleGetCommunityVideos = async (formData: any) => {
-        setGetLoading(true);
-        setGetError(null);
-        setBlockSubmit(true);
-        try {
-            const data = await getCommunityVideosVAMEProject({
-                project: project.config.project_path,
-                segmentation_algorithm: formData.segmentation_algorithm,
-                session: formData.session
-            });
-            setCommunityVideos(data.videos);
-        } catch (err: any) {
-            setGetError(err.message || "Failed to fetch videos.");
-        } finally {
-            setGetLoading(false);
-            setBlockSubmit(false);
-        }
-    };
-
     // Toggle handler for accordions
     const handleToggle = (idx: number, enabled: boolean) => {
         if (!enabled) return;
@@ -354,22 +251,20 @@ const CommunityAnalysisAccordion = ({
                     </span>
                 </AccordionHeader>
                 <AccordionContent $isOpen={openSteps[2]}>
-                    <div>
-                        <DynamicForm
-                            schema={getVideosSchema as unknown as Schema}
-                            blockSubmission={blockSubmit}
-                            submitText={getLoading ? "Fetching..." : "Get Videos"}
-                            onFormSubmit={handleGetCommunityVideos}
-                        />
-                        {getError && <ErrorNote>{getError}</ErrorNote>}
-                        {communityVideos.length > 0 && (
-                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 240px)", gap: 12, marginTop: 12 }}>
-                                {communityVideos.map(({ filename, content }) => (
-                                    <VideoPlayer key={filename} filename={filename} content={content} />
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                    <ResultVideoViewer
+                        open={openSteps[2]}
+                        algoOptions={ALGO_OPTIONS}
+                        sessionOptions={sessionNames}
+                        emptyText="No community videos available for this selection."
+                        load={async ({ segmentation_algorithm, session }) => {
+                            const data = await getCommunityVideosVAMEProject({
+                                project: project.config.project_path,
+                                segmentation_algorithm: segmentation_algorithm!,
+                                session: session!,
+                            });
+                            return data.videos;
+                        }}
+                    />
                 </AccordionContent>
             </Accordion>
             {/* Accordion 4: Visualize Results - Images */}
@@ -385,27 +280,19 @@ const CommunityAnalysisAccordion = ({
                     </span>
                 </AccordionHeader>
                 <AccordionContent $isOpen={openSteps[3]}>
-                    <div>
-                        <DynamicForm
-                            schema={getImagesSchema as unknown as Schema}
-                            blockSubmission={blockSubmit}
-                            submitText={communityImageLoading ? "Fetching..." : "Get Image"}
-                            onFormSubmit={handleGetCommunityImages}
-                        />
-                        {communityImageError && <ErrorNote>{communityImageError}</ErrorNote>}
-                        {communityImage && (
-                            <div style={{ marginTop: 12 }}>
-                                <img
-                                    src={`data:image/png;base64,${communityImage.content}`}
-                                    alt={communityImage.filename}
-                                    style={{ maxWidth: "100%", borderRadius: 4 }}
-                                />
-                                <label style={{ display: "block", marginTop: 4 }}>
-                                    {communityImage.filename}
-                                </label>
-                            </div>
-                        )}
-                    </div>
+                    <ResultImageViewer
+                        open={openSteps[3]}
+                        algoOptions={ALGO_OPTIONS}
+                        altPrefix="Community tree"
+                        emptyText="No community image available for this selection."
+                        load={async ({ segmentation_algorithm }) => {
+                            const data = await getCommunityImagesVAMEProject({
+                                project: project.config.project_path,
+                                segmentation_algorithm: segmentation_algorithm!,
+                            });
+                            return data?.tree_image ? `data:image/png;base64,${data.tree_image.content}` : null;
+                        }}
+                    />
                 </AccordionContent>
             </Accordion>
         </PaddedTab>
