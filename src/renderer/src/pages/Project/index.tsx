@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 import { post } from '@renderer/utils/requests';
 import { onConnected, onProjectReady } from '@renderer/utils/vame';
@@ -9,7 +9,7 @@ import { useProjects } from '@renderer/context/Projects';
 
 import Tabs from '@renderer/components/Tabs';
 import Header from '@renderer/components/Header';
-import { Container, HeaderButton, HeaderButtonContainer, ProjectHeader, ProjectInformation, ProjectInformationCapsule } from './styles';
+import { Container, ProjectHeader, ProjectInformation, ProjectInformationCapsule } from './styles';
 
 import Preprocessing from './Tabs/Preprocessing';
 import ModelTrainingAccordion from './Tabs/ModelTrainingAccordion';
@@ -32,8 +32,6 @@ const Project: React.FC = () => {
   const [project, setProject] = useState<ProjectType | undefined>()
   const [blockSubmit, setBlockSubmit] = useState(true);
   const [selectedTab, setSelectedTab] = useState<string>("input-data");
-
-  const navigate = useNavigate()
 
   // Function to handle tab submission
   const submitTab = useCallback(async (
@@ -253,19 +251,7 @@ const Project: React.FC = () => {
   return (
     <Container>
       <ProjectHeader>
-        <Header title={project.config.project_name || project.config.project_path}>
-          <HeaderButtonContainer>
-            <HeaderButton
-              onClick={() => {
-                navigate({
-                  pathname: '/create',
-                  search: `?project=${project.config.project_path}`
-                })
-              }}>
-              Restart Project
-            </HeaderButton>
-          </HeaderButtonContainer>
-        </Header>
+        <Header title={project.config.project_name || project.config.project_path} />
         <ProjectInformation>
           <ProjectInformationCapsule>
             <small>

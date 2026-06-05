@@ -76,6 +76,26 @@ class EvaluateModel(Resource):
         try:
             data, project_path = resolve_request_data(request)
             config = vame.read_config(str(Path(project_path) / "config.yaml"))
+
+            model_name = config["model_name"]
+            project_name = config["project_name"]
+            best_model = (
+                Path(project_path)
+                / "model"
+                / "best_model"
+                / f"{model_name}_{project_name}.pkl"
+            )
+            if not best_model.exists():
+                api.abort(
+                    400,
+                    "No trained model was found "
+                    f"('{best_model.name}' is missing). Training likely ran for too "
+                    "few epochs to save a best model — the model is only saved once "
+                    "KL annealing completes (around epoch kl_start + annealtime). "
+                    "Increase 'max_epochs' (or lower 'annealtime'/'kl_start') and "
+                    "re-run training.",
+                )
+
             vame.evaluate_model(
                 config=config,
                 save_logs=True,
