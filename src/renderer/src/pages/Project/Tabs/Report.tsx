@@ -11,6 +11,7 @@ import reportImagesGetSchema from "../../../../../schema/report-get-images.schem
 import umapImagesGetSchema from "../../../../../schema/umap-get-images.schema.json";
 import { getReportVAMEProject } from '../../../context/Projects/api/getReportVAMEProject';
 import { getUmapVAMEProject } from '../../../context/Projects/api/getUmapVAMEProject';
+import { StepBadge, StepStateLine, ErrorNote } from '@renderer/components/StepStatus';
 
 const Report: React.FC<TabProps> = ({
     project,
@@ -164,9 +165,7 @@ const Report: React.FC<TabProps> = ({
             <Accordion>
                 <AccordionHeader $disabled={false} onClick={() => handleToggle(0)}>
                     5.1 Generate Report
-                    {reportCompleted && (
-                        <span style={{ color: 'green', marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">✓</span>
-                    )}
+                    <StepBadge state={reportSession.execution_state} />
                     <span style={{ marginLeft: 'auto' }}>
                         <FontAwesomeIcon icon={openSteps[0] ? faChevronUp : faChevronDown} />
                     </span>
@@ -181,21 +180,8 @@ const Report: React.FC<TabProps> = ({
                         logName={["report"]}
                         projectPath={project.config.project_path}
                     />
-                    {reportError && <div style={{ color: 'red', marginTop: 8 }}>{reportError}</div>}
-                    {(isPollingReport || reportState) && (
-                        <div style={{ marginTop: 8 }}>
-                            {isPollingReport && <span style={{ color: '#888' }}>Polling report state…</span>}
-                            {['running', 'success', 'failed', 'aborted', 'not_found'].map(s =>
-                                reportState === s && <span key={s} style={{
-                                    color: s === 'success' ? 'green' : s === 'running' ? '#007bff' : s === 'aborted' ? 'orange' : 'red',
-                                    marginLeft: 8
-                                }}>
-                                    State: <b>{s.charAt(0).toUpperCase() + s.slice(1)}</b>
-                                    {s === 'success' ? ' — Report generated successfully.' : ''}
-                                </span>
-                            )}
-                        </div>
-                    )}
+                    {reportError && <ErrorNote>{reportError}</ErrorNote>}
+                    <StepStateLine state={reportState} polling={isPollingReport} noun="Report generation" />
                 </AccordionContent>
             </Accordion>
 
@@ -214,7 +200,7 @@ const Report: React.FC<TabProps> = ({
                         submitText={reportImageLoading ? "Fetching..." : "Get Image"}
                         onFormSubmit={handleGetReport}
                     />
-                    {reportGetError && <div style={{ color: 'red', marginTop: 8 }}>{reportGetError}</div>}
+                    {reportGetError && <ErrorNote>{reportGetError}</ErrorNote>}
                     {reportImage && (
                         <div style={{ marginTop: 12 }}>
                             <img
@@ -243,7 +229,7 @@ const Report: React.FC<TabProps> = ({
                         submitText={umapLoading ? "Fetching..." : "Get Images"}
                         onFormSubmit={handleGetUmap}
                     />
-                    {umapError && <div style={{ color: 'red', marginTop: 8 }}>{umapError}</div>}
+                    {umapError && <ErrorNote>{umapError}</ErrorNote>}
                     {umapImages && (
                         <div style={{ marginTop: 12 }}>
                             <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
@@ -253,8 +239,9 @@ const Report: React.FC<TabProps> = ({
                                         onClick={() => setUmapTab(tab)}
                                         style={{
                                             padding: '6px 16px',
-                                            borderBottom: umapTab === tab ? '2px solid #1976d2' : '2px solid transparent',
+                                            borderBottom: umapTab === tab ? '2px solid var(--color-accent)' : '2px solid transparent',
                                             background: 'none',
+                                            color: umapTab === tab ? 'var(--color-accent)' : 'var(--color-text)',
                                             fontWeight: umapTab === tab ? 600 : 400,
                                             cursor: 'pointer'
                                         }}
@@ -269,7 +256,7 @@ const Report: React.FC<TabProps> = ({
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                background: '#f8f9fa',
+                                background: 'var(--color-surface-sunken)',
                                 borderRadius: 6,
                                 overflow: 'auto'
                             }}>
@@ -280,7 +267,7 @@ const Report: React.FC<TabProps> = ({
                                         style={{ width: '100%', height: 'auto', objectFit: 'contain' }}
                                     />
                                 ) : (
-                                    <span style={{ color: '#888' }}>No image available for {umapTab}.</span>
+                                    <span style={{ color: 'var(--color-text-muted)' }}>No image available for {umapTab}.</span>
                                 )}
                             </div>
                         </div>

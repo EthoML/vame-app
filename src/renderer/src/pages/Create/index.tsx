@@ -5,6 +5,7 @@ import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 import Header from '@renderer/components/Header';
 import DynamicForm from '@renderer/components/DynamicForm';
+import { ErrorNote } from '@renderer/components/StepStatus';
 import { PaddedContainer, FormOverlay } from './styles';
 
 import { onVAMEReady } from '@renderer/utils/vame';
@@ -18,6 +19,7 @@ const Create: React.FC = () => {
 
   const [blockSubmission, setBlockSubmission] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   useEffect(() => {
     onVAMEReady(() => setBlockSubmission(false))
@@ -26,13 +28,15 @@ const Create: React.FC = () => {
   const handleFormSubmit = async (formData) => {
     // Set submitting state to show overlay immediately
     setIsSubmitting(true)
+    setErrorMessage(null)
 
     try {
       const result = await createProject(formData)
 
       if (!result.created) {
         setIsSubmitting(false)
-        return alert('A project with this name already exists!')
+        setErrorMessage('A project with this name already exists. Choose a different name.')
+        return
       }
 
       // Navigate immediately to the project page
@@ -43,7 +47,7 @@ const Create: React.FC = () => {
 
     } catch (error) {
       setIsSubmitting(false)
-      alert(error)
+      setErrorMessage(error instanceof Error ? error.message : String(error))
     }
   };
 
@@ -56,9 +60,10 @@ const Create: React.FC = () => {
         blockSubmission={blockSubmission || isSubmitting}
         submitText='Create Project'
       />
+      {errorMessage && <ErrorNote>{errorMessage}</ErrorNote>}
       {isSubmitting && (
         <FormOverlay>
-          <FontAwesomeIcon icon={faSpinner} spin size="3x" color="#007bff" />
+          <FontAwesomeIcon icon={faSpinner} spin size="3x" style={{ color: 'var(--color-accent)' }} />
         </FormOverlay>
       )}
     </PaddedContainer>

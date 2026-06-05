@@ -14,10 +14,12 @@ import { TabProps } from "./types"
 import preprocessingSchema from '../../../../../schema/preprocessing.schema.json'
 import { PaddedTab } from "@renderer/components/Tabs/styles"
 import Tippy from "@tippyjs/react"
+import { StepBadge, ErrorNote } from "@renderer/components/StepStatus"
+import Button from "@renderer/components/Button"
 
 // Error boundary component to catch rendering errors
 const ErrorFallback = ({ error }: { error: Error }) => (
-  <div style={{ padding: 20, background: "#fff0f0", border: "1px solid #ffcccc", borderRadius: 4 }}>
+  <div style={{ padding: 20, background: "var(--color-error-soft)", border: "1px solid var(--color-error)", borderRadius: 4 }}>
     <h3>Something went wrong in the Preprocessing component</h3>
     <p>Error: {error.message}</p>
     <p>Please check the console for more details.</p>
@@ -126,11 +128,7 @@ const Preprocessing = ({
             onClick={() => setPreprocessingOpen((v) => !v)}
           >
             2.1 Run Preprocessing
-            {projectPreprocessed && (
-              <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
-                ✓
-              </span>
-            )}
+            <StepBadge state={preprocessingState.execution_state} />
             <span style={{ marginLeft: "auto" }}>
               <FontAwesomeIcon icon={isPreprocessingOpen ? faChevronUp : faChevronDown} />
             </span>
@@ -165,11 +163,7 @@ const Preprocessing = ({
             }}
           >
             2.2 Visualize Preprocessing Results
-            {projectPreprocessed && (
-              <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
-                ✓
-              </span>
-            )}
+            <StepBadge state={preprocessingVisualizationState.execution_state} />
             <span style={{ marginLeft: "auto" }}>
               <FontAwesomeIcon icon={isVisualizeOpen ? faChevronUp : faChevronDown} />
             </span>
@@ -247,26 +241,15 @@ const VisualizationSection = ({ project }: { project: any }) => {
             <option key={name} value={name}>{name}</option>
           ))}
         </select>
-        <button
+        <Button
           onClick={handleGetImages}
           disabled={loading || !selectedSession}
-          style={{
-            marginLeft: 8,
-            padding: "4px 12px",
-            fontWeight: 500,
-            background: "#1976d2",
-            color: "#fff",
-            border: "none",
-            borderRadius: 4,
-            cursor: loading ? "not-allowed" : "pointer"
-          }}
+          style={{ marginLeft: 8 }}
         >
           {loading ? "Loading..." : "Get Images"}
-        </button>
+        </Button>
       </div>
-      {error && (
-        <div style={{ color: "red", marginBottom: 12 }}>{error}</div>
-      )}
+      {error && <ErrorNote>{error}</ErrorNote>}
       {images && (
         <div>
           <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
@@ -276,8 +259,9 @@ const VisualizationSection = ({ project }: { project: any }) => {
                 onClick={() => setActiveTab(tab)}
                 style={{
                   padding: "6px 16px",
-                  borderBottom: activeTab === tab ? "2px solid #1976d2" : "2px solid transparent",
+                  borderBottom: activeTab === tab ? "2px solid var(--color-accent)" : "2px solid transparent",
                   background: "none",
+                  color: activeTab === tab ? "var(--color-accent)" : "var(--color-text)",
                   fontWeight: activeTab === tab ? 600 : 400,
                   cursor: "pointer"
                 }}
@@ -293,9 +277,8 @@ const VisualizationSection = ({ project }: { project: any }) => {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              background: "#f8f9fa",
+              background: "var(--color-surface-sunken)",
               borderRadius: 6,
-              boxShadow: "0 2px 8px #0001",
               overflow: "auto"
             }}
           >
@@ -311,7 +294,7 @@ const VisualizationSection = ({ project }: { project: any }) => {
                 }}
               />
             ) : (
-              <span style={{ color: "#888" }}>No image available for {activeTab}.</span>
+              <span style={{ color: "var(--color-text-muted)" }}>No image available for {activeTab}.</span>
             )}
           </div>
         </div>

@@ -1,30 +1,5 @@
 import styled from 'styled-components';
 
-export const BaseModalBackground = styled.div`
-  display: flex;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 30;
-  background-color: rgba(0, 0, 0, 0.5);
-  align-items: center;
-  justify-content: center;
-`
-
-export const TerminalContainer = styled.div`
-  border-radius: 20px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  width: 80%;
-  height: 80%;
-  max-width: 80%;
-  max-height: 80%;
-`;
-
 export const TerminalDiv = styled.ul`
 
   width: 100%;
@@ -36,12 +11,12 @@ export const TerminalDiv = styled.ul`
   
   padding: 10px;
   overflow: hidden;
-  background-color: #181c24;
+  background-color: var(--color-ink);
   overflow-y: auto !important;
-  color: white;
+  color: var(--color-surface);
 
-  font-family: monospace;
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
 
   li {
     padding: 5px;

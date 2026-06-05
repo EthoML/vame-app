@@ -70,9 +70,12 @@ const Navbar: React.FC = () => {
                 <Tippy content={<span>{hasGpu ? `GPU: ${gpuDevice}` : 'No GPU detected'}</span>}>
                     <span>
                         <NavbarButton
+                            as="span"
                             style={{
-                                background: hasGpu ? '#28a745' : '#dc3545',
-                                cursor: 'default'
+                                background: hasGpu ? 'var(--color-success)' : 'var(--color-error)',
+                                cursor: 'default',
+                                display: 'inline-flex',
+                                alignItems: 'center'
                             }}
                         >
                             <FontAwesomeIcon icon={faMicrochip} />

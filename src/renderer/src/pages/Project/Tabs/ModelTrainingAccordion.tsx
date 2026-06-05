@@ -16,6 +16,7 @@ import createTrainsetSchema from '../../../../../schema/create-trainset.schema.j
 import trainModelSchema from '../../../../../schema/train-model.schema.json';
 import evaluateModelSchema from '../../../../../schema/evaluate-model.schema.json';
 import ModelVisualizationSection from "./ModelVisualizationSection";
+import { StepBadge, StepStateLine, ErrorNote, SuccessNote } from "@renderer/components/StepStatus";
 
 type ModelTrainingAccordionProps = {
     project: ProjectType;
@@ -177,11 +178,7 @@ const ModelTrainingAccordion = ({
                     onClick={() => handleToggle(0, true)}
                 >
                     3.1 Create Training Set
-                    {trainsetCreated && (
-                        <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
-                            ✓
-                        </span>
-                    )}
+                    <StepBadge state={create_trainset.execution_state} />
                     <span style={{ marginLeft: "auto" }}>
                         <FontAwesomeIcon icon={openSteps[0] ? faChevronUp : faChevronDown} />
                     </span>
@@ -197,12 +194,8 @@ const ModelTrainingAccordion = ({
                             logName={["create_trainset"]}
                             projectPath={project.config.project_path}
                         />
-                        {createTrainsetError && (
-                            <div style={{ color: "red", marginTop: 8 }}>{createTrainsetError}</div>
-                        )}
-                        {trainsetCreated && (
-                            <div style={{ color: "green", marginTop: 8 }}>Training set created successfully.</div>
-                        )}
+                        {createTrainsetError && <ErrorNote>{createTrainsetError}</ErrorNote>}
+                        {trainsetCreated && <SuccessNote>Training set created successfully.</SuccessNote>}
                     </div>
                 </AccordionContent>
             </Accordion>
@@ -213,11 +206,7 @@ const ModelTrainingAccordion = ({
                     onClick={() => handleToggle(1, true)}
                 >
                     3.2 Train Model
-                    {modelCreated && (
-                        <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
-                            ✓
-                        </span>
-                    )}
+                    <StepBadge state={train_model.execution_state} />
                     <span style={{ marginLeft: "auto" }}>
                         <FontAwesomeIcon icon={openSteps[1] ? faChevronUp : faChevronDown} />
                     </span>
@@ -233,43 +222,8 @@ const ModelTrainingAccordion = ({
                             logName={["train_model"]}
                             projectPath={project.config.project_path}
                         />
-                        {trainError && (
-                            <div style={{ color: "red", marginTop: 8 }}>{trainError}</div>
-                        )}
-                        {(isPolling || trainModelState) && (
-                            <div style={{ marginTop: 8 }}>
-                                {isPolling && (
-                                    <span style={{ color: "#888" }}>
-                                        Polling training state...
-                                    </span>
-                                )}
-                                {trainModelState === "running" && (
-                                    <span style={{ color: "#007bff", marginLeft: 8 }}>
-                                        State: <b>Running</b>
-                                    </span>
-                                )}
-                                {trainModelState === "success" && (
-                                    <span style={{ color: "green", marginLeft: 8 }}>
-                                        State: <b>Success</b> — Training completed successfully.
-                                    </span>
-                                )}
-                                {trainModelState === "failed" && (
-                                    <span style={{ color: "red", marginLeft: 8 }}>
-                                        State: <b>Failed</b> — Training failed.
-                                    </span>
-                                )}
-                                {trainModelState === "aborted" && (
-                                    <span style={{ color: "orange", marginLeft: 8 }}>
-                                        State: <b>Aborted</b> — Training was aborted.
-                                    </span>
-                                )}
-                                {trainModelState === "not_found" && (
-                                    <span style={{ color: "#888", marginLeft: 8 }}>
-                                        State: <b>Not Found</b> — No training state found.
-                                    </span>
-                                )}
-                            </div>
-                        )}
+                        {trainError && <ErrorNote>{trainError}</ErrorNote>}
+                        <StepStateLine state={trainModelState} polling={isPolling} noun="Training" />
                     </div>
                 </AccordionContent>
             </Accordion>
@@ -280,11 +234,7 @@ const ModelTrainingAccordion = ({
                     onClick={() => handleToggle(2, modelCreated)}
                 >
                     3.3 Evaluate Model
-                    {modelEvaluated && (
-                        <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
-                            ✓
-                        </span>
-                    )}
+                    <StepBadge state={evaluate_model.execution_state} />
                     <span style={{ marginLeft: "auto" }}>
                         <FontAwesomeIcon icon={openSteps[2] ? faChevronUp : faChevronDown} />
                     </span>
@@ -300,12 +250,8 @@ const ModelTrainingAccordion = ({
                             logName={["evaluate_model"]}
                             projectPath={project.config.project_path}
                         />
-                        {evaluateError && (
-                            <div style={{ color: "red", marginTop: 8 }}>{evaluateError}</div>
-                        )}
-                        {modelEvaluated && (
-                            <div style={{ color: "green", marginTop: 8 }}>Model evaluated successfully.</div>
-                        )}
+                        {evaluateError && <ErrorNote>{evaluateError}</ErrorNote>}
+                        {modelEvaluated && <SuccessNote>Model evaluated successfully.</SuccessNote>}
                     </div>
                 </AccordionContent>
             </Accordion>
@@ -316,11 +262,7 @@ const ModelTrainingAccordion = ({
                     onClick={() => handleToggle(3, modelEvaluated)}
                 >
                     3.4 Visualize Model Results
-                    {modelEvaluated && (
-                        <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
-                            ✓
-                        </span>
-                    )}
+                    <StepBadge state={evaluate_model.execution_state} />
                     <span style={{ marginLeft: "auto" }}>
                         <FontAwesomeIcon icon={openSteps[3] ? faChevronUp : faChevronDown} />
                     </span>

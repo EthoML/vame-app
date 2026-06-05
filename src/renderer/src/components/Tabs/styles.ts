@@ -13,7 +13,8 @@ export const TabList = styled.div`
   display: flex;
   overflow-x: auto;
   white-space: nowrap;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
   -webkit-overflow-scrolling: touch;
 
   &::-webkit-scrollbar {
@@ -24,7 +25,7 @@ export const TabList = styled.div`
 export const TabContent = styled.div`
   display: flex;
   position: relative;
-  overflow: auto;
+  overflow: hidden;
   min-height: 0;
 `;
 
@@ -36,11 +37,13 @@ export const TabPane = styled.div<TabPaneProps>`
   display: ${(props) => (props.$active ? 'block' : 'none')};
   width: 100%;
   height: 100%;
+  min-height: 0;
 `;
 
 interface TabButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   $active: boolean;
   $complete?: boolean;
+  $failed?: boolean;
 }
 
 export const TabButton = styled.button<TabButtonProps>`
@@ -48,32 +51,38 @@ export const TabButton = styled.button<TabButtonProps>`
   cursor: pointer;
   border: none;
   background: none;
-  font-size: 16px;
+  font-size: var(--text-body);
   outline: none;
-  transition: background-color 0.3s;
-  border-bottom: ${(props) => (props.$active ? '2px solid #007bff' : 'none')};
-  font-weight: ${(props) => (props.$active ? 'bold' : 'normal')};
+  transition: background-color 0.15s, border-color 0.15s;
+  border-bottom: ${(props) => (props.$active ? '2px solid var(--color-accent)' : '2px solid transparent')};
+  font-weight: ${(props) => (props.$active ? '600' : 'normal')};
   flex-shrink: 0;
   flex-grow: 1;
-  color: #000;
+  color: ${(props) => (props.$active ? 'var(--color-accent)' : 'var(--color-text)')};
 
   &:hover {
-    background-color: #f0f0f0;
+    background-color: var(--color-surface-sunken);
   }
 
   &:disabled {
     pointer-events: none;
-    color: #888;
-    opacity: 0.5;
-    background-color: #f5f5f5;
+    color: var(--color-text-muted);
+    opacity: 0.6;
+    background-color: var(--color-surface-sunken);
   }
 
   ${(props) =>
-    props.$complete
+    props.$failed
       ? `&:after {
-    margin-left: 10px;
+    margin-left: 8px;
+    content: '✕';
+    color: var(--color-error);
+  }`
+      : props.$complete
+      ? `&:after {
+    margin-left: 8px;
     content: '✓';
-    color: #28a745;
+    color: var(--color-success);
   }`
       : ''}
 `;
@@ -81,19 +90,8 @@ export const TabButton = styled.button<TabButtonProps>`
 export const PaddedTab = styled.div`
   padding: 20px;
   height: 100%;
+  min-height: 0;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-`;
-
-export const GridTab = styled.div`
-  display: grid;
-  grid-template-rows: 1fr auto;
-  gap: 20px;
-  height: 100%;
-  min-height: 0;
-`;
-
-export const PaddedBottomRow = styled.div`
-  padding: 20px;
-  padding-top: 0px;
 `;

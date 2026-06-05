@@ -15,6 +15,7 @@ import { segmentVAMEProject } from "../../../context/Projects/api/segmentVAMEPro
 import { getProjectStateVAMEProject } from "../../../context/Projects/api/getProjectStateVAMEProject";
 import { createMotifVideosVAMEProject } from "../../../context/Projects/api/createMotifVideosVAMEProject";
 import { getSegmentVideosVAMEProject } from "../../../context/Projects/api/getSegmentVideosVAMEProject";
+import { StepBadge, StepStateLine, ErrorNote, SuccessNote } from "@renderer/components/StepStatus";
 
 type PoseSegmentationAccordionProps = {
     project: ProjectType;
@@ -256,11 +257,7 @@ const PoseSegmentationAccordion = ({
                     onClick={() => handleToggle(0, true)}
                 >
                     4.1 Run Segmentation
-                    {segmented && (
-                        <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
-                            ✓
-                        </span>
-                    )}
+                    <StepBadge state={segment_session.execution_state} />
                     <span style={{ marginLeft: "auto" }}>
                         <FontAwesomeIcon icon={openSteps[0] ? faChevronUp : faChevronDown} />
                     </span>
@@ -276,46 +273,9 @@ const PoseSegmentationAccordion = ({
                             logName={["pose_segmentation"]}
                             projectPath={project.config.project_path}
                         />
-                        {segmentationError && (
-                            <div style={{ color: "red", marginTop: 8 }}>{segmentationError}</div>
-                        )}
-                        {(isPolling || segmentationState) && (
-                            <div style={{ marginTop: 8 }}>
-                                {isPolling && (
-                                    <span style={{ color: "#888" }}>
-                                        Polling segmentation state...
-                                    </span>
-                                )}
-                                {segmentationState === "running" && (
-                                    <span style={{ color: "#007bff", marginLeft: 8 }}>
-                                        State: <b>Running</b>
-                                    </span>
-                                )}
-                                {segmentationState === "success" && (
-                                    <span style={{ color: "green", marginLeft: 8 }}>
-                                        State: <b>Success</b> — Segmentation completed successfully.
-                                    </span>
-                                )}
-                                {segmentationState === "failed" && (
-                                    <span style={{ color: "red", marginLeft: 8 }}>
-                                        State: <b>Failed</b> — Segmentation failed.
-                                    </span>
-                                )}
-                                {segmentationState === "aborted" && (
-                                    <span style={{ color: "orange", marginLeft: 8 }}>
-                                        State: <b>Aborted</b> — Segmentation was aborted.
-                                    </span>
-                                )}
-                                {segmentationState === "not_found" && (
-                                    <span style={{ color: "#888", marginLeft: 8 }}>
-                                        State: <b>Not Found</b> — No segmentation state found.
-                                    </span>
-                                )}
-                            </div>
-                        )}
-                        {segmented && (
-                            <div style={{ color: "green", marginTop: 8 }}>Segmentation completed successfully.</div>
-                        )}
+                        {segmentationError && <ErrorNote>{segmentationError}</ErrorNote>}
+                        <StepStateLine state={segmentationState} polling={isPolling} noun="Segmentation" />
+                        {segmented && <SuccessNote>Segmentation completed successfully.</SuccessNote>}
                     </div>
                 </AccordionContent>
             </Accordion>
@@ -326,11 +286,7 @@ const PoseSegmentationAccordion = ({
                     onClick={() => handleToggle(1, segmented)}
                 >
                     4.2 Create Segmented Videos
-                    {motifCompleted && (
-                        <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
-                            ✓
-                        </span>
-                    )}
+                    <StepBadge state={motif_session.execution_state} />
                     <span style={{ marginLeft: "auto" }}>
                         <FontAwesomeIcon icon={openSteps[1] ? faChevronUp : faChevronDown} />
                     </span>
@@ -346,48 +302,9 @@ const PoseSegmentationAccordion = ({
                             logName={["motif_videos"]}
                             projectPath={project.config.project_path}
                         />
-                        {motifError && (
-                            <div style={{ color: "red", marginTop: 8 }}>{motifError}</div>
-                        )}
-                        {(isPollingMotif || motifState) && (
-                            <div style={{ marginTop: 8 }}>
-                                {isPollingMotif && (
-                                    <span style={{ color: "#888" }}>
-                                        Polling video creation state...
-                                    </span>
-                                )}
-                                {motifState === "running" && (
-                                    <span style={{ color: "#007bff", marginLeft: 8 }}>
-                                        State: <b>Running</b>
-                                    </span>
-                                )}
-                                {motifState === "success" && (
-                                    <span style={{ color: "green", marginLeft: 8 }}>
-                                        State: <b>Success</b> — Videos created successfully.
-                                    </span>
-                                )}
-                                {motifState === "failed" && (
-                                    <span style={{ color: "red", marginLeft: 8 }}>
-                                        State: <b>Failed</b> — Video creation failed.
-                                    </span>
-                                )}
-                                {motifState === "aborted" && (
-                                    <span style={{ color: "orange", marginLeft: 8 }}>
-                                        State: <b>Aborted</b> — Video creation was aborted.
-                                    </span>
-                                )}
-                                {motifState === "not_found" && (
-                                    <span style={{ color: "#888", marginLeft: 8 }}>
-                                        State: <b>Not Found</b> — No video creation state found.
-                                    </span>
-                                )}
-                            </div>
-                        )}
-                        {motifCompleted && (
-                            <div style={{ color: "green", marginTop: 8 }}>
-                                Videos created successfully.
-                            </div>
-                        )}
+                        {motifError && <ErrorNote>{motifError}</ErrorNote>}
+                        <StepStateLine state={motifState} polling={isPollingMotif} noun="Video creation" />
+                        {motifCompleted && <SuccessNote>Videos created successfully.</SuccessNote>}
                     </div>
                 </AccordionContent>
             </Accordion>
@@ -399,11 +316,7 @@ const PoseSegmentationAccordion = ({
                     onClick={() => handleToggle(2, motifCompleted)}
                 >
                     4.3 Visualize Results
-                    {motifCompleted && (
-                        <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
-                            ✓
-                        </span>
-                    )}
+                    <StepBadge state={motif_session.execution_state} />
                     <span style={{ marginLeft: "auto" }}>
                         <FontAwesomeIcon icon={openSteps[2] ? faChevronUp : faChevronDown} />
                     </span>
@@ -416,9 +329,7 @@ const PoseSegmentationAccordion = ({
                             submitText={getLoading ? "Fetching..." : "Get Videos"}
                             onFormSubmit={handleGetSegmentVideos}
                         />
-                        {getError && (
-                            <div style={{ color: "red", marginTop: 8 }}>{getError}</div>
-                        )}
+                        {getError && <ErrorNote>{getError}</ErrorNote>}
                         {segmentVideos.length > 0 && (
                             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 240px)", gap: 12, marginTop: 12 }}>
                                 {segmentVideos.map(({ filename, content }) => (

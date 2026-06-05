@@ -11,14 +11,28 @@ export const ListItem = styled.li`
   align-items: center;
   gap: 20px;
   padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
   margin-bottom: 10px;
+  transition: border-color 0.15s;
+
+  &:hover {
+    border-color: var(--color-border-strong);
+  }
 
   h3 {
-    font-size: 18px;
-    font-weight: bold;
+    font-size: var(--text-lg);
+    font-weight: var(--weight-semibold);
+    letter-spacing: -0.01em;
     margin: 0;
+    color: var(--color-text);
+  }
+
+  small {
+    font-family: var(--font-mono);
+    font-size: var(--text-caption);
+    color: var(--color-text-secondary);
   }
 `;
 

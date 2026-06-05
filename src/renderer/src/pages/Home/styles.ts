@@ -10,13 +10,18 @@ export const PaddedContainer = styled.div`
 `;
 
 export const ControlButton = styled.button`
-  font-size: 20px;
+  font-size: var(--text-h3);
   cursor: pointer;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
   padding: 2px 5px;
-  color: white;
-  background: #181c24;
+  color: var(--color-on-accent);
+  background: var(--color-accent);
+  transition: background 0.15s;
+
+  &:hover {
+    background: var(--color-accent-hover);
+  }
 
   &[disabled] {
     opacity: 0.5;

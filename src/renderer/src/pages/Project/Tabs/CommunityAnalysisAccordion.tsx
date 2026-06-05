@@ -17,6 +17,7 @@ import { getProjectStateVAMEProject } from "../../../context/Projects/api/getPro
 import { createCommunityVideosVAMEProject } from "../../../context/Projects/api/createCommunityVideosVAMEProject";
 import { getCommunityVideosVAMEProject } from "../../../context/Projects/api/getCommunityVideosVAMEProject";
 import { getCommunityImagesVAMEProject } from "../../../context/Projects/api/getCommunityImagesVAMEProject";
+import { StepBadge, StepStateLine, ErrorNote, SuccessNote } from "@renderer/components/StepStatus";
 
 type CommunityAnalysisAccordionProps = {
     project: ProjectType;
@@ -288,11 +289,7 @@ const CommunityAnalysisAccordion = ({
                     onClick={() => handleToggle(0, true)}
                 >
                     5.1 Run Community Analysis
-                    {communityAnalysisCompleted && (
-                        <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
-                            ✓
-                        </span>
-                    )}
+                    <StepBadge state={community_session.execution_state} />
                     <span style={{ marginLeft: "auto" }}>
                         <FontAwesomeIcon icon={openSteps[0] ? faChevronUp : faChevronDown} />
                     </span>
@@ -308,46 +305,9 @@ const CommunityAnalysisAccordion = ({
                             logName={["community"]}
                             projectPath={project.config.project_path}
                         />
-                        {communityError && (
-                            <div style={{ color: "red", marginTop: 8 }}>{communityError}</div>
-                        )}
-                        {(isPollingCommunity || communityState) && (
-                            <div style={{ marginTop: 8 }}>
-                                {isPollingCommunity && (
-                                    <span style={{ color: "#888" }}>
-                                        Polling community analysis state...
-                                    </span>
-                                )}
-                                {communityState === "running" && (
-                                    <span style={{ color: "#007bff", marginLeft: 8 }}>
-                                        State: <b>Running</b>
-                                    </span>
-                                )}
-                                {communityState === "success" && (
-                                    <span style={{ color: "green", marginLeft: 8 }}>
-                                        State: <b>Success</b> — Community analysis completed successfully.
-                                    </span>
-                                )}
-                                {communityState === "failed" && (
-                                    <span style={{ color: "red", marginLeft: 8 }}>
-                                        State: <b>Failed</b> — Community analysis failed.
-                                    </span>
-                                )}
-                                {communityState === "aborted" && (
-                                    <span style={{ color: "orange", marginLeft: 8 }}>
-                                        State: <b>Aborted</b> — Community analysis was aborted.
-                                    </span>
-                                )}
-                                {communityState === "not_found" && (
-                                    <span style={{ color: "#888", marginLeft: 8 }}>
-                                        State: <b>Not Found</b> — No community analysis state found.
-                                    </span>
-                                )}
-                            </div>
-                        )}
-                        {communityAnalysisCompleted && (
-                            <div style={{ color: "green", marginTop: 8 }}>Community analysis completed successfully.</div>
-                        )}
+                        {communityError && <ErrorNote>{communityError}</ErrorNote>}
+                        <StepStateLine state={communityState} polling={isPollingCommunity} noun="Community analysis" />
+                        {communityAnalysisCompleted && <SuccessNote>Community analysis completed successfully.</SuccessNote>}
                     </div>
                 </AccordionContent>
             </Accordion>
@@ -358,11 +318,7 @@ const CommunityAnalysisAccordion = ({
                     onClick={() => handleToggle(1, communityAnalysisCompleted)}
                 >
                     5.2 Create Community Videos
-                    {communityVideosCompleted && (
-                        <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
-                            ✓
-                        </span>
-                    )}
+                    <StepBadge state={community_videos_session.execution_state} />
                     <span style={{ marginLeft: "auto" }}>
                         <FontAwesomeIcon icon={openSteps[1] ? faChevronUp : faChevronDown} />
                     </span>
@@ -378,48 +334,9 @@ const CommunityAnalysisAccordion = ({
                             logName={["community_videos"]}
                             projectPath={project.config.project_path}
                         />
-                        {communityVideosError && (
-                            <div style={{ color: "red", marginTop: 8 }}>{communityVideosError}</div>
-                        )}
-                        {(isPollingCommunityVideos || communityVideosState) && (
-                            <div style={{ marginTop: 8 }}>
-                                {isPollingCommunityVideos && (
-                                    <span style={{ color: "#888" }}>
-                                        Polling video creation state...
-                                    </span>
-                                )}
-                                {communityVideosState === "running" && (
-                                    <span style={{ color: "#007bff", marginLeft: 8 }}>
-                                        State: <b>Running</b>
-                                    </span>
-                                )}
-                                {communityVideosState === "success" && (
-                                    <span style={{ color: "green", marginLeft: 8 }}>
-                                        State: <b>Success</b> — Videos created successfully.
-                                    </span>
-                                )}
-                                {communityVideosState === "failed" && (
-                                    <span style={{ color: "red", marginLeft: 8 }}>
-                                        State: <b>Failed</b> — Video creation failed.
-                                    </span>
-                                )}
-                                {communityVideosState === "aborted" && (
-                                    <span style={{ color: "orange", marginLeft: 8 }}>
-                                        State: <b>Aborted</b> — Video creation was aborted.
-                                    </span>
-                                )}
-                                {communityVideosState === "not_found" && (
-                                    <span style={{ color: "#888", marginLeft: 8 }}>
-                                        State: <b>Not Found</b> — No video creation state found.
-                                    </span>
-                                )}
-                            </div>
-                        )}
-                        {communityVideosCompleted && (
-                            <div style={{ color: "green", marginTop: 8 }}>
-                                Videos created successfully.
-                            </div>
-                        )}
+                        {communityVideosError && <ErrorNote>{communityVideosError}</ErrorNote>}
+                        <StepStateLine state={communityVideosState} polling={isPollingCommunityVideos} noun="Video creation" />
+                        {communityVideosCompleted && <SuccessNote>Videos created successfully.</SuccessNote>}
                     </div>
                 </AccordionContent>
             </Accordion>
@@ -431,11 +348,7 @@ const CommunityAnalysisAccordion = ({
                     onClick={() => handleToggle(2, communityVideosCompleted)}
                 >
                     5.3 Visualize Results - Videos
-                    {communityVideosCompleted && (
-                        <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
-                            ✓
-                        </span>
-                    )}
+                    <StepBadge state={community_videos_session.execution_state} />
                     <span style={{ marginLeft: "auto" }}>
                         <FontAwesomeIcon icon={openSteps[2] ? faChevronUp : faChevronDown} />
                     </span>
@@ -448,9 +361,7 @@ const CommunityAnalysisAccordion = ({
                             submitText={getLoading ? "Fetching..." : "Get Videos"}
                             onFormSubmit={handleGetCommunityVideos}
                         />
-                        {getError && (
-                            <div style={{ color: "red", marginTop: 8 }}>{getError}</div>
-                        )}
+                        {getError && <ErrorNote>{getError}</ErrorNote>}
                         {communityVideos.length > 0 && (
                             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 240px)", gap: 12, marginTop: 12 }}>
                                 {communityVideos.map(({ filename, content }) => (
@@ -468,11 +379,7 @@ const CommunityAnalysisAccordion = ({
                     onClick={() => handleToggle(3, communityAnalysisCompleted)}
                 >
                     5.4 Visualize Results - Images
-                    {communityAnalysisCompleted && (
-                        <span style={{ color: "green", marginLeft: 8, fontWeight: 700, fontSize: 18 }} title="Success">
-                            ✓
-                        </span>
-                    )}
+                    <StepBadge state={community_session.execution_state} />
                     <span style={{ marginLeft: "auto" }}>
                         <FontAwesomeIcon icon={openSteps[3] ? faChevronUp : faChevronDown} />
                     </span>
@@ -485,9 +392,7 @@ const CommunityAnalysisAccordion = ({
                             submitText={communityImageLoading ? "Fetching..." : "Get Image"}
                             onFormSubmit={handleGetCommunityImages}
                         />
-                        {communityImageError && (
-                            <div style={{ color: "red", marginTop: 8 }}>{communityImageError}</div>
-                        )}
+                        {communityImageError && <ErrorNote>{communityImageError}</ErrorNote>}
                         {communityImage && (
                             <div style={{ marginTop: 12 }}>
                                 <img

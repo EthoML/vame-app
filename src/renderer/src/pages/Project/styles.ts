@@ -30,7 +30,20 @@ export const ProjectInformationCapsule = styled.div`
   display: flex;
   align-items: center;
   margin: 0;
-  background: #f4f4f4;
+  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
   padding: 5px 10px;
-  border-radius: 10px;
+  border-radius: 8px;
+
+  /* Labels stay sans (bold); the literal values (path, date, version)
+     render mono so they read precisely and align. */
+  b {
+    font-weight: var(--weight-semibold);
+  }
+
+  small small {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
 `;

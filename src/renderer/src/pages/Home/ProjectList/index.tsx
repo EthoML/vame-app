@@ -22,10 +22,10 @@ const ProjectsList: React.FC<Props> = ({
             <small>{project.config.project_path}</small>
           </div>
           <ButtonContainer>
-            <Button onClick={() => {
+            <Button variant="primary" onClick={() => {
               onEdit(project)
             }}>Open</Button>
-            <Button onClick={() => {
+            <Button variant="danger" onClick={() => {
 
               // Check to make sure user wants to delete the project
               if (!window.confirm(`Are you sure you want to delete project "${project.config.project_name}"?`)) return

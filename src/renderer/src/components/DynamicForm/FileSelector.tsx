@@ -1,6 +1,14 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Controller } from "react-hook-form";
 import { Tree } from "react-arborist";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faFolder,
+  faFile,
+  faChevronDown,
+  faChevronRight,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
 import { get } from "@renderer/utils/requests";
 import { FileList, FileListItem } from "./styles";
 
@@ -159,14 +167,16 @@ const FileInput: React.FC<FileSelectorProps> = ({
             {/* Left column: file browser */}
             <div style={{ flex: 1, minWidth: 0 }}>
               {error && (
-                <div style={{ color: "red", marginBottom: 6 }}>{error}</div>
+                <div style={{ color: "var(--color-error)", marginBottom: 6 }}>{error}</div>
               )}
               <div
                 style={{
-                  border: "1px solid #ccc",
+                  border: "1px solid var(--color-border)",
                   borderRadius: 4,
                   height: 260,
                   overflow: "auto",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "var(--text-sm)",
                 }}
               >
                 <Tree<TreeNode>
@@ -192,8 +202,9 @@ const FileInput: React.FC<FileSelectorProps> = ({
                           display: "flex",
                           alignItems: "center",
                           gap: 6,
+                          minWidth: 0,
                           fontStyle: placeholder ? "italic" : undefined,
-                          color: placeholder ? "#999" : undefined,
+                          color: placeholder ? "var(--color-text-muted)" : undefined,
                         }}
                       >
                         {isDir ? (
@@ -202,9 +213,18 @@ const FileInput: React.FC<FileSelectorProps> = ({
                               e.stopPropagation();
                               node.toggle();
                             }}
-                            style={{ width: 14, cursor: "pointer", userSelect: "none" }}
+                            style={{
+                              width: 14,
+                              cursor: "pointer",
+                              userSelect: "none",
+                              color: "var(--color-text-muted)",
+                              textAlign: "center",
+                            }}
                           >
-                            {node.isOpen ? "▾" : "▸"}
+                            <FontAwesomeIcon
+                              icon={node.isOpen ? faChevronDown : faChevronRight}
+                              style={{ fontSize: 10 }}
+                            />
                           </span>
                         ) : (
                           <span style={{ width: 14 }} />
@@ -216,13 +236,26 @@ const FileInput: React.FC<FileSelectorProps> = ({
                             disabled={readOnly}
                             onClick={(e) => e.stopPropagation()}
                             onChange={() => toggleSelected(node.data.id)}
+                            style={{ flexShrink: 0 }}
                           />
                         ) : (
                           <span style={{ width: 13 }} />
                         )}
-                        <span>{isDir ? "📁" : placeholder ? "" : "📄"}</span>
+                        <span style={{ width: 16, flexShrink: 0, textAlign: "center", color: "var(--color-text-secondary)" }}>
+                          {placeholder ? null : (
+                            <FontAwesomeIcon icon={isDir ? faFolder : faFile} />
+                          )}
+                        </span>
                         <span
-                          style={{ cursor: isDir || selectable ? "pointer" : "default" }}
+                          title={node.data.name}
+                          style={{
+                            flex: 1,
+                            minWidth: 0,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                            cursor: isDir || selectable ? "pointer" : "default",
+                          }}
                           onClick={(e) => {
                             e.stopPropagation();
                             if (isDir) node.toggle();
@@ -243,7 +276,7 @@ const FileInput: React.FC<FileSelectorProps> = ({
               style={{
                 flex: 1,
                 minWidth: 0,
-                border: "1px solid #ccc",
+                border: "1px solid var(--color-border)",
                 borderRadius: 4,
                 height: 260,
                 overflow: "auto",
@@ -254,7 +287,7 @@ const FileInput: React.FC<FileSelectorProps> = ({
                 Selected ({selected.length})
               </div>
               {selected.length === 0 ? (
-                <div style={{ color: "#999" }}>
+                <div style={{ color: "var(--color-text-muted)" }}>
                   {folderMode ? "No folder selected" : "No files selected"}
                 </div>
               ) : (
@@ -279,12 +312,13 @@ const FileInput: React.FC<FileSelectorProps> = ({
                             border: "none",
                             background: "transparent",
                             cursor: "pointer",
-                            color: "#c00",
+                            color: "var(--color-error)",
                             flexShrink: 0,
                           }}
                           title="Remove"
+                          aria-label={`Remove ${basename(p)}`}
                         >
-                          ✕
+                          <FontAwesomeIcon icon={faXmark} />
                         </button>
                       )}
                     </FileListItem>

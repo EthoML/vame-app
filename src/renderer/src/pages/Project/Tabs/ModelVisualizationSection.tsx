@@ -1,5 +1,7 @@
 import React, { useState } from "react"
 import { getModelVisualization } from "../../../context/Projects/api/getModelVisualization"
+import { ErrorNote } from "@renderer/components/StepStatus"
+import Button from "@renderer/components/Button"
 
 type ModelVisualizationSectionProps = {
     project: any
@@ -35,25 +37,11 @@ export const ModelVisualizationSection: React.FC<ModelVisualizationSectionProps>
     return (
         <div style={{ marginTop: 16 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-                <button
-                    onClick={handleGetImages}
-                    disabled={loading}
-                    style={{
-                        padding: "4px 12px",
-                        fontWeight: 500,
-                        background: "#1976d2",
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: 4,
-                        cursor: loading ? "not-allowed" : "pointer"
-                    }}
-                >
+                <Button onClick={handleGetImages} disabled={loading}>
                     {loading ? "Loading..." : "Get Images"}
-                </button>
+                </Button>
             </div>
-            {error && (
-                <div style={{ color: "red", marginBottom: 12 }}>{error}</div>
-            )}
+            {error && <ErrorNote>{error}</ErrorNote>}
             {images && (
                 <div>
                     <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
@@ -63,8 +51,9 @@ export const ModelVisualizationSection: React.FC<ModelVisualizationSectionProps>
                                 onClick={() => setActiveTab(tab.key)}
                                 style={{
                                     padding: "6px 16px",
-                                    borderBottom: activeTab === tab.key ? "2px solid #1976d2" : "2px solid transparent",
+                                    borderBottom: activeTab === tab.key ? "2px solid var(--color-accent)" : "2px solid transparent",
                                     background: "none",
+                                    color: activeTab === tab.key ? "var(--color-accent)" : "var(--color-text)",
                                     fontWeight: activeTab === tab.key ? 600 : 400,
                                     cursor: "pointer"
                                 }}
@@ -80,9 +69,8 @@ export const ModelVisualizationSection: React.FC<ModelVisualizationSectionProps>
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            background: "#f8f9fa",
+                            background: "var(--color-surface-sunken)",
                             borderRadius: 6,
-                            boxShadow: "0 2px 8px #0001",
                             overflow: "auto"
                         }}
                     >
@@ -98,7 +86,7 @@ export const ModelVisualizationSection: React.FC<ModelVisualizationSectionProps>
                                 }}
                             />
                         ) : (
-                            <span style={{ color: "#888" }}>No image available for {imageTabs.find(t => t.key === activeTab)?.label}.</span>
+                            <span style={{ color: "var(--color-text-muted)" }}>No image available for {imageTabs.find(t => t.key === activeTab)?.label}.</span>
                         )}
                     </div>
                 </div>

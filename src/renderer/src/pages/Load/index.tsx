@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import Header from '@renderer/components/Header';
 import DynamicForm from '@renderer/components/DynamicForm';
+import { ErrorNote } from '@renderer/components/StepStatus';
 import { get } from '@renderer/utils/requests';
 
 import loadSchema from '../../../../schema/load-project.schema.json';
@@ -56,7 +57,7 @@ const Load: React.FC = () => {
         Select the VAME project directory — the folder that contains{' '}
         <code>config.yaml</code>.
       </p>
-      {error && <div style={{ color: 'red', marginBottom: 8 }}>{error}</div>}
+      {error && <ErrorNote>{error}</ErrorNote>}
       <DynamicForm
         schema={loadSchema as unknown as Schema}
         onFormSubmit={handleSubmit}

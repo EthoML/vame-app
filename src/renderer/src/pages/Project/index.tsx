@@ -50,7 +50,7 @@ const Project: React.FC = () => {
 
       await refresh()
     } catch (e) {
-      console.log("[DEBUG] Error in submitTab:", e);
+      console.error("Error in submitTab:", e);
     } finally {
       setBlockSubmit(false);
     }
@@ -58,11 +58,9 @@ const Project: React.FC = () => {
 
 
   useEffect(() => {
-    console.log("[DEBUG] projectPath on mount:", projectPath);
     if (projectPath) {
       onConnected(async () => {
         post('project/register', { project: projectPath }).then(res => {
-          console.log("[DEBUG] post('project/register') result:", res);
           if (res.success) {
             setProject(getProject(projectPath) as ProjectType);
           }
@@ -113,6 +111,11 @@ const Project: React.FC = () => {
   const report_session = project.states?.generate_reports || {};
   const reportCompleted = report_session.execution_state === "success";
 
+  // A step that died (failed/aborted) surfaces a ✕ on its tab so a broken
+  // stage is visible at a glance, not hidden behind an unchanged label.
+  const isFailed = (s: { execution_state?: string } = {}) =>
+    s.execution_state === "failed" || s.execution_state === "aborted";
+
   const tabs = [
     {
       id: 'input-data',
@@ -129,7 +132,7 @@ const Project: React.FC = () => {
         } catch (error) {
           console.error("Error rendering ProjectConfiguration:", error);
           return (
-            <div style={{ padding: 20, background: "#f5f5f5" }}>
+            <div style={{ padding: 20, background: "var(--color-surface-sunken)" }}>
               <h3>Project Configuration Content (Fallback)</h3>
               <p>Error rendering the ProjectConfiguration component.</p>
               <p><b>Error:</b> {String(error)}</p>
@@ -148,6 +151,7 @@ const Project: React.FC = () => {
       label: '2. Preprocessing',
       disabled: false,
       complete: projectPreprocessed,
+      failed: isFailed(preprocessingState) || isFailed(preprocessingVisualizationState),
       tooltip: "Finish project configuration first.",
       content: (() => {
         try {
@@ -172,7 +176,7 @@ const Project: React.FC = () => {
         } catch (error) {
           console.error("Error rendering Preprocessing component:", error);
           return (
-            <div style={{ padding: 20, background: "#f5f5f5" }}>
+            <div style={{ padding: 20, background: "var(--color-surface-sunken)" }}>
               <h3>Preprocessing Content (Fallback)</h3>
               <p>Error rendering the Preprocessing component.</p>
               <p><b>Error:</b> {String(error)}</p>
@@ -191,6 +195,7 @@ const Project: React.FC = () => {
       label: '3. Model Training',
       disabled: !projectPreprocessed,
       complete: trainsetCreated && modelCreated && modelEvaluated,
+      failed: isFailed(create_trainset) || isFailed(train_model) || isFailed(evaluate_model),
       tooltip: "Organize your project first.",
       content: (
         <ModelTrainingAccordion
@@ -206,6 +211,7 @@ const Project: React.FC = () => {
       label: '4. Pose Segmentation',
       disabled: !modelEvaluated,
       complete: segmented,
+      failed: isFailed(segment_session),
       tooltip: "Model your project first.",
       content: (
         <PoseSegmentationAccordion
@@ -221,6 +227,7 @@ const Project: React.FC = () => {
       label: '5. Community Analysis',
       disabled: !segmented,
       complete: community?.execution_state === "success",
+      failed: isFailed(community),
       tooltip: "Need Pose Segmentation.",
       content: (
         <CommunityAnalysisAccordion
@@ -235,6 +242,7 @@ const Project: React.FC = () => {
       id: 'report',
       label: '6. Report',
       complete: reportCompleted,
+      failed: isFailed(report_session),
       disabled: !segmented,
       tooltip: "Need segmentation.",
       content: (
