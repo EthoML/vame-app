@@ -8,14 +8,14 @@ import {
 } from "@renderer/components/DynamicForm/styles"
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons"
+import { faChevronDown, faChevronUp, faSpinner } from "@fortawesome/free-solid-svg-icons"
 import { TabProps } from "./types"
 
 import preprocessingSchema from '../../../../../schema/preprocessing.schema.json'
 import { PaddedTab } from "@renderer/components/Tabs/styles"
 import Tippy from "@tippyjs/react"
 import { StepBadge, ErrorNote } from "@renderer/components/StepStatus"
-import Button from "@renderer/components/Button"
+import SegmentedControl from "@renderer/components/SegmentedControl"
 
 // Error boundary component to catch rendering errors
 const ErrorFallback = ({ error }: { error: Error }) => (
@@ -184,9 +184,17 @@ const Preprocessing = ({
 /**
  * VisualizationSection component for session dropdown, fetch button, and image tabs.
  */
-import { useState as useReactState, useContext } from "react";
+import { useState as useReactState, useContext, useEffect } from "react";
 import { ProjectsContext } from "../../../context/Projects";
 import type { IProjectContext } from "../../../context/Projects/types";
+
+const IMAGE_TABS = [
+  { value: "timeseries", label: "Time series" },
+  { value: "scatter", label: "Scatter" },
+  { value: "cloud", label: "Cloud" },
+] as const;
+
+type ImageTab = (typeof IMAGE_TABS)[number]["value"];
 
 const VisualizationSection = ({ project }: { project: any }) => {
   const { getPreprocessingVisualization } = useContext(ProjectsContext) as IProjectContext;
@@ -202,103 +210,113 @@ const VisualizationSection = ({ project }: { project: any }) => {
     scatter: string | null;
     cloud: string | null;
   } | null>(null);
-  const [activeTab, setActiveTab] = useReactState<"timeseries" | "scatter" | "cloud">("timeseries");
+  const [activeTab, setActiveTab] = useReactState<ImageTab>("timeseries");
   const [error, setError] = useReactState<string | null>(null);
 
-  const handleGetImages = async () => {
-    setLoading(true);
-    setError(null);
-    setImages(null);
-    try {
-      const result = await getPreprocessingVisualization({
-        project: project.config.project_path,
-        session_name: selectedSession,
-      });
-      // Ensure all keys are present and never undefined
-      setImages({
-        timeseries: result.timeseries ?? null,
-        scatter: result.scatter ?? null,
-        cloud: result.cloud ?? null,
-      });
-    } catch (err: any) {
-      setError(err.message || "Failed to fetch images.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Default to the first session once names are available.
+  useEffect(() => {
+    if (!selectedSession && sessionNames.length) setSelectedSession(sessionNames[0]);
+  }, [sessionNames, selectedSession]);
+
+  // Auto-load whenever the selected session changes (no button). Race-safe.
+  useEffect(() => {
+    if (!selectedSession) return;
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const result = await getPreprocessingVisualization({
+          project: project.config.project_path,
+          session_name: selectedSession,
+        });
+        if (cancelled) return;
+        setImages({
+          timeseries: result.timeseries ?? null,
+          scatter: result.scatter ?? null,
+          cloud: result.cloud ?? null,
+        });
+      } catch (err: any) {
+        if (!cancelled) {
+          setError(err.message || "Failed to fetch images.");
+          setImages(null);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedSession, project.config.project_path]);
 
   return (
     <div style={{ marginTop: 16 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-        <label htmlFor="session-select" style={{ fontWeight: 500 }}>Session:</label>
-        <select
-          id="session-select"
-          value={selectedSession}
-          onChange={e => setSelectedSession(e.target.value)}
-          style={{ minWidth: 120, padding: "4px 8px" }}
+      <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 16, flexWrap: "wrap" }}>
+        <label
+          htmlFor="preproc-session"
+          style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--color-text-secondary)", fontSize: "var(--text-sm)" }}
         >
-          {sessionNames.map(name => (
-            <option key={name} value={name}>{name}</option>
-          ))}
-        </select>
-        <Button
-          onClick={handleGetImages}
-          disabled={loading || !selectedSession}
-          style={{ marginLeft: 8 }}
-        >
-          {loading ? "Loading..." : "Get Images"}
-        </Button>
-      </div>
-      {error && <ErrorNote>{error}</ErrorNote>}
-      {images && (
-        <div>
-          <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
-            {(["timeseries", "scatter", "cloud"] as const).map(tab => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                style={{
-                  padding: "6px 16px",
-                  borderBottom: activeTab === tab ? "2px solid var(--color-accent)" : "2px solid transparent",
-                  background: "none",
-                  color: activeTab === tab ? "var(--color-accent)" : "var(--color-text)",
-                  fontWeight: activeTab === tab ? 600 : 400,
-                  cursor: "pointer"
-                }}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
-          </div>
-          <div
+          Session
+          <select
+            id="preproc-session"
+            value={selectedSession}
+            onChange={(e) => setSelectedSession(e.target.value)}
             style={{
-              minHeight: 220,
-              width: "100%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "var(--color-surface-sunken)",
+              fontFamily: "var(--font-mono)",
+              fontSize: "var(--text-sm)",
+              color: "var(--color-text)",
+              background: "var(--color-surface)",
+              border: "1px solid var(--color-border-strong)",
               borderRadius: 6,
-              overflow: "auto"
+              padding: "6px 10px",
             }}
           >
-            {images[activeTab] ? (
-              <img
-                src={images[activeTab]!}
-                alt={`${activeTab} visualization`}
-                style={{
-                  width: "100%",
-                  height: "auto",
-                  objectFit: "contain",
-                  display: "block"
-                }}
-              />
-            ) : (
-              <span style={{ color: "var(--color-text-muted)" }}>No image available for {activeTab}.</span>
-            )}
-          </div>
-        </div>
-      )}
+            {sessionNames.map((name) => (
+              <option key={name} value={name}>{name}</option>
+            ))}
+          </select>
+        </label>
+        <SegmentedControl<ImageTab>
+          options={IMAGE_TABS as unknown as { value: ImageTab; label: string }[]}
+          value={activeTab}
+          onChange={setActiveTab}
+          ariaLabel="Visualization type"
+        />
+      </div>
+
+      {error && <ErrorNote>{error}</ErrorNote>}
+
+      <div
+        style={{
+          height: "60vh",
+          width: "100%",
+          background: "var(--color-surface-sunken)",
+          border: "1px solid var(--color-border)",
+          borderRadius: 6,
+          overflow: "auto",
+          display: "flex",
+          alignItems: loading || !images?.[activeTab] ? "center" : "flex-start",
+          justifyContent: "center",
+        }}
+      >
+        {loading ? (
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "var(--color-text-muted)", fontSize: "var(--text-sm)" }}>
+            <FontAwesomeIcon icon={faSpinner} spin style={{ color: "var(--color-accent)" }} />
+            Loading {selectedSession}…
+          </span>
+        ) : images?.[activeTab] ? (
+          <img
+            src={images[activeTab]!}
+            alt={`${activeTab} visualization for ${selectedSession}`}
+            style={{ width: "100%", height: "auto", objectFit: "contain", display: "block" }}
+          />
+        ) : (
+          <span style={{ color: "var(--color-text-muted)", fontSize: "var(--text-sm)" }}>
+            No {activeTab} image available for this session.
+          </span>
+        )}
+      </div>
     </div>
   );
 };
