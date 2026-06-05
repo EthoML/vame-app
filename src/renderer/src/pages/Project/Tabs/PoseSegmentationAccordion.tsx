@@ -15,7 +15,7 @@ import { segmentVAMEProject } from "../../../context/Projects/api/segmentVAMEPro
 import { getProjectStateVAMEProject } from "../../../context/Projects/api/getProjectStateVAMEProject";
 import { createMotifVideosVAMEProject } from "../../../context/Projects/api/createMotifVideosVAMEProject";
 import { getSegmentVideosVAMEProject } from "../../../context/Projects/api/getSegmentVideosVAMEProject";
-import { StepBadge, StepStateLine, ErrorNote, SuccessNote } from "@renderer/components/StepStatus";
+import { StepBadge, StepStateLine, ErrorNote, SuccessNote, OptionalTag } from "@renderer/components/StepStatus";
 import ResultVideoViewer from "@renderer/components/ResultVideoViewer";
 
 const ALGO_OPTIONS = motifVideosGetSchema.properties.segmentation_algorithm.enum as string[];
@@ -33,7 +33,7 @@ const PoseSegmentationAccordion = ({
     setBlockSubmit,
     onFormSubmit,
 }: PoseSegmentationAccordionProps) => {
-    const [openSteps, setOpenSteps] = useState([false, false, false]);
+    const [openSteps, setOpenSteps] = useState([false, false]);
     const [motifLoading, setMotifLoading] = useState(false);
     const [motifError, setMotifError] = useState<string | null>(null);
     const [isPollingMotif, setIsPollingMotif] = useState(false);
@@ -77,7 +77,7 @@ const PoseSegmentationAccordion = ({
                             console.error("Error calling onFormSubmit:", e);
                         }
                         setBlockSubmit(false);
-                        setOpenSteps([false, false, false]);
+                        setOpenSteps([false, false]);
                     }
                 } catch (err) {
                     console.error("Error during polling:", err);
@@ -115,7 +115,7 @@ const PoseSegmentationAccordion = ({
                             console.error("Error calling onFormSubmit:", e);
                         }
                         setBlockSubmit(false);
-                        setOpenSteps([false, false, false]);
+                        setOpenSteps([false, false]);
                     }
                 } catch (err) {
                     console.error("Error during polling videos:", err);
@@ -206,14 +206,15 @@ const PoseSegmentationAccordion = ({
                     </div>
                 </AccordionContent>
             </Accordion>
-            {/* Accordion 1: Run Segmentation */}
+            {/* Accordion 2: Create & View Segmented Videos (optional) */}
             <Accordion>
                 <AccordionHeader
                     $disabled={!segmented}
                     onClick={() => handleToggle(1, segmented)}
                 >
-                    4.2 Create Segmented Videos
+                    4.2 Create &amp; View Segmented Videos
                     <StepBadge state={motif_session.execution_state} />
+                    <OptionalTag />
                     <span style={{ marginLeft: "auto" }}>
                         <FontAwesomeIcon icon={openSteps[1] ? faChevronUp : faChevronDown} />
                     </span>
@@ -232,37 +233,27 @@ const PoseSegmentationAccordion = ({
                         {motifError && <ErrorNote>{motifError}</ErrorNote>}
                         <StepStateLine state={motifState} polling={isPollingMotif} noun="Video creation" />
                         {motifCompleted && <SuccessNote>Videos created successfully.</SuccessNote>}
-                    </div>
-                </AccordionContent>
-            </Accordion>
 
-            {/* Accordion 3: Visualize Results */}
-            <Accordion>
-                <AccordionHeader
-                    $disabled={!motifCompleted}
-                    onClick={() => handleToggle(2, motifCompleted)}
-                >
-                    4.3 Visualize Results
-                    <StepBadge state={motif_session.execution_state} />
-                    <span style={{ marginLeft: "auto" }}>
-                        <FontAwesomeIcon icon={openSteps[2] ? faChevronUp : faChevronDown} />
-                    </span>
-                </AccordionHeader>
-                <AccordionContent $isOpen={openSteps[2]}>
-                    <ResultVideoViewer
-                        open={openSteps[2]}
-                        algoOptions={ALGO_OPTIONS}
-                        sessionOptions={sessionNames}
-                        emptyText="No segmented videos available for this selection."
-                        load={async ({ segmentation_algorithm, session }) => {
-                            const data = await getSegmentVideosVAMEProject({
-                                project: project.config.project_path,
-                                segmentation_algorithm: segmentation_algorithm!,
-                                session: session!,
-                            });
-                            return data.videos;
-                        }}
-                    />
+                        {motifCompleted && (
+                            <div style={{ marginTop: "var(--space-5)", paddingTop: "var(--space-4)", borderTop: "1px solid var(--color-border)" }}>
+                                <h3 style={{ fontSize: "var(--text-lg)", margin: 0 }}>Segmented videos</h3>
+                                <ResultVideoViewer
+                                    open={openSteps[1] && motifCompleted}
+                                    algoOptions={ALGO_OPTIONS}
+                                    sessionOptions={sessionNames}
+                                    emptyText="No segmented videos available for this selection."
+                                    load={async ({ segmentation_algorithm, session }) => {
+                                        const data = await getSegmentVideosVAMEProject({
+                                            project: project.config.project_path,
+                                            segmentation_algorithm: segmentation_algorithm!,
+                                            session: session!,
+                                        });
+                                        return data.videos;
+                                    }}
+                                />
+                            </div>
+                        )}
+                    </div>
                 </AccordionContent>
             </Accordion>
         </PaddedTab>

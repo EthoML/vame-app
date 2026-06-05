@@ -5,12 +5,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileCirclePlus, faFileImport, faHome, faMicrochip } from '@fortawesome/free-solid-svg-icons';
 
 import Tippy from '@tippyjs/react';
-import { NavbarButton, NavbarContainer, NavbarHeader, NavbarSection } from './styles';
+import { NavbarButton, NavbarContainer, NavbarHeader, NavbarHeaderSlot, NavbarSection } from './styles';
 import { get } from '../../utils/requests';
+import { usePageHeaderSlot } from '../../context/PageHeader';
 
 const Navbar: React.FC = () => {
     const [hasGpu, setHasGpu] = useState<boolean>(false);
     const [gpuDevice, setGpuDevice] = useState<string | null>(null);
+    const pageHeader = usePageHeaderSlot();
 
     useEffect(() => {
         const checkGpuStatus = async () => {
@@ -36,9 +38,9 @@ const Navbar: React.FC = () => {
 
     return (
         <NavbarContainer>
-            <NavbarSection>
-                <NavbarHeader to="/">VAME Desktop</NavbarHeader>
-            </NavbarSection>
+            <NavbarHeaderSlot>
+                {pageHeader ?? <NavbarHeader to="/">VAME Desktop</NavbarHeader>}
+            </NavbarHeaderSlot>
             <NavbarSection>
                 <Link to="/">
                     <Tippy content={<span>Home page</span>}>

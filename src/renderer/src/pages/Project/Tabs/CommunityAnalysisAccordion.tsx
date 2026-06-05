@@ -16,7 +16,7 @@ import { getProjectStateVAMEProject } from "../../../context/Projects/api/getPro
 import { createCommunityVideosVAMEProject } from "../../../context/Projects/api/createCommunityVideosVAMEProject";
 import { getCommunityVideosVAMEProject } from "../../../context/Projects/api/getCommunityVideosVAMEProject";
 import { getCommunityImagesVAMEProject } from "../../../context/Projects/api/getCommunityImagesVAMEProject";
-import { StepBadge, StepStateLine, ErrorNote, SuccessNote } from "@renderer/components/StepStatus";
+import { StepBadge, StepStateLine, ErrorNote, SuccessNote, OptionalTag } from "@renderer/components/StepStatus";
 import ResultImageViewer from "@renderer/components/ResultImageViewer";
 import ResultVideoViewer from "@renderer/components/ResultVideoViewer";
 
@@ -35,7 +35,7 @@ const CommunityAnalysisAccordion = ({
     setBlockSubmit,
     onFormSubmit,
 }: CommunityAnalysisAccordionProps) => {
-    const [openSteps, setOpenSteps] = useState([false, false, false, false]);
+    const [openSteps, setOpenSteps] = useState([false, false, false]);
     const [communityVideosLoading, setCommunityVideosLoading] = useState(false);
     const [communityVideosError, setCommunityVideosError] = useState<string | null>(null);
     const [isPollingCommunityVideos, setIsPollingCommunityVideos] = useState(false);
@@ -79,7 +79,7 @@ const CommunityAnalysisAccordion = ({
                             console.error("Error calling onFormSubmit:", e);
                         }
                         setBlockSubmit(false);
-                        setOpenSteps([false, false, false, false]);
+                        setOpenSteps([false, false, false]);
                     }
                 } catch (err) {
                     console.error("Error during polling:", err);
@@ -117,7 +117,7 @@ const CommunityAnalysisAccordion = ({
                             console.error("Error calling onFormSubmit:", e);
                         }
                         setBlockSubmit(false);
-                        setOpenSteps([false, false, false, false]);
+                        setOpenSteps([false, false, false]);
                     }
                 } catch (err) {
                     console.error("Error during polling videos:", err);
@@ -208,19 +208,48 @@ const CommunityAnalysisAccordion = ({
                     </div>
                 </AccordionContent>
             </Accordion>
-            {/* Accordion 2: Create Community Videos */}
+            {/* Accordion 2: Visualize Results - Images (independent of videos) */}
             <Accordion>
                 <AccordionHeader
                     $disabled={!communityAnalysisCompleted}
                     onClick={() => handleToggle(1, communityAnalysisCompleted)}
                 >
-                    5.2 Create Community Videos
-                    <StepBadge state={community_videos_session.execution_state} />
+                    5.2 Visualize Results - Images
                     <span style={{ marginLeft: "auto" }}>
                         <FontAwesomeIcon icon={openSteps[1] ? faChevronUp : faChevronDown} />
                     </span>
                 </AccordionHeader>
                 <AccordionContent $isOpen={openSteps[1]}>
+                    <ResultImageViewer
+                        open={openSteps[1]}
+                        algoOptions={ALGO_OPTIONS}
+                        altPrefix="Community tree"
+                        emptyText="No community image available for this selection."
+                        load={async ({ segmentation_algorithm }) => {
+                            const data = await getCommunityImagesVAMEProject({
+                                project: project.config.project_path,
+                                segmentation_algorithm: segmentation_algorithm!,
+                            });
+                            return data?.tree_image ? `data:image/png;base64,${data.tree_image.content}` : null;
+                        }}
+                    />
+                </AccordionContent>
+            </Accordion>
+
+            {/* Accordion 3: Create & View Community Videos (optional) */}
+            <Accordion>
+                <AccordionHeader
+                    $disabled={!communityAnalysisCompleted}
+                    onClick={() => handleToggle(2, communityAnalysisCompleted)}
+                >
+                    5.3 Create &amp; View Community Videos
+                    <StepBadge state={community_videos_session.execution_state} />
+                    <OptionalTag />
+                    <span style={{ marginLeft: "auto" }}>
+                        <FontAwesomeIcon icon={openSteps[2] ? faChevronUp : faChevronDown} />
+                    </span>
+                </AccordionHeader>
+                <AccordionContent $isOpen={openSteps[2]}>
                     <div>
                         <DynamicForm
                             schema={communityVideosGenerateSchema as unknown as Schema}
@@ -234,65 +263,27 @@ const CommunityAnalysisAccordion = ({
                         {communityVideosError && <ErrorNote>{communityVideosError}</ErrorNote>}
                         <StepStateLine state={communityVideosState} polling={isPollingCommunityVideos} noun="Video creation" />
                         {communityVideosCompleted && <SuccessNote>Videos created successfully.</SuccessNote>}
-                    </div>
-                </AccordionContent>
-            </Accordion>
 
-            {/* Accordion 3: Visualize Results - Videos */}
-            <Accordion>
-                <AccordionHeader
-                    $disabled={!communityVideosCompleted}
-                    onClick={() => handleToggle(2, communityVideosCompleted)}
-                >
-                    5.3 Visualize Results - Videos
-                    <StepBadge state={community_videos_session.execution_state} />
-                    <span style={{ marginLeft: "auto" }}>
-                        <FontAwesomeIcon icon={openSteps[2] ? faChevronUp : faChevronDown} />
-                    </span>
-                </AccordionHeader>
-                <AccordionContent $isOpen={openSteps[2]}>
-                    <ResultVideoViewer
-                        open={openSteps[2]}
-                        algoOptions={ALGO_OPTIONS}
-                        sessionOptions={sessionNames}
-                        emptyText="No community videos available for this selection."
-                        load={async ({ segmentation_algorithm, session }) => {
-                            const data = await getCommunityVideosVAMEProject({
-                                project: project.config.project_path,
-                                segmentation_algorithm: segmentation_algorithm!,
-                                session: session!,
-                            });
-                            return data.videos;
-                        }}
-                    />
-                </AccordionContent>
-            </Accordion>
-            {/* Accordion 4: Visualize Results - Images */}
-            <Accordion>
-                <AccordionHeader
-                    $disabled={!communityAnalysisCompleted}
-                    onClick={() => handleToggle(3, communityAnalysisCompleted)}
-                >
-                    5.4 Visualize Results - Images
-                    <StepBadge state={community_session.execution_state} />
-                    <span style={{ marginLeft: "auto" }}>
-                        <FontAwesomeIcon icon={openSteps[3] ? faChevronUp : faChevronDown} />
-                    </span>
-                </AccordionHeader>
-                <AccordionContent $isOpen={openSteps[3]}>
-                    <ResultImageViewer
-                        open={openSteps[3]}
-                        algoOptions={ALGO_OPTIONS}
-                        altPrefix="Community tree"
-                        emptyText="No community image available for this selection."
-                        load={async ({ segmentation_algorithm }) => {
-                            const data = await getCommunityImagesVAMEProject({
-                                project: project.config.project_path,
-                                segmentation_algorithm: segmentation_algorithm!,
-                            });
-                            return data?.tree_image ? `data:image/png;base64,${data.tree_image.content}` : null;
-                        }}
-                    />
+                        {communityVideosCompleted && (
+                            <div style={{ marginTop: "var(--space-5)", paddingTop: "var(--space-4)", borderTop: "1px solid var(--color-border)" }}>
+                                <h3 style={{ fontSize: "var(--text-lg)", margin: 0 }}>Community videos</h3>
+                                <ResultVideoViewer
+                                    open={openSteps[2] && communityVideosCompleted}
+                                    algoOptions={ALGO_OPTIONS}
+                                    sessionOptions={sessionNames}
+                                    emptyText="No community videos available for this selection."
+                                    load={async ({ segmentation_algorithm, session }) => {
+                                        const data = await getCommunityVideosVAMEProject({
+                                            project: project.config.project_path,
+                                            segmentation_algorithm: segmentation_algorithm!,
+                                            session: session!,
+                                        });
+                                        return data.videos;
+                                    }}
+                                />
+                            </div>
+                        )}
+                    </div>
                 </AccordionContent>
             </Accordion>
         </PaddedTab>

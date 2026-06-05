@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import Header from '@renderer/components/Header';
+import PageHeading from '@renderer/components/PageHeading';
+import { usePageHeader } from '@renderer/context/PageHeader';
 import DynamicForm from '@renderer/components/DynamicForm';
 import { ErrorNote } from '@renderer/components/StepStatus';
 import { get } from '@renderer/utils/requests';
@@ -50,9 +51,10 @@ const Load: React.FC = () => {
     }
   };
 
+  usePageHeader(<PageHeading title="Load an External Project" />, [])
+
   return (
     <PaddedContainer>
-      <Header title="Load an External Project" />
       <p>
         Select the VAME project directory — the folder that contains{' '}
         <code>config.yaml</code>.

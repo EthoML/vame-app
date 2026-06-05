@@ -173,6 +173,31 @@ export const ErrorNote: React.FC<{ children: React.ReactNode }> = ({ children })
     </ErrorNoteBox>
 );
 
+// --- Optional-step marker ---------------------------------------------------
+// A neutral pill that flags a step as skippable. It sits next to (not instead
+// of) the StepBadge, so an optional step that *failed* still shows the red ✗ —
+// but the tag makes clear that failure doesn't block the pipeline.
+
+const OptionalTagBox = styled.span`
+    margin-left: 8px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    border: 1px solid var(--color-border-strong);
+    background: var(--color-surface-sunken);
+    color: var(--color-text-secondary);
+    font-size: var(--text-caption);
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1.4;
+`;
+
+export const OptionalTag: React.FC = () => (
+    <OptionalTagBox title="This step is optional — skipping or failing it does not block the pipeline.">
+        Optional
+    </OptionalTagBox>
+);
+
 export const SuccessNote: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <SuccessNoteBox>
         <FontAwesomeIcon icon={faCircleCheck} style={{ marginTop: 2, flexShrink: 0 }} />

@@ -8,8 +8,9 @@ import { formatDatetime } from '@renderer/utils/date';
 import { useProjects } from '@renderer/context/Projects';
 
 import Tabs from '@renderer/components/Tabs';
-import Header from '@renderer/components/Header';
-import { Container, ProjectHeader, ProjectInformation, ProjectInformationCapsule } from './styles';
+import PageHeading from '@renderer/components/PageHeading';
+import { usePageHeader } from '@renderer/context/PageHeader';
+import { Container } from './styles';
 
 import Preprocessing from './Tabs/Preprocessing';
 import ModelTrainingAccordion from './Tabs/ModelTrainingAccordion';
@@ -81,6 +82,26 @@ const Project: React.FC = () => {
       }
     }
   }, [project])
+
+  // Publish the project name + facts into the navbar header slot.
+  usePageHeader(
+    project ? (
+      <PageHeading
+        title={project.config.project_name || project.config.project_path}
+        meta={[
+          {
+            label: 'Created',
+            value: project.config.creation_datetime ? formatDatetime(project.config.creation_datetime) : '',
+          },
+          { label: 'Location', value: project.config.project_path || '' },
+          { label: 'VAME', value: project.config.vame_version || '' },
+        ]}
+      />
+    ) : (
+      <PageHeading title="Loading project…" />
+    ),
+    [project]
+  )
 
   if (!project) {
     return (
@@ -258,35 +279,6 @@ const Project: React.FC = () => {
 
   return (
     <Container>
-      <ProjectHeader>
-        <Header title={project.config.project_name || project.config.project_path} />
-        <ProjectInformation>
-          <ProjectInformationCapsule>
-            <small>
-              <b>Creation Date: </b>
-              <small>
-                {project.config.creation_datetime ? formatDatetime(project.config.creation_datetime) : ""}
-              </small>
-            </small>
-          </ProjectInformationCapsule>
-          <ProjectInformationCapsule>
-            <small>
-              <b>Project Location</b>
-              <small>
-                {project.config.project_path || ""}
-              </small>
-            </small>
-          </ProjectInformationCapsule>
-          <ProjectInformationCapsule>
-            <small>
-              <b>VAME Version: </b>
-              <small>
-                {project.config.vame_version || ""}
-              </small>
-            </small>
-          </ProjectInformationCapsule>
-        </ProjectInformation>
-      </ProjectHeader>
       <Tabs
         tabs={tabs}
         selected={selectedTab}

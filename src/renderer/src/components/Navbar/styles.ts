@@ -9,21 +9,31 @@ export const NavbarHeader = styled(Link)`
     text-decoration: none;
 `;
 
+/* Left region that hosts the current page's heading (published via the
+   PageHeader slot). Grows to fill the bar and lets long content truncate. */
+export const NavbarHeaderSlot = styled.div`
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+`;
+
 export const NavbarContainer = styled.nav`
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 20px;
   font-size: var(--text-h3);
-  padding: 20px 20px;
+  padding: 14px 20px;
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
 `;
 
 export const NavbarSection = styled.div`
   display: flex;
-  justify-content: space-between;
   align-items: center;
   gap: 10px;
+  flex-shrink: 0;
 `;
 
 export const NavbarButton = styled.button`

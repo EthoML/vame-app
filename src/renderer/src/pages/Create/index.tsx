@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 
-import Header from '@renderer/components/Header';
+import PageHeading from '@renderer/components/PageHeading';
+import { usePageHeader } from '@renderer/context/PageHeader';
 import DynamicForm from '@renderer/components/DynamicForm';
 import { ErrorNote } from '@renderer/components/StepStatus';
 import { PaddedContainer, FormOverlay } from './styles';
@@ -51,9 +52,10 @@ const Create: React.FC = () => {
     }
   };
 
+  usePageHeader(<PageHeading title="Create a New Project" />, [])
+
   return (
     <PaddedContainer>
-      <Header title="Create a New Project" />
       <DynamicForm
         schema={createSchema as unknown as Schema}
         onFormSubmit={handleFormSubmit}

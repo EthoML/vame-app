@@ -2,17 +2,14 @@ import { useProjects } from '@renderer/context/Projects';
 import React, { useCallback, useState } from 'react';
 import { PaddedContainer } from './styles';
 import { ErrorNote } from '@renderer/components/StepStatus';
-import Header from '@renderer/components/Header';
-import Tippy from '@tippyjs/react';
-import Button from '@renderer/components/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowsRotate } from '@fortawesome/free-solid-svg-icons';
+import PageHeading from '@renderer/components/PageHeading';
+import { usePageHeader } from '@renderer/context/PageHeader';
 import ProjectsList from './ProjectList';
 import { useNavigate } from 'react-router-dom';
 import SubHeader from '@renderer/components/SubHeader';
 
 const Home: React.FC = () => {
-  const { projects, recentProjects, refresh, deleteProject } = useProjects()
+  const { projects, recentProjects, deleteProject } = useProjects()
   const navigate = useNavigate()
   const [deleteError, setDeleteError] = useState<string | null>(null)
 
@@ -31,19 +28,10 @@ const Home: React.FC = () => {
     }
   }, [])
 
+  usePageHeader(<PageHeading title="Projects" />, [])
+
   return (
     <PaddedContainer>
-
-      <Header title="Projects">
-        <Tippy content={<span>Refresh</span>}>
-          <>
-            <Button variant="icon" onClick={refresh} aria-label="Refresh projects">
-              <FontAwesomeIcon icon={faArrowsRotate} />
-            </Button>
-          </>
-        </Tippy>
-      </Header>
-
       {deleteError && <ErrorNote>{deleteError}</ErrorNote>}
 
       <SubHeader title="Recents:" />
