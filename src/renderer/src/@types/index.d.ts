@@ -1,11 +1,65 @@
 declare global {
 
-  export type Project = {
+  export type ProjectStates = {
+    update_config: {
+      execution_state?: string;
+      [key: string]: unknown
+    };
+    preprocessing: {
+      execution_state?: string;
+      [key: string]: unknown
+    };
+    preprocessing_visualization: {
+      execution_state?: string;
+      [key: string]: unknown
+    };
+    create_trainset: {
+      execution_state?: string;
+      [key: string]: unknown
+    };
+    train_model: {
+      execution_state?: string;
+      [key: string]: unknown
+    };
+    evaluate_model: {
+      execution_state?: string;
+      [key: string]: unknown
+    };
+    generative_model: {
+      execution_state?: string;
+      [key: string]: unknown
+    };
+    community: {
+      execution_state?: string;
+      [key: string]: unknown
+    };
+    community_videos: {
+      execution_state?: string;
+      [key: string]: unknown
+    };
+    motif_videos: {
+      execution_state?: string;
+      [key: string]: unknown
+    };
+    segment_session: {
+      execution_state?: string;
+      [key: string]: unknown
+    };
+    generate_reports: {
+      execution_state?: string;
+      [key: string]: unknown
+    };
+  };
+
+  export type ProjectType = {
     project: string;
     config: {
       Project: string;
       project_path: string;
-      
+      project_name: string;
+      creation_datetime: string;
+      vame_version: string;
+      keypoints: string[];
       all_data: boolean;
       anneal_function: string;
       annealtime: number;
@@ -38,14 +92,13 @@ declare global {
       model_snapshot: number;
       mse_prediction_reduction: string;
       mse_reconstruction_reduction: string;
-      n_cluster: number;
+      n_clusters: number;
       n_init_kmeans: number;
       n_layers: number;
       n_neighbors: number;
       noise: boolean;
       num_features: number;
       num_points: number;
-      parametrization: string;
       pose_confidence: number;
       prediction_decoder: number;
       prediction_steps: number;
@@ -65,13 +118,10 @@ declare global {
       test_fraction: number;
       time_window: number;
       transition_function: string;
-      video_sets: string[];
       zdims: number;
     };
     workflow: {
       organized: boolean;
-      pose_ref_index_description: string;
-      ref_index_len: number;
       modeled: boolean;
       segmented: boolean;
       motif_videos_created: boolean;
@@ -80,81 +130,29 @@ declare global {
       motif_community_videos_created: boolean;
       umaps_created: boolean;
     };
-    states: {
-      community: {
-        execution_state?: string;
-        [key:string]: unknown
-      };
-      community_videos: {
-        execution_state?: string;
-        [key:string]: unknown
-      };
-      create_trainset: {
-        execution_state?: string;
-        check_parameter: boolean;
-        config: string;
-        pose_ref_index: number[];
-      };
-      csv_to_numpy: {
-        execution_state?: string;
-        [key:string]: unknown
-      };
-      egocentric_alignment: {
-        check_video: boolean;
-        config: string;
-        crop_size: number[];
-        execution_state?: string;
-        pose_ref_index: number[];
-        use_video: boolean;
-        video_format: string;
-      };
-      evaluate_model: {
-        execution_state?: string;
-        [key:string]: unknown
-      };
-      generative_model: {
-        execution_state?: string;
-        [key:string]: unknown
-      };
-      motif_videos: {
-        execution_state?: string;
-        [key:string]: unknown
-      };
-      pose_segmentation: {
-        execution_state?: string;
-        [key:string]: unknown
-      };
-      train_model: {
-        config: string;
-        execution_state?: string;
-      };
-      visualization: {
-        execution_state?: string;
-        [key:string]: unknown
-      };
-    };
+    states: ProjectStates;
     videos: string[];
-    csvs: string[];
+    pes_paths: string[];
     assets: {
       images: {
         evaluation: string[];
         visualization: {
-          hmm: Record<string,string[]>,
-          kmeans: Record<string,string[]>
+          hmm: Record<string, string[]>,
+          kmeans: Record<string, string[]>
         };
       };
       videos: {
         community: {
-          hmm: Record<string,string[]>,
-          kmeans: Record<string,string[]>
+          hmm: Record<string, string[]>,
+          kmeans: Record<string, string[]>
         };
         motif: {
-          hmm: Record<string,string[]>,
-          kmeans: Record<string,string[]>
+          hmm: Record<string, string[]>,
+          kmeans: Record<string, string[]>
         };
       };
     };
-    created_at: string;
+    creation_datetime: string;
   };
 
   export type TypeName =
@@ -169,7 +167,7 @@ declare global {
   export interface Schema {
     title: string;
     properties: Properties;
-    
+
     type?: "object";
     description?: string;
 
@@ -189,7 +187,7 @@ declare global {
     | ArrayBooleanProperty
     | ArrayObjectProperty
 
-  export type SimpleProperty = 
+  export type SimpleProperty =
     | StringProperty
     | BooleanProperty
     | NumberProperty
@@ -234,21 +232,21 @@ declare global {
     minimum?: number;
   };
 
-  export type EnumProperty = DefaultPropertyAttrs &  {
+  export type EnumProperty = DefaultPropertyAttrs & {
     type: "string";
     enum: string[];
     multiple?: boolean;
     default?: string;
   };
 
-  export type ObjectProperty = DefaultPropertyAttrs &  {
+  export type ObjectProperty = DefaultPropertyAttrs & {
     type: "object";
     properties: Record<string, SimpleProperty>
     default?: Record<string, any>
     required?: string[];
   };
 
-  interface DefaultArrayPropertyAttrs extends DefaultPropertyAttrs{
+  interface DefaultArrayPropertyAttrs extends DefaultPropertyAttrs {
     maxItems?: number;
     minItems?: number;
   }
@@ -287,4 +285,4 @@ declare module 'react' {
   }
 }
 
-export {};
+export { };

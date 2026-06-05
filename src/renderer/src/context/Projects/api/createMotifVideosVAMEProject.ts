@@ -3,11 +3,11 @@ import { post } from "@renderer/utils/requests"
 
 type CreateMotifVideosProps = {
     project: string
-    [key:string]: any
+    [key: string]: any
 }
 
 export const createMotifVideosVAMEProject = async (data: CreateMotifVideosProps) => {
-    const result = await post<Project>('motif_videos', { ...data})
+    const result = await post<ProjectType>('motif-videos', { ...data })
 
     if (result.success) {
         return result.data

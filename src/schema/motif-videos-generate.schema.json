@@ -1,0 +1,15 @@
+{
+    "title": "Motifs Videos",
+    "type": "object",
+    "properties": {
+        "overwrite": {
+            "type": "boolean",
+            "title": "Overwrite Existing Videos",
+            "description": "If true, overwrite any existing videos",
+            "default": false
+        }
+    },
+    "required": [
+        "overwrite"
+    ]
+}

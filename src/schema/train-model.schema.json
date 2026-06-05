@@ -1,0 +1,22 @@
+{
+    "title": "Train Model Parameters",
+    "type": "object",
+    "properties": {
+        "batch_size": {
+            "type": "integer",
+            "title": "Batch Size",
+            "description": "Number of samples per gradient update.",
+            "default": 256
+        },
+        "max_epochs": {
+            "type": "integer",
+            "title": "Max Epochs",
+            "description": "Maximum number of training epochs.",
+            "default": 500
+        }
+    },
+    "required": [
+        "batch_size",
+        "max_epochs"
+    ]
+}

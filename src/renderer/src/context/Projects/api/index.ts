@@ -1,9 +1,9 @@
 export * from "./createVAMEProject"
 export * from "./deleteVAMEProject"
 
-export * from "./configureVAMEProject"
+export * from "./preprocessingVAMEProject"
+export * from "./preprocessingVisualization"
 
-export * from "./alignVAMEProject"
 export * from "./createTrainsetVAMEProject"
 
 export * from "./trainVAMEProject"
@@ -17,6 +17,9 @@ export * from "./createCommunityVideosVAMEProject"
 
 export * from "./createMotifVideosVAMEProject"
 
+export * from "./generateReportVAMEProject"
+export * from "./getProjectStateVAMEProject"
+
 // community analises
 
 // community videos
@@ -24,4 +27,3 @@ export * from "./createMotifVideosVAMEProject"
 // motif community videos
 
 export * from "./createUMAPVisualizationVAMEProject"
-

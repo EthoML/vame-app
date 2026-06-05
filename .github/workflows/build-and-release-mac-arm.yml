@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - dev
 
 permissions:
   actions: write
@@ -22,14 +23,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Set up Conda environment
+        uses: conda-incubator/setup-miniconda@v3
         with:
-          python-version: "3.11"
-
-      - name: install python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          environment-file: environment-mac-arm.yml
+          activate-environment: vame-desktop
+          auto-activate-base: false
 
       - uses: actions/setup-node@v4
         with:
@@ -38,12 +37,23 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Set version based on branch
+        id: set-version
+        run: |
+          BASE_VERSION=$(node -p "require('./package.json').version")
+          if [[ "${{ github.ref_name }}" == "dev" ]]; then
+            echo "VERSION=${BASE_VERSION}-dev" >> $GITHUB_ENV
+          else
+            echo "VERSION=${BASE_VERSION}" >> $GITHUB_ENV
+          fi
+          echo "Using version: $VERSION"
+
       - uses: apple-actions/import-codesign-certs@v3
         with:
           p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
-          p12-password: ${{ secrets.MAOS_CERTIFICATE_PWD }}
+          p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
 
       - name: Build and publish for MacOS arm64
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run build:mac -- --publish=always --arm64
+        run: npm run build:mac -- --publish=always --arm64 --config.extraMetadata.version=${{ env.VERSION }}

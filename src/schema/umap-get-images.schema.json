@@ -1,0 +1,22 @@
+{
+    "title": "Get UMAP Images",
+    "type": "object",
+    "properties": {
+        "segmentation_algorithm": {
+            "type": "string",
+            "enum": [
+                "hmm",
+                "kmeans"
+            ]
+        },
+        "session": {
+            "type": "string",
+            "title": "Session",
+            "description": "Select the session to retrieve UMAP images from"
+        }
+    },
+    "required": [
+        "segmentation_algorithm",
+        "session"
+    ]
+}

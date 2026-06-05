@@ -25,6 +25,7 @@ export const TabContent = styled.div`
   display: flex;
   position: relative;
   overflow: auto;
+  min-height: 0;
 `;
 
 interface TabPaneProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -62,6 +63,9 @@ export const TabButton = styled.button<TabButtonProps>`
 
   &:disabled {
     pointer-events: none;
+    color: #888;
+    opacity: 0.5;
+    background-color: #f5f5f5;
   }
 
   ${(props) =>
@@ -76,6 +80,9 @@ export const TabButton = styled.button<TabButtonProps>`
 
 export const PaddedTab = styled.div`
   padding: 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 `;
 
 export const GridTab = styled.div`
@@ -83,6 +90,7 @@ export const GridTab = styled.div`
   grid-template-rows: 1fr auto;
   gap: 20px;
   height: 100%;
+  min-height: 0;
 `;
 
 export const PaddedBottomRow = styled.div`

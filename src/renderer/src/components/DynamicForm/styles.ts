@@ -1,6 +1,51 @@
 import styled from "styled-components";
 import ButtonComponent from "@renderer/components/Button"
 
+// Styled input component with constrained width
+export const StyledInput = styled.input`
+  width: 350px;
+  max-width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+`;
+
+// Styled select component with constrained width
+export const StyledSelect = styled.select`
+  width: 350px;
+  max-width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  background-color: #fff;
+`;
+
+// --- Layout for the whole form ---
+export const FormLayout = styled.form`
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* for flexbox scrolling */
+`;
+
+/* --- Footer for the button --- */
+export const FormFooter = styled.div`
+  flex-shrink: 0;
+  padding: 16px 0 24px 0;
+  background: transparent;
+  display: flex;
+  align-items: flex-end;
+  bottom: 0;
+`;
+
+/* --- Scrollable content area above the button --- */
+export const FormScrollContent = styled.div`
+  height: calc(100% - 56px);
+  overflow-y: auto;
+  min-height: 0;
+`;
+
 // Accordion Component
 export const Accordion = styled.div`
   background-color: #f1f1f1;
@@ -8,14 +53,18 @@ export const Accordion = styled.div`
   margin-bottom: 10px;
 `;
 
-export const AccordionHeader = styled.div`
-  background-color: black;
-  color: white;
-  cursor: pointer;
+export const AccordionHeader = styled.div<{ $disabled?: boolean }>`
+  background-color:rgb(166, 166, 166);
+  color: black;
+  font-weight: 500;
+  cursor: ${({ $disabled }) => ($disabled ? 'not-allowed' : 'pointer')};
+  opacity: ${({ $disabled }) => ($disabled ? 0.6 : 1)};
   padding: 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  user-select: none;
+  transition: background 0.2s, color 0.2s, opacity 0.2s;
 `;
 
 interface AccordionContentProps {
@@ -31,7 +80,8 @@ export const InputGroup = styled.div`
   display: flex;
   justify-content: space-between;
   flex-direction: column;
-  gap: 10px;
+  gap: 4px; /* Reduced gap between label and input */
+  margin-bottom: 20px; /* Increased spacing between form items */
 `;
 
 interface InputLabelProps {
@@ -40,6 +90,8 @@ interface InputLabelProps {
 }
 
 export const InputLabel = styled.label<InputLabelProps>`
+  display: flex;
+  align-items: flex-start;
 
   span {
     font-weight: bold;
@@ -48,6 +100,13 @@ export const InputLabel = styled.label<InputLabelProps>`
   small {
     font-size: 12px;
     color: #666;
+    margin-left: 5px;
+    &:before {
+      content: '(';
+    }
+    &:after {
+      content: ')';
+    }
   }
 
   &[required] span:after {
@@ -61,22 +120,40 @@ export const InputLabel = styled.label<InputLabelProps>`
     color: gray;
     margin-left: 5px;
   }
-
 `;
 
 export const Button = styled.button`
   padding: 10px;
-  background-color: #007bff;
-  width: 100%;
+  width: 400px;
+  background-color: #0056b3;
   color: white;
-  border: none;
+  border: 2px solid #007bff;
   border-radius: 5px;
   font-weight: bold;
   cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover,
+  &:focus {
+    background-color: #003366;
+    color: white;
+  }
 
   &[disabled] {
     pointer-events: none;
     opacity: 0.5;
+  }
+`;
+
+export const LogsButton = styled(Button)`
+  width: 100px;
+  background-color: #000000;
+  border: 2px solid #333333;
+  margin-left: 10px;
+
+  &:hover,
+  &:focus {
+    background-color: #333333;
   }
 `;
 
