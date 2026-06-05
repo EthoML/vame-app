@@ -1,109 +1,110 @@
 # VAME Desktop
-A desktop application for the Variational Animal Motion Encoding (VAME) project.
 
-<!-- ![VAME-Desktop](https://github.com/user-attachments/assets/1b834650-14f5-4dff-8ba0-b29f18178337) -->
+A web application for the Variational Animal Motion Encoding (VAME) project — an
+open-source machine learning tool for behavioral segmentation and analyses.
 
+VAME Desktop runs locally: a Python (Flask) backend wraps the
+[VAME](https://github.com/EthoML/VAME) library and also serves a React frontend,
+which you use in your browser. There is no Electron shell and no PyInstaller
+bundle — it installs and runs like a normal Python package.
 
-## Installation
+> **Migrating from the old Electron app?** See [MIGRATION.md](MIGRATION.md) for
+> what changed and why.
 
-You can find installers for VAME Desktop on the [release page](https://github.com/catalystneuro/vame-desktop/releases).
+## Requirements
 
-### Requirement:
+- Python ≥ 3.12 (VAME 0.14 requires it)
+- [conda](https://docs.conda.io/en/latest/) or a virtualenv
+- [ffmpeg](https://www.ffmpeg.org/) (needed for some video/image functions)
+- A modern browser (Chrome, Edge, Firefox, or Safari)
 
-For some functionalities, [ffmpeg](https://www.ffmpeg.org/) might be needed. You can download it from: https://www.ffmpeg.org/download.html
-
-### MacOS
-> For M-series Macs, download the -arm64.dmg. For Intel Macs, download the -x64.dmg.
-
-Open the `vame-desktop-<VERSION>-macos-arm64.dmg` or `vame-desktop-<VERSION>-macos-x64.dmg`, and drag and drop the `VAME Desktop` into the `Applications` folder.
-
-Then go to `Applications` in Finder:
-![Finder](https://github.com/user-attachments/assets/87c1de95-0a61-455d-8582-71ed2958c649)
-
-Hold `Control ^` on the keyboard, then click open. In the following window, click on open again. This process needs to be done once. After that, the app can be opened from Launchpad as usual.
-
-### Windows
-
-Double-click on `vame-desktop-<VERSION>-win-setup.exe`. The app will be installed and a shortcut named `VAME Desktop` will be added to your Desktop. Double-click on it to launch the app.
-
-### Linux Debian
-
-To install it from the terminal:
-```sh
-sudo dpkg -i vame-desktop-<VERSION>-ubuntu24.deb
-```
-
-The executable will be added to the main applications folder on your Linux distribution.
-
-
-## Development mode
-
-### Setup
-
-Pre-requisites:
-- [git](https://git-scm.com/)
-- [Node.js 18](https://nodejs.org/en/) or higher
-- [Python 3.8+](https://www.python.org/downloads/) or higher
-- [conda](https://docs.conda.io/en/latest/) or [anaconda](https://www.anaconda.com/products/distribution)
-- [ffmpeg](https://www.ffmpeg.org/) (might be needed for some functionalities)
-
-To run the app in development mode, you will need to clone the repository:
-```bash
-git clone https://github.com/EthoML/vame-desktop.git
-cd vame-desktop
-```
-
-Create the Conda environment for the project, which will install all the necessary Python dependencies:
+## Install & run
 
 ```bash
-conda env create -f environment-<os>.yml
-```
-
-Once complete, activate the environment by running the following command:
-```bash
+# 1. Create an environment (conda recommended because of PyTorch/VAME).
+#    This also installs vame-desktop and its Python dependencies (from
+#    pyproject.toml) via `pip install -e .`.
+conda env create -f environment-<os>.yml   # linux | mac-arm | mac-x86 | win
 conda activate vame-desktop
-```
 
-Install Node modules by running the following command:
-```bash
+# 2. Build the frontend into the Python package
 npm install
+npm run build
+
+# 3. Run it
+vame-desktop
 ```
 
-### Running the App
-To run the Electron app in development mode, run the following command:
+`vame-desktop` starts the local server and opens the app in your browser.
+
+### CLI options
+
+```
+vame-desktop [--host HOST] [--port PORT] [--data-root DIR] [--no-browser] [--dev]
+```
+
+| Flag | Default | Purpose |
+|------|---------|---------|
+| `--host` | `127.0.0.1` | Interface to bind. Use `0.0.0.0` to expose on the LAN. |
+| `--port` | `8641` | Port to listen on. Use `0` to auto-pick a free port. |
+| `--data-root` | home directory | Root the in-app file browser may traverse. Restrict this on shared servers. |
+| `--no-browser` | off | Don't auto-open the browser. |
+| `--dev` | off | Use the Flask dev server instead of waitress. |
+
+Projects are stored under `~/vame-desktop/projects`. `--data-root` (env
+`VAME_DATA_ROOT`) only controls the *file browser* root, not project storage.
+
+## Selecting your data
+
+Because the app runs in a browser, files are chosen through an **in-app file
+browser** (built with [react-arborist](https://github.com/brimdata/react-arborist))
+that lists the **server's** filesystem via the backend. When you run locally, the
+server is your own machine, so you simply navigate to your videos / pose files.
+The selected absolute paths are sent to VAME — no file uploads.
+
+## Development
+
+Run the backend and the Vite dev server in two terminals:
+
 ```bash
+# Terminal 1 — backend API
+pip install -e .
+vame-desktop --no-browser            # or: npm run backend
+
+# Terminal 2 — frontend with hot reload (http://localhost:5173)
 npm run dev
 ```
 
-### Build
+In dev the frontend talks to the backend at `http://localhost:8641` (override
+with `VITE_API_BASE`). In production the frontend is served by Flask itself, so
+requests are same-origin.
 
-The build process will create a `.exe`, `.dmg` or `.deb`, depending on the OS.
+Useful scripts:
 
-MacOS
+- `npm run dev` — Vite dev server (hot reload)
+- `npm run build` — build the frontend into `src/services/vameApi/vame_desktop/web`
+- `npm run typecheck` — TypeScript checks
+- `npm run lint` / `npm run format`
+
+## Building a distributable wheel
+
 ```bash
-npm run build:mac
+npm run build              # frontend -> vame_desktop/web
+python -m build --wheel    # wheel bundles the built frontend
 ```
 
-Windows
-```bash
-npm run build:win
+The resulting wheel in `dist/` can be installed anywhere with
+`pip install vame_desktop-*.whl` and launched with `vame-desktop`.
+
+## Architecture
+
+```
+vame-desktop (CLI)
+  └─ Flask (waitress) on 127.0.0.1:8641
+       ├─ serves the built React SPA (HashRouter)
+       ├─ REST API wrapping the VAME library
+       └─ /fs filesystem API for the in-app file browser
 ```
 
-Linux Debian
-```bash
-npm run build:linux
-```
-
-### Publish
-
-Publishing will happen every time a new push is maded to the `main` branch with a tag associated, creating a release at [release page](https://github.com/catalystneuro/vame-desktop/releases).
-
-To avoid unecessary releases, follow these steps:
-- Create a branch `git checkout -b <branch_name>`, work on it, and create a pull request to `main`.
-- Update the `package.json` with the new version number.
-- Create a new tag with `git tag v<tag_number>`, push it to the repo with `git push orgin --tags`. **IMPORTANT**: the tag must be in the format `vX.Y.Z` where `X.Y.Z` is the package version number in `package.json`.
-- Create a draft release on github using the tag created.
-- Merge the PR from `<branch_name>` into `main`. The github action will publish the executable assets to the draft release.
-- Manually edit the draft release, add information about the new features, bug fixes, and breaking changes.
-- Finally, approve and publish the new release.
-
+Frontend: React + TypeScript + Vite + styled-components + Bootstrap.
+Backend: Flask + flask-restx + VAME (`vame-py`).

@@ -6,9 +6,13 @@ data/*.mp4
 venv
 __pycache__
 
-# Python Service Output
-resources/python/build
-resources/python/main
+# Built frontend (emitted by `npm run build`, shipped in the wheel)
+src/services/vameApi/vame_desktop/web
+
+# Python packaging
+build/
+*.egg-info/
+dist/
 
 # Logs
 logs

@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
-import { open } from '@renderer/utils/folders';
 import { post } from '@renderer/utils/requests';
 import { onConnected, onProjectReady } from '@renderer/utils/vame';
 import { formatDatetime } from '@renderer/utils/date';
@@ -17,7 +16,6 @@ import ModelTrainingAccordion from './Tabs/ModelTrainingAccordion';
 import PoseSegmentationAccordion from './Tabs/PoseSegmentationAccordion';
 import CommunityAnalysisAccordion from './Tabs/CommunityAnalysisAccordion';
 import { MainContainer } from '@renderer/components/Container';
-import { useSettings } from '@renderer/context/Settings';
 import RawDataTab from './Tabs/RawDataTab';
 import Report from './Tabs/Report';
 
@@ -30,10 +28,6 @@ const Project: React.FC = () => {
     refresh,
     runPreprocessing,
   } = useProjects()
-
-  const {
-    tabsLock
-  } = useSettings()
 
   const [project, setProject] = useState<ProjectType | undefined>()
   const [blockSubmit, setBlockSubmit] = useState(true);
@@ -197,7 +191,7 @@ const Project: React.FC = () => {
     {
       id: 'model-training',
       label: '3. Model Training',
-      disabled: tabsLock && !projectPreprocessed,
+      disabled: !projectPreprocessed,
       complete: trainsetCreated && modelCreated && modelEvaluated,
       tooltip: "Organize your project first.",
       content: (
@@ -212,7 +206,7 @@ const Project: React.FC = () => {
     {
       id: 'segmentation',
       label: '4. Pose Segmentation',
-      disabled: tabsLock && !modelEvaluated,
+      disabled: !modelEvaluated,
       complete: segmented,
       tooltip: "Model your project first.",
       content: (
@@ -227,7 +221,7 @@ const Project: React.FC = () => {
     {
       id: 'community-analysis',
       label: '5. Community Analysis',
-      disabled: tabsLock && !segmented,
+      disabled: !segmented,
       complete: community?.execution_state === "success",
       tooltip: "Need Pose Segmentation.",
       content: (
@@ -243,7 +237,7 @@ const Project: React.FC = () => {
       id: 'report',
       label: '6. Report',
       complete: reportCompleted,
-      disabled: tabsLock && !segmented,
+      disabled: !segmented,
       tooltip: "Need segmentation.",
       content: (
         <Report
@@ -261,12 +255,6 @@ const Project: React.FC = () => {
       <ProjectHeader>
         <Header title={project.config.project_name || project.config.project_path}>
           <HeaderButtonContainer>
-            <HeaderButton
-              onClick={() => {
-                open(project.config.project_path)
-              }}>
-              Open in File Explorer
-            </HeaderButton>
             <HeaderButton
               onClick={() => {
                 navigate({

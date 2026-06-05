@@ -6,7 +6,7 @@ import React, {
 } from "react";
 import { createCustomContext } from "@renderer/utils/createContext";
 import { onConnected, onVAMEReady } from "@renderer/utils/vame";
-import { get, post } from "@renderer/utils/requests";
+import { API_BASE, get, post } from "@renderer/utils/requests";
 
 import {
   type IProjectContext,
@@ -230,7 +230,8 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
 
     const fullProjectDirectory = `${Project}${project_path.split(Project).slice(1).join(Project)}`
 
-    return new URL(`${basePath}/${fullProjectDirectory}/${asset}`, "http://localhost:8641").href
+    const path = encodeURI(`/${basePath}/${fullProjectDirectory}/${asset}`)
+    return `${API_BASE}${path}`
   }, [getProject])
 
 

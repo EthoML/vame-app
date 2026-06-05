@@ -2,7 +2,7 @@ import React, { useState } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faTerminal } from "@fortawesome/free-solid-svg-icons"
-import TerminalModal from "../TerminalModal"
+import LogComponent from "../TerminalModal/LogComponent"
 import { extractDefaultValues } from "@renderer/utils/extractDefaultValues"
 import { Button, LogsButton, InputGroup, InputLabel, FormLayout, FormScrollContent, FormFooter } from './styles';
 import DynamicInput from "./DynamicInput"
@@ -44,49 +44,66 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
   const properties = Object.entries(schema.properties)
   const readOnly = properties.length > 0 && !properties.some(([_, p]) => !p.readOnly)
 
-  // const handleSubmit = (data) => {
-  //   console.log(data)
-  //   onFormSubmit(data)
-  // }
+  const logNames = logName ? (Array.isArray(logName) ? logName : [logName]) : []
 
   return (
     <FormProvider {...methods}>
+      <div style={{ display: "flex", gap: 16, alignItems: "stretch" }}>
+        {/* Left column: the form (everything that was in the collapsible) */}
+        <FormLayout
+          onSubmit={methods.handleSubmit(onFormSubmit)}
+          style={{ flex: 1, minWidth: 0 }}
+        >
+          <FormScrollContent>
+            {properties.map(([name, property]) => {
+              const required = schema.required?.includes(name)
 
-      <FormLayout
-        onSubmit={methods.handleSubmit(onFormSubmit)}
-      >
-        <FormScrollContent>
-          {properties.map(([name, property]) => {
-            const required = schema.required?.includes(name)
+              return (
+                <InputGroup key={name}>
+                  <InputLabel required={required} readOnly={property.readOnly}>
+                    <span>{property.title ?? header(name)}</span>
+                    {property.description && <small>{property.description}</small>}
+                  </InputLabel>
+                  <DynamicInput name={name} property={property} required={required} readOnly={property.readOnly} />
+                </InputGroup>
+              )
+            })}
+          </FormScrollContent>
+          <FormFooter>
+            <Button type="submit" disabled={blockSubmission || readOnly}>{submitText}</Button>
+            {showLogsButton && (
+              <LogsButton type="button" onClick={() => setLogsOpen((open) => !open)}>
+                {logsOpen ? "Hide Logs" : "Logs"} <FontAwesomeIcon icon={faTerminal} />
+              </LogsButton>
+            )}
+          </FormFooter>
+        </FormLayout>
 
-            return (
-              <InputGroup key={name}>
-                <InputLabel required={required} readOnly={property.readOnly}>
-                  <span>{property.title ?? header(name)}</span>
-                  {property.description && <small>{property.description}</small>}
-                </InputLabel>
-                <DynamicInput name={name} property={property} required={required} readOnly={property.readOnly} />
-              </InputGroup>
-            )
-          })}
-        </FormScrollContent>
-        <FormFooter>
-          <Button type="submit" disabled={blockSubmission || readOnly}>{submitText}</Button>
-          {showLogsButton && (
-            <LogsButton type="button" onClick={() => setLogsOpen(true)}>
-              Logs <FontAwesomeIcon icon={faTerminal} />
-            </LogsButton>
-          )}
-        </FormFooter>
-        {showLogsButton && (
-          <TerminalModal
-            isOpen={logsOpen}
-            onClose={() => setLogsOpen(false)}
-            logName={logName || ''}
-            projectPath={projectPath || ''}
-          />
+        {/* Right column: logs, shown beside the form instead of as a modal */}
+        {showLogsButton && logsOpen && (
+          <div
+            style={{
+              flex: 1,
+              minWidth: 0,
+              alignSelf: "stretch",
+              display: "flex",
+              flexDirection: "column",
+              gap: 8,
+              minHeight: 240,
+              maxHeight: 600,
+              overflowY: "auto",
+            }}
+          >
+            {logNames.length === 0 ? (
+              <LogComponent projectPath={projectPath || ""} />
+            ) : (
+              logNames.map((l) => (
+                <LogComponent key={l} logName={l} projectPath={projectPath || ""} />
+              ))
+            )}
+          </div>
         )}
-      </FormLayout>
+      </div>
     </FormProvider>
   );
 }
