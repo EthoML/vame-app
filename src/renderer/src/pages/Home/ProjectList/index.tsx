@@ -24,7 +24,7 @@ const ProjectsList: React.FC<Props> = ({
           <ButtonContainer>
             <Button onClick={() => {
               onEdit(project)
-            }}>Edit</Button>
+            }}>Open</Button>
             <Button onClick={() => {
 
               // Check to make sure user wants to delete the project
