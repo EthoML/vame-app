@@ -8,7 +8,6 @@ import {
   evaluateVAMEProject,
   segmentVAMEProject,
   createMotifVideosVAMEProject,
-  createUMAPVisualizationVAMEProject,
   communityAnalysisVAMEProject,
   createCommunityVideosVAMEProject,
 } from "./api"
@@ -60,6 +59,4 @@ export type IProjectContext = {
 
   communityAnalysis: typeof communityAnalysisVAMEProject
   createCommunityVideos: typeof createCommunityVideosVAMEProject
-
-  createUMAPVisualization: typeof createUMAPVisualizationVAMEProject
 }

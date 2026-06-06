@@ -19,6 +19,10 @@ class Report(Resource):
     def post(self):
         def background_task(config: dict):
             vame.visualization.generate_reports(config=config)
+            # UMAP embeddings are cohort-wide (all sessions combined) and are
+            # written to reports/umap/. They are part of the report artifacts,
+            # so generate them in the same step (logs to the same report.log).
+            vame.visualization.visualize_umap(config=config)
 
         try:
             data, project_path = resolve_request_data(request)
@@ -70,7 +74,6 @@ class Umap(Resource):
     )
     def get(self):
         project_path = request.args.get("project")
-        session = request.args.get("session")
         segmentation_algorithm = request.args.get("segmentation_algorithm")
         if not project_path or not segmentation_algorithm:
             api.abort(400, "Missing 'project' or 'segmentation_algorithm'")
@@ -80,18 +83,20 @@ class Umap(Resource):
             model_name = config.get("model_name")
             base_path = Path(project_path) / "reports" / "umap"
             images = dict()
+            # UMAP embeddings are cohort-wide (all sessions combined), so the
+            # filenames carry no session segment.
             # No label
-            file_path = base_path / f"umap_{session}_{model_name}_{segmentation_algorithm}-{n_clusters}.png"
+            file_path = base_path / f"umap_{model_name}_{segmentation_algorithm}-{n_clusters}.png"
             if file_path.exists():
                 content = base64.b64encode(file_path.read_bytes()).decode()
                 images["no_label"] = {"filename": file_path.name, "content": content}
             # Motif
-            file_path = base_path / f"umap_{session}_{model_name}_{segmentation_algorithm}-{n_clusters}_motif.png"
+            file_path = base_path / f"umap_{model_name}_{segmentation_algorithm}-{n_clusters}_motif.png"
             if file_path.exists():
                 content = base64.b64encode(file_path.read_bytes()).decode()
                 images["motif"] = {"filename": file_path.name, "content": content}
             # Community
-            file_path = base_path / f"umap_{session}_{model_name}_{segmentation_algorithm}-{n_clusters}_community.png"
+            file_path = base_path / f"umap_{model_name}_{segmentation_algorithm}-{n_clusters}_community.png"
             if file_path.exists():
                 content = base64.b64encode(file_path.read_bytes()).decode()
                 images["community"] = {"filename": file_path.name, "content": content}

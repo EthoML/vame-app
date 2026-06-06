@@ -277,7 +277,6 @@ def load_project(project_path: Path):
         segmentation_algorithms = config["segmentation_algorithms"]
 
         visualization = {
-            # param: get_visualization_images(project_path, f"{param}-{n_clusters}")
             param: {}
             for param in segmentation_algorithms
         }
@@ -320,14 +319,13 @@ def load_project(project_path: Path):
             for param in segmentation_algorithms
         }
 
-        # Check if UMAPs were created for each parametrization
+        # Check if UMAPs were created for each parametrization. UMAP embeddings
+        # are cohort-wide (all sessions combined) and are written to
+        # reports/umap/ as umap_<model>_<seg>-<n_clusters>.png.
+        model_name = config.get("model_name")
+        umap_folder = path_obj / "reports" / "umap"
         umaps_created = {
-            param: any(
-                map(
-                    lambda videos: len(videos) > 0,
-                    images["visualization"][param].values(),
-                )
-            )
+            param: (umap_folder / f"umap_{model_name}_{param}-{n_clusters}.png").exists()
             for param in segmentation_algorithms
         }
 

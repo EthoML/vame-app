@@ -20,10 +20,3 @@ export * from "./createMotifVideosVAMEProject"
 export * from "./generateReportVAMEProject"
 export * from "./getProjectStateVAMEProject"
 
-// community analises
-
-// community videos
-
-// motif community videos
-
-export * from "./createUMAPVisualizationVAMEProject"

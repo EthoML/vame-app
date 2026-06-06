@@ -21,7 +21,7 @@ import {
   trainVAMEProject,
   evaluateVAMEProject,
   segmentVAMEProject,
-  createMotifVideosVAMEProject, createUMAPVisualizationVAMEProject,
+  createMotifVideosVAMEProject,
   communityAnalysisVAMEProject,
   createCommunityVideosVAMEProject,
 } from "./api";
@@ -197,12 +197,6 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
     return res
   }, [])
 
-  const createUMAPVisualization = useCallback(async (data) => {
-    const res = await createUMAPVisualizationVAMEProject(data)
-    await refresh()
-    return res
-  }, [])
-
   const runPreprocessing = useCallback(async (data) => {
     const res = await preprocessingVAMEProject(data)
     await refresh()
@@ -253,7 +247,6 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
     communityAnalysis,
     createCommunityVideos,
     createMotifCommunityVideos,
-    createUMAPVisualization
   }
 
   return (

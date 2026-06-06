@@ -148,15 +148,13 @@ const Report: React.FC<TabProps> = ({
                     <ResultImageViewer
                         open={openSteps[2]}
                         algoOptions={ALGO_OPTIONS}
-                        sessionOptions={sessionNames}
                         views={UMAP_VIEWS}
                         altPrefix="UMAP"
                         emptyText="No UMAP image available for this selection."
-                        load={async ({ segmentation_algorithm, session }) => {
+                        load={async ({ segmentation_algorithm }) => {
                             const imgs = await getUmapVAMEProject({
                                 project: project.config.project_path,
                                 segmentation_algorithm: segmentation_algorithm!,
-                                session: session!,
                             });
                             return {
                                 no_label: imgs?.no_label ? `data:image/png;base64,${imgs.no_label.content}` : null,

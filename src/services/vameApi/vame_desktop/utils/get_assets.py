@@ -3,22 +3,6 @@ from typing import Union
 import yaml
 
 
-def get_visualization_images(project_path: Path, parametrization: str):
-    community_subfolders = get_video_related_asset(
-        project_path, subpath=Path(parametrization) / "community", validate=True
-    )
-    visualization_images = dict()
-    for video_set, community_subfolder in community_subfolders.items():
-        if community_subfolder:
-            visualization_images[video_set] = [
-                str(image.relative_to(project_path))
-                for image in community_subfolder.glob("umap_*.png")
-            ]
-        else:
-            visualization_images[video_set] = []
-    return visualization_images
-
-
 def get_video_related_asset(
     project_path: Path,
     subpath: Union[str, callable],
