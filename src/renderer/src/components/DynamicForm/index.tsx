@@ -3,6 +3,7 @@ import { FormProvider, useForm } from "react-hook-form"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faTerminal } from "@fortawesome/free-solid-svg-icons"
 import LogComponent from "../TerminalModal/LogComponent"
+import { ErrorNote } from "@renderer/components/StepStatus"
 import { extractDefaultValues } from "@renderer/utils/extractDefaultValues"
 import { Button, LogsButton, InputGroup, InputLabel, FormLayout, FormScrollContent, FormFooter } from './styles';
 import DynamicInput from "./DynamicInput"
@@ -17,6 +18,12 @@ export interface DynamicFormProps {
   showLogsButton?: boolean
   logName?: string | string[]
   projectPath?: string
+  /**
+   * Cross-field validation. Returns a list of human-readable requirements that
+   * are NOT yet satisfied; an empty list means the form is valid. While any
+   * remain, the submit button is disabled and the list is surfaced to the user.
+   */
+  validate?: (values: Record<string, unknown>) => string[]
 }
 
 const DynamicForm: React.FC<DynamicFormProps> = ({
@@ -28,6 +35,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
   showLogsButton = false,
   logName,
   projectPath,
+  validate,
 }) => {
   const [logsOpen, setLogsOpen] = useState(false)
 
@@ -46,6 +54,30 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
 
   const logNames = logName ? (Array.isArray(logName) ? logName : [logName]) : []
 
+  // Subscribe to all values so conditional fields (visibleWhen) re-evaluate as
+  // the user edits their dependencies.
+  const values = methods.watch()
+
+  const isVisible = (property: Property): boolean => {
+    const cond = property.visibleWhen
+    if (!cond) return true
+    const dep = (values as Record<string, unknown>)[cond.field]
+    if (cond.fileExtension) {
+      const arr = Array.isArray(dep) ? dep : dep ? [dep] : []
+      return (
+        arr.length > 0 &&
+        arr.every((p) => String(p).toLowerCase().endsWith(cond.fileExtension!))
+      )
+    }
+    if ("equals" in cond) return dep === cond.equals
+    return true
+  }
+
+  // Unmet requirements (empty = valid). Shown once the user starts editing so a
+  // pristine form isn't pre-painted with errors, but the button stays disabled.
+  const validationErrors = validate ? validate(values as Record<string, unknown>) : []
+  const showValidation = validationErrors.length > 0 && methods.formState.isDirty
+
   return (
     <FormProvider {...methods}>
       <div style={{ display: "flex", gap: 16, alignItems: "stretch" }}>
@@ -56,6 +88,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
         >
           <FormScrollContent>
             {properties.map(([name, property]) => {
+              if (!isVisible(property)) return null
               const required = schema.required?.includes(name)
 
               return (
@@ -69,8 +102,20 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
               )
             })}
           </FormScrollContent>
+          {showValidation && (
+            <ErrorNote>
+              {validationErrors.map((msg) => (
+                <span key={msg} style={{ display: "block" }}>• {msg}</span>
+              ))}
+            </ErrorNote>
+          )}
           <FormFooter>
-            <Button type="submit" disabled={blockSubmission || readOnly}>{submitText}</Button>
+            <Button
+              type="submit"
+              disabled={blockSubmission || readOnly || validationErrors.length > 0}
+            >
+              {submitText}
+            </Button>
             {showLogsButton && (
               <LogsButton type="button" onClick={() => setLogsOpen((open) => !open)}>
                 {logsOpen ? "Hide Logs" : "Logs"} <FontAwesomeIcon icon={faTerminal} />

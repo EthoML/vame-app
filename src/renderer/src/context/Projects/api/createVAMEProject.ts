@@ -2,9 +2,11 @@ import { post } from "@renderer/utils/requests"
 
 export interface CreateProps {
   name: string
-  source_software: string
   videos: string[]
   pes_paths: string[]
+  // Only used for NWB sources; surfaced by the create form when .nwb is picked.
+  processing_module_key?: string
+  pose_estimation_key?: string
 }
 
 export interface CreateResponse {
@@ -13,12 +15,38 @@ export interface CreateResponse {
   project: string
 }
 
-export const createVAMEProject = async ({ name, source_software, videos, pes_paths }: CreateProps) => {
+// Derive the VAME `source_software` from the selected files' extensions.
+// VAME applies one source_software to the whole project, so this assumes the
+// selection is homogeneous (enforced by the UI guidance).
+//   .nwb            -> "NWB"      (movement's NWB loader, default pose keys)
+//   .nc             -> "movement" (movement-schema NetCDF read directly)
+//   .csv/.slp/.h5   -> "auto"     (movement infers DLC / SLEAP / LightningPose)
+const inferSourceSoftware = (pes_paths: string[]): string => {
+  const ext = (p: string) => p.slice(p.lastIndexOf(".")).toLowerCase()
+  const exts = (pes_paths ?? []).map(ext)
+  if (exts.length > 0 && exts.every((e) => e === ".nwb")) return "NWB"
+  if (exts.length > 0 && exts.every((e) => e === ".nc")) return "movement"
+  return "auto"
+}
+
+export const createVAMEProject = async ({
+  name,
+  videos,
+  pes_paths,
+  processing_module_key,
+  pose_estimation_key,
+}: CreateProps) => {
+  const source_software = inferSourceSoftware(pes_paths)
+
   const result = await post<CreateResponse>('create', {
     project: name,
-    source_software: source_software,
+    source_software,
     videos: videos,
     poses_estimations: pes_paths,
+    // The NWB pose-location keys only matter for NWB sources.
+    ...(source_software === "NWB"
+      ? { processing_module_key, pose_estimation_key }
+      : {}),
   })
 
   if (result.success) {

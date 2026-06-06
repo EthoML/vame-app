@@ -207,6 +207,17 @@ declare global {
     description?: string;
     "allow-spaces"?: boolean;
     readOnly?: boolean;
+    /**
+     * Conditionally render this field based on another field's current value.
+     * - `fileExtension`: visible only when every value of `field` (a file
+     *   picker) ends with the given extension (e.g. ".nwb").
+     * - `equals`: visible only when `field`'s value strictly equals this.
+     */
+    visibleWhen?: {
+      field: string;
+      fileExtension?: string;
+      equals?: unknown;
+    };
   }
 
   export type StringProperty = DefaultPropertyAttrs & {

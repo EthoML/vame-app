@@ -8,40 +8,54 @@
             "description": "Name of the project. No spaces allowed.",
             "allow-spaces": false
         },
-        "source_software": {
-            "type": "string",
-            "title": "Source Software",
-            "description": "Pose estimation software used to generate the data",
-            "enum": [
-                "DeepLabCut",
-                "SLEAP",
-                "LightningPose"
-            ]
-        },
         "pes_paths": {
             "type": "string",
             "format": "file",
-            "description": "Pose estimation data files. Supported formats: CSV, SLP, H5.",
+            "description": "Pose estimation data files. Supported formats: CSV, SLP, H5 (DeepLabCut / SLEAP / LightningPose), NWB, or movement NetCDF (.nc). All files must be the same type.",
             "title": "Pose Estimation Files",
             "accept": [
                 ".csv",
                 ".slp",
-                ".h5"
+                ".h5",
+                ".nwb",
+                ".nc"
             ],
             "multiple": true
+        },
+        "processing_module_key": {
+            "type": "string",
+            "title": "NWB Processing Module",
+            "description": "Name of the NWB processing module that holds the pose estimation data.",
+            "default": "behavior",
+            "visibleWhen": {
+                "field": "pes_paths",
+                "fileExtension": ".nwb"
+            }
+        },
+        "pose_estimation_key": {
+            "type": "string",
+            "title": "NWB Pose Estimation Key",
+            "description": "Name of the PoseEstimation object inside the processing module.",
+            "default": "PoseEstimation",
+            "visibleWhen": {
+                "field": "pes_paths",
+                "fileExtension": ".nwb"
+            }
         },
         "videos": {
             "title": "Video Files (Optional)",
             "type": "string",
-            "description": "Labeled videos corresponding to the pose estimation files",
+            "description": "Labeled videos corresponding to the pose estimation files. Supported formats: MP4, AVI.",
             "format": "file",
-            "accept": "video/*",
+            "accept": [
+                ".mp4",
+                ".avi"
+            ],
             "multiple": true
         }
     },
     "required": [
         "name",
-        "source_software",
         "pes_paths"
     ]
 }
