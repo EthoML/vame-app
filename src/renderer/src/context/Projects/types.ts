@@ -33,12 +33,12 @@ export interface Project {
   workflow?: any;
   states?: ProjectStates;
   creation_datetime?: string;
+  last_modified?: string;
   error?: string;
 }
 
 export type IProjectContext = {
   projects: Project[]
-  recentProjects: Project[]
   refresh: () => Promise<void>
   getProject: (path: string) => Project | undefined;
   getAssetsPath: (projectPath: string, asset: string, basePath?: string) => string | undefined

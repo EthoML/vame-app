@@ -37,29 +37,19 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
   const [loadingPaths, setLoadingPaths] = useState<boolean>(true);
 
   const [projects, setProjects] = useState<ProjectType[]>([])
-  const [recentProjects, setRecentProjects] = useState<ProjectType[]>([])
 
   // deal with paths
   const [paths, setPaths] = useState<string[]>([]);
-  const [recentPaths, setRecentPaths] = useState<string[]>([]);
-
-  // deal with recent projects paths
 
   const loadProjectsPaths = useCallback(async () => {
     try {
       setLoadingPaths(true);
       const projectsPath = await get<string[]>('projects')
-      const recentProjectsPath = await get<string[]>('/projects/recent')
 
-      if (projectsPath.success && recentProjectsPath.success) {
+      if (projectsPath.success) {
         setPaths(projectsPath.data)
-        setRecentPaths(recentProjectsPath.data)
       } else {
-        if (!projectsPath.success) {
-          throw new Error(projectsPath.error)
-        } else if (!recentProjectsPath.success) {
-          throw new Error(recentProjectsPath.error)
-        }
+        throw new Error(projectsPath.error)
       }
     } catch (e) {
       if (e instanceof Error) {
@@ -71,7 +61,7 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
   }, [])
 
   const loadProjectsData = useCallback(async () => {
-    if (!paths || !recentPaths) {
+    if (!paths) {
       return
     }
 
@@ -80,12 +70,8 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
       return await post<Omit<ProjectType, "creation_datetime">>('load', { project: path })
     })
 
-    const promisesRecents = recentPaths.map(async (path) => {
-      return await post<Omit<ProjectType, "creation_datetime">>('load', { project: path })
-    })
     try {
       const data = await Promise.allSettled(promisesProjects)
-      const data2 = await Promise.allSettled(promisesRecents)
 
       setProjects(data.map(icpResponse => {
         if (icpResponse.status === "fulfilled") {
@@ -95,24 +81,8 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
               // Return a project object with error info
               return { error: projectData.error };
             }
-            const { Project, project_path } = projectData.config;
-            const creation_datetime = new Date(project_path.split(`${Project}-`)[1]).toLocaleDateString();
-            const project = { ...projectData, creation_datetime };
-            return project;
-          }
-        }
-        return;
-      }).filter(p => !!p) as ProjectType[]);
-
-      setRecentProjects(data2.map(icpResponse => {
-        if (icpResponse.status === "fulfilled") {
-          if (icpResponse.value.success) {
-            const projectData = icpResponse.value.data;
-            if (projectData.error) {
-              return { error: projectData.error };
-            }
-            const { Project, project_path } = projectData.config;
-            const creation_datetime = new Date(project_path.split(`${Project}-`)[1]).toLocaleDateString();
+            // creation_datetime comes straight from config.yaml.
+            const creation_datetime = projectData.config.creation_datetime;
             const project = { ...projectData, creation_datetime };
             return project;
           }
@@ -125,7 +95,7 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
     } finally {
       setLoadingProjects(false)
     }
-  }, [paths, recentPaths])
+  }, [paths])
 
   const refresh = useCallback(loadProjectsPaths, [])
 
@@ -231,7 +201,6 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
 
   const value = {
     projects,
-    recentProjects,
     refresh,
     getProject,
     getAssetsPath,

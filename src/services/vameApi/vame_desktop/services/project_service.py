@@ -2,47 +2,103 @@ import json
 import yaml
 import os
 import time
+from datetime import datetime, timezone
 from pathlib import Path
+from typing import Callable
 import portalocker
 
 from vame_desktop.config import VAME_PROJECTS_DIRECTORY, GLOBAL_STATES_FILE
 from vame_desktop.utils.get_project_path import get_project_path
 
 
+# ---------------------------------------------------------------------------
+# Global states file (~/vame-desktop/states.json)
+#
+# Holds a single registry of known projects keyed by project name:
+#
+#     {"projects": {"<name>": {"project_path": "/abs/path/to/<name>"}}}
+#
+# `last_modified` is intentionally NOT stored here — it is derived on read from
+# the project's own files (see `_get_project_mtime`), so it can never drift out
+# of sync with what actually happened on disk.
+# ---------------------------------------------------------------------------
+
+
+def _update_global_states(mutator: Callable[[dict], None]) -> dict:
+    """Read-modify-write the global states file atomically under an exclusive lock.
+
+    `mutator` receives the parsed states dict and mutates it in place.
+    Returns the written states.
+    """
+    GLOBAL_STATES_FILE.parent.mkdir(parents=True, exist_ok=True)
+    GLOBAL_STATES_FILE.touch(exist_ok=True)
+    with open(GLOBAL_STATES_FILE, "r+") as f:
+        portalocker.lock(f, portalocker.LOCK_EX)
+        try:
+            content = f.read().strip()
+            states = json.loads(content) if content else {}
+            mutator(states)
+            f.seek(0)
+            json.dump(states, f, indent=2)
+            f.truncate()
+        finally:
+            portalocker.unlock(f)
+    return states
+
+
+def register_project(project_path) -> dict:
+    """Add (or refresh) a project in the registry, keyed by its folder name."""
+    path = str(Path(project_path).resolve())
+    name = Path(path).name
+
+    def mutate(states: dict) -> None:
+        states.pop("recent_projects", None)  # drop legacy key if present
+        projects = states.setdefault("projects", {})
+        projects[name] = {"project_path": path}
+
+    _update_global_states(mutate)
+    return {"registered": name, "project_path": path}
+
+
+def unregister_project(project_path) -> None:
+    """Remove a project from the registry (by name or matching path)."""
+    path = str(Path(project_path).resolve())
+    name = Path(path).name
+
+    def mutate(states: dict) -> None:
+        projects = states.setdefault("projects", {})
+        projects.pop(name, None)
+        for key in [k for k, v in projects.items() if v.get("project_path") == path]:
+            projects.pop(key, None)
+
+    _update_global_states(mutate)
+
+
 def get_projects():
-    projects = [
-        str(project)
+    """Return the absolute paths of all known projects.
+
+    Self-heals the registry on each call: discovers projects living in the
+    VAME projects directory (including symlinks to external projects), folds
+    them into the registry, and prunes entries whose ``config.yaml`` is gone.
+    """
+    discovered = [
+        str(project.resolve())
         for project in VAME_PROJECTS_DIRECTORY.glob("*")
         if (project.is_dir() and (project / "config.yaml").exists())
     ]
-    return projects
 
+    def mutate(states: dict) -> None:
+        states.pop("recent_projects", None)  # drop legacy key if present
+        projects = states.setdefault("projects", {})
+        for path in discovered:
+            projects[Path(path).name] = {"project_path": path}
+        for name in list(projects.keys()):
+            project_path = Path(projects[name].get("project_path", ""))
+            if not (project_path / "config.yaml").exists():
+                projects.pop(name, None)
 
-def get_recent_projects():
-    with open(GLOBAL_STATES_FILE, "r+") as f:
-        portalocker.lock(f, portalocker.LOCK_SH)
-        content = f.read().strip()
-        states = json.loads(content) if content else {}
-        portalocker.unlock(f)
-
-    recent_projects = states.get("recent_projects", [])
-
-    # Filter those that no longer exist
-    recent_projects = [
-        str(project)
-        for project in recent_projects
-        if (VAME_PROJECTS_DIRECTORY / project).exists()
-    ]
-    states["recent_projects"] = recent_projects
-
-    with open(GLOBAL_STATES_FILE, "r+") as f:
-        portalocker.lock(f, portalocker.LOCK_EX)
-        f.seek(0)
-        json.dump(states, f)
-        f.truncate()
-        portalocker.unlock(f)
-
-    return recent_projects
+    states = _update_global_states(mutate)
+    return [entry["project_path"] for entry in states.get("projects", {}).values()]
 
 
 def is_project_ready(project_path: Path):
@@ -60,35 +116,6 @@ def is_project_ready(project_path: Path):
             return dict(is_ready=False)
 
     return dict(is_ready=True)
-
-
-def register_recent_project(project_path: Path):
-    with open(GLOBAL_STATES_FILE, "r+") as f:
-        portalocker.lock(f, portalocker.LOCK_EX)
-        content = f.read().strip()
-        states = json.loads(content) if content else {}
-
-        recent_projects = states.get("recent_projects", [])
-
-        project_path_str = str(project_path)
-        if project_path_str in recent_projects:
-            recent_projects.remove(project_path_str)
-        recent_projects.append(project_path_str)
-        if len(recent_projects) > 5:
-            recent_projects = recent_projects[-5:]
-
-        f.seek(0)
-        json.dump(
-            {
-                **states,
-                "recent_projects": recent_projects,
-            },
-            f,
-        )
-        f.truncate()
-        portalocker.unlock(f)
-
-    return recent_projects
 
 
 def create_project(data):
@@ -124,6 +151,9 @@ def create_project(data):
     # Small extra delay to ensure file handles are flushed
     time.sleep(0.2)
 
+    # Record the new project in the global registry.
+    register_project(Path(config_path).parent)
+
     return dict(
         project=str(Path(config_path).parent),
         created=created,
@@ -139,6 +169,9 @@ def delete_project(project_path):
 
     if path_obj.exists():
         import shutil
+
+        # Drop it from the registry first so a half-deleted project never lingers.
+        unregister_project(path_obj)
 
         # Check if the path is a symlink
         if path_obj.is_symlink():
@@ -340,6 +373,19 @@ def load_project(project_path: Path):
             umaps_created=any(umaps_created.values()),
         )
 
+        # Keep the registry in sync whenever a project is opened.
+        register_project(path_obj)
+
+        # `last_modified` is derived on read from the project's own files
+        # (config.yaml + states/states.json), never stored — so it always
+        # reflects the latest pipeline activity. Cache is keyed on this mtime,
+        # so the value refreshes automatically when anything changes.
+        last_modified = (
+            datetime.fromtimestamp(mtime, tz=timezone.utc).isoformat(timespec="seconds")
+            if mtime
+            else None
+        )
+
         result = dict(
             project=str(config_path.parent),
             config=config,
@@ -348,6 +394,7 @@ def load_project(project_path: Path):
             pes_paths=pes_paths,
             workflow=workflow,
             states=states,
+            last_modified=last_modified,
         )
         _PROJECT_CACHE[cache_key] = {
             "data": result,

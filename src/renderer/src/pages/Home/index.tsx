@@ -6,10 +6,9 @@ import PageHeading from '@renderer/components/PageHeading';
 import { usePageHeader } from '@renderer/context/PageHeader';
 import ProjectsList from './ProjectList';
 import { useNavigate } from 'react-router-dom';
-import SubHeader from '@renderer/components/SubHeader';
 
 const Home: React.FC = () => {
-  const { projects, recentProjects, deleteProject } = useProjects()
+  const { projects, deleteProject } = useProjects()
   const navigate = useNavigate()
   const [deleteError, setDeleteError] = useState<string | null>(null)
 
@@ -33,20 +32,6 @@ const Home: React.FC = () => {
   return (
     <PaddedContainer>
       {deleteError && <ErrorNote>{deleteError}</ErrorNote>}
-
-      <SubHeader title="Recents:" />
-
-      {recentProjects && recentProjects?.length > 0 ? (
-        <ProjectsList
-          projects={recentProjects}
-          onEdit={onEdit}
-          onDelete={onDelete}
-        />
-      ) : (
-        <p>No recent projects found in the VAME Desktop output directory.</p>
-      )}
-
-      <SubHeader title="All projects:" />
 
       {projects && projects?.length > 0 ? (
         <ProjectsList

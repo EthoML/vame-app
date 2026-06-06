@@ -9,9 +9,8 @@ from . import api
 from vame_desktop.utils.resolve_request_util import resolve_request_data
 from vame_desktop.services.project_service import (
     get_projects,
-    get_recent_projects,
     is_project_ready,
-    register_recent_project,
+    register_project,
     load_project,
     create_project,
     delete_project,
@@ -26,20 +25,6 @@ class Projects(Resource):
     def get(self):
         projects = get_projects()
         return jsonify(projects)
-
-
-@api.route("/projects/recent")
-class RecentProjects(Resource):
-    @api.doc(
-        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
-    )
-    def get(self):
-        try:
-            recent_projects = get_recent_projects()
-            return jsonify(recent_projects)
-        except Exception as exception:
-            print("exception", exception)
-            api.abort(500, str(exception))
 
 
 @api.route("/project_ready")
@@ -61,7 +46,7 @@ class RegisterProject(Resource):
     def post(self):
         try:
             _, project_path = resolve_request_data(request)
-            return register_recent_project(project_path)
+            return register_project(project_path)
         except Exception as exception:
             # TODO: Should lock access to the file
             print("exception", exception)

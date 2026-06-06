@@ -153,6 +153,8 @@ declare global {
       };
     };
     creation_datetime: string;
+    /** Derived on the backend from the project's files; reflects last pipeline activity. */
+    last_modified?: string;
   };
 
   export type TypeName =
