@@ -5,20 +5,38 @@ export const TabsContainer = styled.div`
   width: 100%;
   height: 100%;
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-columns: auto 1fr;
   overflow: hidden;
 `;
 
-export const TabList = styled.div`
+export const TabList = styled.nav`
   display: flex;
-  overflow-x: auto;
-  white-space: nowrap;
-  border-bottom: 1px solid var(--color-border);
+  flex-direction: column;
+  gap: 2px;
+  width: 232px;
+  flex-shrink: 0;
+  padding: var(--space-2) 0;
+  border-right: 1px solid var(--color-border);
   background: var(--color-surface);
-  -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
+
+  & > div {
+    width: 100%;
+  }
+
+  /* Tippy wraps the disabled button in a span — keep it full-width so the
+     button still fills the sidebar column. */
+  & > div > span {
+    display: block;
+    width: 100%;
+  }
 
   &::-webkit-scrollbar {
-    display: none; /* Hide scrollbar for webkit browsers */
+    width: 8px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-border-strong);
+    border-radius: 4px;
   }
 `;
 
@@ -47,40 +65,45 @@ interface TabButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export const TabButton = styled.button<TabButtonProps>`
-  padding: 10px 20px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
   cursor: pointer;
   border: none;
-  background: none;
-  font-size: var(--text-body);
+  background: ${(props) => (props.$active ? 'var(--color-accent-soft)' : 'transparent')};
+  font-size: var(--text-sm);
   outline: none;
-  transition: background-color 0.15s, border-color 0.15s;
-  border-bottom: ${(props) => (props.$active ? '2px solid var(--color-accent)' : '2px solid transparent')};
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+  border-left: 3px solid ${(props) => (props.$active ? 'var(--color-accent)' : 'transparent')};
   font-weight: ${(props) => (props.$active ? '600' : 'normal')};
-  flex-shrink: 0;
-  flex-grow: 1;
   color: ${(props) => (props.$active ? 'var(--color-accent)' : 'var(--color-text)')};
 
   &:hover {
-    background-color: var(--color-surface-sunken);
+    background-color: ${(props) => (props.$active ? 'var(--color-accent-soft)' : 'var(--color-surface-sunken)')};
   }
 
   &:disabled {
     pointer-events: none;
     color: var(--color-text-muted);
     opacity: 0.6;
-    background-color: var(--color-surface-sunken);
+    background-color: transparent;
   }
 
+  /* Status glyph sits flush against the sidebar's right edge. */
   ${(props) =>
     props.$failed
       ? `&:after {
-    margin-left: 8px;
+    margin-left: auto;
+    padding-left: var(--space-2);
     content: '✕';
     color: var(--color-error);
   }`
       : props.$complete
       ? `&:after {
-    margin-left: 8px;
+    margin-left: auto;
+    padding-left: var(--space-2);
     content: '✓';
     color: var(--color-success);
   }`
