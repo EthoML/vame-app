@@ -1,3 +1,4 @@
+# install: conda env create -f environment-mac-arm.yml
 name: vame-app
 channels:
   - pytorch
@@ -6,9 +7,9 @@ channels:
   - defaults
 dependencies:
   - python=3.12
-  - pytorch=2.5.1
+  - pytorch=2.11.0
   - pip
   - pip:
-      - -e .
+      - vame-app
 
 prefix: /opt/anaconda3/envs/vame-app

@@ -1,3 +1,4 @@
+# install: conda env create -f environment-linux.yml
 name: vame-app
 channels:
   - conda-forge
@@ -6,6 +7,6 @@ dependencies:
   - python=3.12
   - pip
   - pip:
-    - -e .
+    - vame-app
 
 prefix: /opt/anaconda3/envs/vame-app
