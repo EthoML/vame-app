@@ -6,8 +6,8 @@ import vame
 import xarray as xr
 
 from . import api
-from vame_desktop.utils.resolve_request_util import resolve_request_data
-from vame_desktop.services.project_service import (
+from vame_app.utils.resolve_request_util import resolve_request_data
+from vame_app.services.project_service import (
     get_projects,
     is_project_ready,
     register_project,
@@ -17,7 +17,7 @@ from vame_desktop.services.project_service import (
     configure_project,
 )
 
-from vame_desktop.utils.not_bad_request_exception import not_bad_request_exception
+from vame_app.utils.not_bad_request_exception import not_bad_request_exception
 
 
 @api.route("/projects")

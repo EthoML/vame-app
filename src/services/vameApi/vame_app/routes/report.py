@@ -8,8 +8,8 @@ import base64
 import vame
 
 from . import api
-from vame_desktop.utils.resolve_request_util import resolve_request_data
-from vame_desktop.utils.not_bad_request_exception import not_bad_request_exception
+from vame_app.utils.resolve_request_util import resolve_request_data
+from vame_app.utils.not_bad_request_exception import not_bad_request_exception
 
 
 @api.route("/report", methods=["POST", "GET"])

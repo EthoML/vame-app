@@ -40,7 +40,7 @@ const Home: React.FC = () => {
           onDelete={onDelete}
         />
       ) : (
-        <p>No projects found in the VAME Desktop output directory.</p>
+        <p>No projects found in the VAME App output directory.</p>
       )}
     </PaddedContainer>
   );

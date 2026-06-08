@@ -15,7 +15,7 @@ export default defineConfig({
   },
   plugins: [react()],
   build: {
-    outDir: resolve(__dirname, 'src/services/vameApi/vame_desktop/web'),
+    outDir: resolve(__dirname, 'src/services/vameApi/vame_app/web'),
     emptyOutDir: true,
     sourcemap: false
   },

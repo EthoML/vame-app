@@ -9,7 +9,7 @@ module.exports = {
     'plugin:react/recommended',
     'plugin:react/jsx-runtime'
   ],
-  ignorePatterns: ['dist', 'src/services/vameApi/vame_desktop/web', 'node_modules'],
+  ignorePatterns: ['dist', 'src/services/vameApi/vame_app/web', 'node_modules'],
   rules: {
     'react/prop-types': 'off',
     'no-unused-vars': 'off'

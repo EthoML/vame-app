@@ -7,7 +7,7 @@ venv
 __pycache__
 
 # Built frontend (emitted by `npm run build`, shipped in the wheel)
-src/services/vameApi/vame_desktop/web
+src/services/vameApi/vame_app/web
 
 # Python packaging
 build/

@@ -1,6 +1,6 @@
 from flask import jsonify
 from pathlib import Path
-from vame_desktop.config import VAME_PROJECTS_DIRECTORY
+from vame_app.config import VAME_PROJECTS_DIRECTORY
 
 
 def check_file_exists(project: Path, path: str):

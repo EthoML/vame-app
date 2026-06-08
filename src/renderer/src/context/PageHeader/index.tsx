@@ -9,7 +9,7 @@ import React, {
 // ============================================================================
 // Page-header slot.
 //
-// The navbar used to show a static "VAME Desktop" wordmark while every page
+// The navbar used to show a static "VAME App" wordmark while every page
 // rendered its own header row below it (title + metadata), wasting a full band
 // of vertical space. Instead, each page now *publishes* its heading into this
 // slot via usePageHeader(); the navbar renders it inline where the wordmark

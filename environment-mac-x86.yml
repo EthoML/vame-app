@@ -1,4 +1,4 @@
-name: vame-desktop
+name: vame-app
 channels:
   - pytorch
   - nvidia
@@ -11,4 +11,4 @@ dependencies:
   - pip:
       - -e .
 
-prefix: /opt/anaconda3/envs/vame-desktop
+prefix: /opt/anaconda3/envs/vame-app

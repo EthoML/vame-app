@@ -3,7 +3,7 @@ requires = ["setuptools>=64", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "vame-desktop"
+name = "vame-app"
 version = "0.4.0"
 description = "An open-source machine learning tool for behavioral segmentation and analyses."
 readme = "README.md"
@@ -22,10 +22,10 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/EthoML/vame-desktop"
+Homepage = "https://github.com/EthoML/vame-app"
 
 [project.scripts]
-vame-desktop = "vame_desktop.cli:main"
+vame-app = "vame_app.cli:main"
 
 [tool.setuptools]
 package-dir = { "" = "src/services/vameApi" }
@@ -34,6 +34,6 @@ package-dir = { "" = "src/services/vameApi" }
 where = ["src/services/vameApi"]
 
 # Ship the built React frontend (produced by `npm run build` into
-# vame_desktop/web) inside the wheel so `vame-desktop` can serve it.
+# vame_app/web) inside the wheel so `vame-app` can serve it.
 [tool.setuptools.package-data]
-vame_desktop = ["web/**/*"]
+vame_app = ["web/**/*"]

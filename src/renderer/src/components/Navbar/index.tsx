@@ -39,7 +39,7 @@ const Navbar: React.FC = () => {
     return (
         <NavbarContainer>
             <NavbarHeaderSlot>
-                {pageHeader ?? <NavbarHeader to="/">VAME Desktop</NavbarHeader>}
+                {pageHeader ?? <NavbarHeader to="/">VAME App</NavbarHeader>}
             </NavbarHeaderSlot>
             <NavbarSection>
                 <Link to="/">

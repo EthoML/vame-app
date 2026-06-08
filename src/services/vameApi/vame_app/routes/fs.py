@@ -12,8 +12,8 @@ from flask import request, jsonify
 from flask_restx import Resource
 
 from . import api
-from vame_desktop.config import DATA_ROOT, VAME_PROJECTS_DIRECTORY, resolve_within
-from vame_desktop.utils.not_bad_request_exception import not_bad_request_exception
+from vame_app.config import DATA_ROOT, VAME_PROJECTS_DIRECTORY, resolve_within
+from vame_app.utils.not_bad_request_exception import not_bad_request_exception
 
 
 def _entry(path: Path) -> dict:

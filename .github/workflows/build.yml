@@ -1,6 +1,6 @@
 name: Build
 
-run-name: ${{ github.actor }} is building the VAME Desktop wheel
+run-name: ${{ github.actor }} is building the VAME App wheel
 
 on:
   push:
@@ -39,7 +39,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: vame-desktop-wheel
+          name: vame-app-wheel
           path: dist/*.whl
 
       - name: Publish wheel to the GitHub release

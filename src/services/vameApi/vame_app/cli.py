@@ -1,6 +1,6 @@
-"""Command-line entry point for VAME Desktop.
+"""Command-line entry point for VAME App.
 
-Running ``vame-desktop`` starts the Flask backend (which also serves the built React frontend) and opens
+Running ``vame-app`` starts the Flask backend (which also serves the built React frontend) and opens
 the app in the user's default browser.
 """
 
@@ -16,7 +16,7 @@ import webbrowser
 from pathlib import Path
 
 
-_SETTINGS_FILE = Path.home() / "vame-desktop" / "settings.json"
+_SETTINGS_FILE = Path.home() / "vame-app" / "settings.json"
 
 
 def _read_app_settings() -> dict:
@@ -57,7 +57,7 @@ def _install_signal_handlers():
 
 
 def _ensure_directories():
-    from vame_desktop.config import (
+    from vame_app.config import (
         VAME_PROJECTS_DIRECTORY,
         VAME_LOG_DIRECTORY,
         GLOBAL_STATES_FILE,
@@ -112,8 +112,8 @@ def _open_browser_when_ready(url: str, host: str, port: int):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(
-        prog="vame-desktop",
-        description="Run the VAME Desktop web application locally.",
+        prog="vame-app",
+        description="Run the VAME App web application locally.",
     )
     parser.add_argument(
         "--host",
@@ -131,7 +131,7 @@ def main(argv=None):
         default=None,
         help=(
             "Root directory the in-app file browser may traverse. When passed, it "
-            "is remembered in ~/vame-desktop/settings.json for future launches. "
+            "is remembered in ~/vame-app/settings.json for future launches. "
             "Precedence: this flag > VAME_DATA_ROOT env var > settings.json > home directory."
         ),
     )
@@ -172,8 +172,8 @@ def main(argv=None):
     port = _pick_port(host, args.port)
     os.environ["VAME_PORT"] = str(port)
 
-    from vame_desktop import create_app
-    from vame_desktop.config import DATA_ROOT
+    from vame_app import create_app
+    from vame_app.config import DATA_ROOT
 
     app = create_app()
 
@@ -181,7 +181,7 @@ def main(argv=None):
     url = f"http://{display_host}:{port}"
 
     print("=" * 60)
-    print("  VAME Desktop")
+    print("  VAME App")
     print(f"  URL:        {url}")
     print(f"  Data root:  {DATA_ROOT}")
     print("  Press Ctrl+C to stop.")

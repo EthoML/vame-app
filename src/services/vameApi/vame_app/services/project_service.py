@@ -7,12 +7,12 @@ from pathlib import Path
 from typing import Callable
 import portalocker
 
-from vame_desktop.config import VAME_PROJECTS_DIRECTORY, GLOBAL_STATES_FILE
-from vame_desktop.utils.get_project_path import get_project_path
+from vame_app.config import VAME_PROJECTS_DIRECTORY, GLOBAL_STATES_FILE
+from vame_app.utils.get_project_path import get_project_path
 
 
 # ---------------------------------------------------------------------------
-# Global states file (~/vame-desktop/states.json)
+# Global states file (~/vame-app/states.json)
 #
 # Holds a single registry of known projects keyed by project name:
 #

@@ -1,9 +1,9 @@
-# VAME Desktop
+# VAME App
 
 A web application for the Variational Animal Motion Encoding (VAME) project — an
 open-source machine learning tool for behavioral segmentation and analyses.
 
-VAME Desktop runs locally: a Python (Flask) backend wraps the
+VAME App runs locally: a Python (Flask) backend wraps the
 [VAME](https://github.com/EthoML/VAME) library and also serves a React frontend,
 which you use in your browser.
 
@@ -18,25 +18,25 @@ which you use in your browser.
 
 ```bash
 # 1. Create an environment (conda recommended because of PyTorch/VAME).
-#    This also installs vame-desktop and its Python dependencies (from
+#    This also installs vame-app and its Python dependencies (from
 #    pyproject.toml) via `pip install -e .`.
 conda env create -f environment-<os>.yml   # linux | mac-arm | mac-x86 | win
-conda activate vame-desktop
+conda activate vame-app
 
 # 2. Build the frontend into the Python package
 npm install
 npm run build
 
 # 3. Run it
-vame-desktop
+vame-app
 ```
 
-`vame-desktop` starts the local server and opens the app in your browser.
+`vame-app` starts the local server and opens the app in your browser.
 
 ### CLI options
 
 ```
-vame-desktop [--host HOST] [--port PORT] [--data-root DIR] [--no-browser] [--dev]
+vame-app [--host HOST] [--port PORT] [--data-root DIR] [--no-browser] [--dev]
 ```
 
 | Flag | Default | Purpose |
@@ -47,7 +47,7 @@ vame-desktop [--host HOST] [--port PORT] [--data-root DIR] [--no-browser] [--dev
 | `--no-browser` | off | Don't auto-open the browser. |
 | `--dev` | off | Use the Flask dev server instead of waitress. |
 
-Projects are stored under `~/vame-desktop/projects`. `--data-root` (env
+Projects are stored under `~/vame-app/projects`. `--data-root` (env
 `VAME_DATA_ROOT`) only controls the *file browser* root, not project storage.
 
 ## Selecting your data
@@ -65,7 +65,7 @@ Run the backend and the Vite dev server in two terminals:
 ```bash
 # Terminal 1 — backend API
 pip install -e .
-vame-desktop --no-browser            # or: npm run backend
+vame-app --no-browser            # or: npm run backend
 
 # Terminal 2 — frontend with hot reload (http://localhost:5173)
 npm run dev
@@ -78,24 +78,24 @@ requests are same-origin.
 Useful scripts:
 
 - `npm run dev` — Vite dev server (hot reload)
-- `npm run build` — build the frontend into `src/services/vameApi/vame_desktop/web`
+- `npm run build` — build the frontend into `src/services/vameApi/vame_app/web`
 - `npm run typecheck` — TypeScript checks
 - `npm run lint` / `npm run format`
 
 ## Building a distributable wheel
 
 ```bash
-npm run build              # frontend -> vame_desktop/web
+npm run build              # frontend -> vame_app/web
 python -m build --wheel    # wheel bundles the built frontend
 ```
 
 The resulting wheel in `dist/` can be installed anywhere with
-`pip install vame_desktop-*.whl` and launched with `vame-desktop`.
+`pip install vame_app-*.whl` and launched with `vame-app`.
 
 ## Architecture
 
 ```
-vame-desktop (CLI)
+vame-app (CLI)
   └─ Flask (waitress) on 127.0.0.1:8641
        ├─ serves the built React SPA (HashRouter)
        ├─ REST API wrapping the VAME library

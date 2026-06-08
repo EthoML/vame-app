@@ -10,7 +10,7 @@ from flask import Flask, send_from_directory
 from flask_cors import CORS
 from flask_restx import Api
 
-from vame_desktop.config import VAME_APP_DIRECTORY
+from vame_app.config import VAME_APP_DIRECTORY
 
 # Directory holding the built React frontend (produced by `npm run build`).
 WEB_DIR = Path(__file__).parent / "web"
@@ -49,7 +49,7 @@ def create_app():
         doc="/swagger",
     )
 
-    from vame_desktop.routes import (
+    from vame_app.routes import (
         project,
         file,
         health_check,
@@ -97,7 +97,7 @@ def _register_frontend(app: Flask):
     def serve_index():
         if not index_file.is_file():
             return (
-                "<h1>VAME Desktop backend is running</h1>"
+                "<h1>VAME App backend is running</h1>"
                 "<p>The frontend has not been built. Run <code>npm run build</code> "
                 "or use the Vite dev server (<code>npm run dev</code>).</p>",
                 200,

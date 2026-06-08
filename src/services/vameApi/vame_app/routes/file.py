@@ -1,8 +1,8 @@
 from flask_restx import Resource
 from flask import send_from_directory, request
-from vame_desktop.routes import api
-from vame_desktop.services.file_service import check_file_exists, log_file
-from vame_desktop.config import VAME_PROJECTS_DIRECTORY
+from vame_app.routes import api
+from vame_app.services.file_service import check_file_exists, log_file
+from vame_app.config import VAME_PROJECTS_DIRECTORY
 from pathlib import Path
 
 
