@@ -13,6 +13,29 @@ import sys
 import threading
 import traceback
 import webbrowser
+from pathlib import Path
+
+
+_SETTINGS_FILE = Path.home() / "vame-desktop" / "settings.json"
+
+
+def _read_app_settings() -> dict:
+    """Return the persisted app-level settings (``{}`` if missing/unreadable)."""
+    try:
+        with open(_SETTINGS_FILE) as fh:
+            data = json.load(fh)
+        return data if isinstance(data, dict) else {}
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+
+def _write_app_settings(updates: dict) -> None:
+    """Merge ``updates`` into settings.json, creating it if needed."""
+    settings = _read_app_settings()
+    settings.update(updates)
+    _SETTINGS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(_SETTINGS_FILE, "w") as fh:
+        json.dump(settings, fh, indent=2)
 
 
 def _install_signal_handlers():
@@ -44,6 +67,9 @@ def _ensure_directories():
     VAME_LOG_DIRECTORY.mkdir(exist_ok=True, parents=True)
     if not GLOBAL_STATES_FILE.exists():
         with open(GLOBAL_STATES_FILE, "w") as fh:
+            json.dump({}, fh)
+    if not _SETTINGS_FILE.exists():
+        with open(_SETTINGS_FILE, "w") as fh:
             json.dump({}, fh)
 
 
@@ -102,8 +128,12 @@ def main(argv=None):
     )
     parser.add_argument(
         "--data-root",
-        default=os.getenv("VAME_DATA_ROOT"),
-        help="Root directory the in-app file browser may traverse (default: home directory).",
+        default=None,
+        help=(
+            "Root directory the in-app file browser may traverse. When passed, it "
+            "is remembered in ~/vame-desktop/settings.json for future launches. "
+            "Precedence: this flag > VAME_DATA_ROOT env var > settings.json > home directory."
+        ),
     )
     parser.add_argument(
         "--no-browser",
@@ -117,10 +147,21 @@ def main(argv=None):
     )
     args = parser.parse_args(argv)
 
+    # Resolve the file-browser root with precedence:
+    #   --data-root flag  >  VAME_DATA_ROOT env  >  settings.json  >  home dir (config default)
+    if args.data_root:
+        data_root = str(Path(args.data_root).expanduser())
+        if data_root != _read_app_settings().get("data_root"):
+            _write_app_settings({"data_root": data_root})
+    elif os.getenv("VAME_DATA_ROOT"):
+        data_root = os.environ["VAME_DATA_ROOT"]
+    else:
+        data_root = _read_app_settings().get("data_root")
+
     # IMPORTANT: set env before importing the app, because config values
     # (DATA_ROOT, host, port) are read from the environment at import time.
-    if args.data_root:
-        os.environ["VAME_DATA_ROOT"] = str(args.data_root)
+    if data_root:
+        os.environ["VAME_DATA_ROOT"] = data_root
     os.environ["VAME_HOST"] = args.host
     os.environ.setdefault("PYTHONUNBUFFERED", "1")
 

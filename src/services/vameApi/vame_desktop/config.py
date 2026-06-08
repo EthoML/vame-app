@@ -6,6 +6,9 @@ VAME_PROJECTS_DIRECTORY = VAME_APP_DIRECTORY / "projects"
 VAME_LOG_DIRECTORY = VAME_APP_DIRECTORY / "logs"
 GLOBAL_STATES_FILE = VAME_APP_DIRECTORY / "states.json"
 
+# Persistent app-level settings
+GLOBAL_SETTINGS_FILE = VAME_APP_DIRECTORY / "settings.json"
+
 # Server defaults. Can be overridden via environment variables (set by the CLI).
 DEFAULT_HOST = os.getenv("VAME_HOST", "127.0.0.1")
 DEFAULT_PORT = int(os.getenv("VAME_PORT", "8641"))

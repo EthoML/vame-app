@@ -5,11 +5,7 @@ open-source machine learning tool for behavioral segmentation and analyses.
 
 VAME Desktop runs locally: a Python (Flask) backend wraps the
 [VAME](https://github.com/EthoML/VAME) library and also serves a React frontend,
-which you use in your browser. There is no Electron shell and no PyInstaller
-bundle — it installs and runs like a normal Python package.
-
-> **Migrating from the old Electron app?** See [MIGRATION.md](MIGRATION.md) for
-> what changed and why.
+which you use in your browser.
 
 ## Requirements
 
