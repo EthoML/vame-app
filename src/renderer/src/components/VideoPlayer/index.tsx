@@ -1,28 +1,19 @@
-import React, { memo, useEffect, useMemo, useRef } from "react";
+import React, { memo } from "react";
+import { API_BASE } from "@renderer/utils/requests";
 
-// Decodes a base64 mp4 into a blob URL and plays it, revoking the URL on
-// unmount. Shared by the segmentation / community video result grids.
-const VideoPlayer = memo(({ content, filename }: { content: string; filename: string }) => {
-    const blobUrl = useMemo(() => {
-        const binaryString = atob(content);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-        }
-        return URL.createObjectURL(new Blob([bytes], { type: "video/mp4" }));
-    }, [content]);
-
-    const videoRef = useRef<HTMLVideoElement>(null);
-
-    useEffect(() => {
-        return () => {
-            if (blobUrl) URL.revokeObjectURL(blobUrl);
-        };
-    }, [blobUrl]);
-
+// Streams an mp4 from the backend's /files static route. The clip is fetched
+// lazily by the <video> element (range requests), so the grid stays light and
+// each clip loads/seeks independently. `url` is the backend-relative path
+// (e.g. "/files/<project>/results/.../clip.mp4").
+const VideoPlayer = memo(({ url, filename }: { url: string; filename: string }) => {
     return (
         <div style={{ display: "flex", flexDirection: "column" }}>
-            <video ref={videoRef} controls src={blobUrl} style={{ width: "100%", borderRadius: 4 }} />
+            <video
+                controls
+                preload="metadata"
+                src={`${API_BASE}${url}`}
+                style={{ width: "100%", borderRadius: 4 }}
+            />
             <label style={{ marginTop: 4, fontFamily: "var(--font-mono)", fontSize: "var(--text-caption)", color: "var(--color-text-secondary)" }}>
                 {filename}
             </label>

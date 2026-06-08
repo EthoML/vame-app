@@ -1,7 +1,7 @@
 from pathlib import Path
+from urllib.parse import quote
 import threading
 import time
-import base64
 from flask_restx import Resource
 from flask import request
 import vame
@@ -90,18 +90,15 @@ class MotifVideos(Resource):
             if session not in sessions:
                 api.abort(400, f"Session '{session}' not found in project")
 
+            # Return streamable URLs (served by the /files static route)
+            project_name = Path(project).name
+            rel_dir = f"results/{session}/{model_name}/{segmentation_algorithm}-{n_clusters}/cluster_videos"
+            dir_path = Path(project) / rel_dir
             videos = []
-            dir_path = (
-                Path(project)
-                / "results"
-                / session
-                / model_name
-                / f"{segmentation_algorithm}-{n_clusters}/cluster_videos"
-            )
             if dir_path.exists():
-                for file_path in dir_path.glob("*.mp4"):
-                    content = base64.b64encode(file_path.read_bytes()).decode()
-                    videos.append({"filename": file_path.name, "content": content})
+                for file_path in sorted(dir_path.glob("*.mp4")):
+                    url = "/files/" + quote(f"{project_name}/{rel_dir}/{file_path.name}")
+                    videos.append({"filename": file_path.name, "url": url})
             return {"videos": videos}
         except Exception as exception:
             if not_bad_request_exception(exception):

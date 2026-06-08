@@ -8,7 +8,7 @@ import VideoPlayer from "../VideoPlayer";
 // Video counterpart to ResultImageViewer: pick algorithm + session, the
 // matching videos load automatically (no "Get" button) and render in a grid.
 
-type Video = { filename: string; content: string };
+type Video = { filename: string; url: string };
 type LoadParams = { segmentation_algorithm?: string; session?: string };
 
 type Props = {
@@ -83,8 +83,8 @@ const ResultVideoViewer: React.FC<Props> = ({
                 </span>
             ) : videos && videos.length > 0 ? (
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 240px)", gap: 12 }}>
-                    {videos.map(({ filename, content }) => (
-                        <VideoPlayer key={filename} filename={filename} content={content} />
+                    {videos.map(({ filename, url }) => (
+                        <VideoPlayer key={filename} filename={filename} url={url} />
                     ))}
                 </div>
             ) : (
