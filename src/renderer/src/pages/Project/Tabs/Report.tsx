@@ -12,14 +12,9 @@ import { getReportVAMEProject } from '../../../context/Projects/api/getReportVAM
 import { getUmapVAMEProject } from '../../../context/Projects/api/getUmapVAMEProject';
 import { StepBadge, StepStateLine, ErrorNote } from '@renderer/components/StepStatus';
 import ResultImageViewer from '@renderer/components/ResultImageViewer';
+import ResultHtmlViewer from '@renderer/components/ResultHtmlViewer';
 
 const ALGO_OPTIONS = reportImagesGetSchema.properties.segmentation_algorithm.enum as string[];
-
-const UMAP_VIEWS = [
-    { value: 'no_label', label: 'No labels' },
-    { value: 'motif', label: 'Motif' },
-    { value: 'community', label: 'Community' },
-];
 
 const Report: React.FC<TabProps> = ({
     project,
@@ -145,23 +140,17 @@ const Report: React.FC<TabProps> = ({
                     </span>
                 </AccordionHeader>
                 <AccordionContent $isOpen={openSteps[2]}>
-                    <ResultImageViewer
+                    <ResultHtmlViewer
                         open={openSteps[2]}
                         algoOptions={ALGO_OPTIONS}
-                        views={UMAP_VIEWS}
-                        altPrefix="UMAP"
-                        emptyText="No UMAP image available for this selection."
-                        load={async ({ segmentation_algorithm }) => {
-                            const imgs = await getUmapVAMEProject({
+                        title="UMAP"
+                        emptyText="No UMAP figure available for this selection."
+                        load={async ({ segmentation_algorithm }) =>
+                            getUmapVAMEProject({
                                 project: project.config.project_path,
                                 segmentation_algorithm: segmentation_algorithm!,
-                            });
-                            return {
-                                no_label: imgs?.no_label ? `data:image/png;base64,${imgs.no_label.content}` : null,
-                                motif: imgs?.motif ? `data:image/png;base64,${imgs.motif.content}` : null,
-                                community: imgs?.community ? `data:image/png;base64,${imgs.community.content}` : null,
-                            };
-                        }}
+                            })
+                        }
                     />
                 </AccordionContent>
             </Accordion>

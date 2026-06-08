@@ -16,12 +16,14 @@ export const getReportVAMEProject = async ({
         `segmentation_algorithm=${encodeURIComponent(segmentation_algorithm)}`,
         `session=${encodeURIComponent(session)}`,
     ].join("&");
-    const result = await get<{ report_image: { filename: string; content: string } }>(
+    const result = await get<{ report_image: { filename: string; content: string } | null }>(
         `report?${query}`
     );
 
     if (result.success) {
-        return result.data.report_image;
+        // Image may not exist yet (background report task still running) — guard
+        // so a null/absent body can't crash.
+        return result.data?.report_image ?? null;
     }
     throw new Error(result.error);
 };

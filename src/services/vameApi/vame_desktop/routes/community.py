@@ -126,8 +126,9 @@ class CommunityImages(Resource):
                 content = base64.b64encode(file_path.read_bytes()).decode()
                 tree_image = {"filename": file_path.name, "content": content}
                 return {"tree_image": tree_image}
-            else:
-                api.abort(400, f"Image file '{file_path}' not found")
+            # Not generated yet — return null so the UI shows an empty state
+            # rather than erroring.
+            return {"tree_image": None}
         except Exception as exception:
             if not_bad_request_exception(exception):
                 api.abort(500, str(exception))

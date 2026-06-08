@@ -1,4 +1,5 @@
 from pathlib import Path
+from urllib.parse import quote
 import threading
 import time
 from flask_restx import Resource
@@ -60,8 +61,8 @@ class Report(Resource):
                 content = base64.b64encode(file_path.read_bytes()).decode()
                 report_image = {"filename": file_path.name, "content": content}
                 return {"report_image": report_image}
-            else:
-                api.abort(400, f"Image file '{file_path}' not found")
+            # Not generated yet (background report task may still be running)
+            return {"report_image": None}
         except Exception as exception:
             if not_bad_request_exception(exception):
                 api.abort(500, str(exception))
@@ -81,29 +82,16 @@ class Umap(Resource):
             config = vame.read_config(str(Path(project_path) / "config.yaml"))
             n_clusters = config.get("n_clusters")
             model_name = config.get("model_name")
-            base_path = Path(project_path) / "reports" / "umap"
-            images = dict()
-            # UMAP embeddings are cohort-wide (all sessions combined), so the
-            # filenames carry no session segment.
-            # No label
-            file_path = base_path / f"umap_{model_name}_{segmentation_algorithm}-{n_clusters}.png"
-            if file_path.exists():
-                content = base64.b64encode(file_path.read_bytes()).decode()
-                images["no_label"] = {"filename": file_path.name, "content": content}
-            # Motif
-            file_path = base_path / f"umap_{model_name}_{segmentation_algorithm}-{n_clusters}_motif.png"
-            if file_path.exists():
-                content = base64.b64encode(file_path.read_bytes()).decode()
-                images["motif"] = {"filename": file_path.name, "content": content}
-            # Community
-            file_path = base_path / f"umap_{model_name}_{segmentation_algorithm}-{n_clusters}_community.png"
-            if file_path.exists():
-                content = base64.b64encode(file_path.read_bytes()).decode()
-                images["community"] = {"filename": file_path.name, "content": content}
-            # Check if any images were found
-            if not images:
-                api.abort(400, f"Image files not found in '{base_path}'")
-            return {"umap_images": images}
+            # Serve the interactive Plotly HTML (cohort-wide, no session segment).
+            # It is self-contained and carries its own labeling controls (no-label
+            # / motif / community), so it replaces the three static PNGs and their
+            # view selector. Return a streamable URL via the /files static route;
+            # null while the background report task hasn't written it yet, so the
+            # UI shows an empty state rather than erroring.
+            project_name = Path(project_path).name
+            rel = f"reports/umap/umap_{model_name}_{segmentation_algorithm}-{n_clusters}_interactive.html"
+            html_url = "/files/" + quote(f"{project_name}/{rel}") if (Path(project_path) / rel).exists() else None
+            return {"umap_html_url": html_url}
         except Exception as exception:
             if not_bad_request_exception(exception):
                 api.abort(500, str(exception))
