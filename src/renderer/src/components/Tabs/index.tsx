@@ -9,6 +9,7 @@ type Tab = {
   disabled?: boolean;
   tooltip?: string;
   complete?: boolean;
+  failed?: boolean;
 }
 
 type TabProps = {
@@ -30,15 +31,16 @@ const Tabs = ({
   return (
     <TabsContainer>
       <TabList>
-        {tabs.map(({ id, label, complete, disabled, tooltip }) => (
+        {tabs.map(({ id, label, complete, failed, disabled, tooltip }) => (
           <div key={id}>
             {tooltip ? (
-              <Tippy content={tooltip} disabled={!disabled || !tooltip} placement="bottom" hideOnClick={false}>
+              <Tippy content={tooltip} disabled={!disabled || !tooltip} placement="right" hideOnClick={false}>
                 <span>
                   <TabButton
                     disabled={disabled}
                     $active={id === activeTab}
                     $complete={complete}
+                    $failed={failed}
                     onClick={() => handleTabClick(id)}
                   >
                     {label}
@@ -51,6 +53,7 @@ const Tabs = ({
                 disabled={disabled}
                 $active={id === activeTab}
                 $complete={complete}
+                $failed={failed}
                 onClick={() => handleTabClick(id)}
               >
                 {label}
@@ -59,15 +62,13 @@ const Tabs = ({
           </div>
         ))}
       </TabList>
-      <TabsContainer>
-        <TabContent>
-          {tabs.map((tab) => (
-            <TabPane key={tab.id} $active={tab.id === activeTab}>
-              {tab.content}
-            </TabPane>
-          ))}
-        </TabContent>
-      </TabsContainer>
+      <TabContent>
+        {tabs.map((tab) => (
+          <TabPane key={tab.id} $active={tab.id === activeTab}>
+            {tab.content}
+          </TabPane>
+        ))}
+      </TabContent>
     </TabsContainer>
   );
 };

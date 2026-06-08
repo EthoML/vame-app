@@ -6,25 +6,25 @@ import Dashboard from './components/Dashboard';
 
 import Home from './pages/Home';
 import { ProjectsProvider } from './context/Projects';
-import { SettingsProvider } from './context/Settings';
+import { PageHeaderProvider } from './context/PageHeader';
 import Create from './pages/Create';
-import Settings from './pages/Settings';
 import Project from './pages/Project';
+import Load from './pages/Load';
 
 const App: React.FC = () => {
 
   return (<Dashboard>
-    <Navbar />
-    <ProjectsProvider>
-      <SettingsProvider>
+    <PageHeaderProvider>
+      <Navbar />
+      <ProjectsProvider>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/create" element={<Create />} />
+          <Route path="/load" element={<Load />} />
           <Route path="/project" element={<Project />} />
-          <Route path="/settings" element={<Settings />} />
         </Routes>
-      </SettingsProvider>
-    </ProjectsProvider>
+      </ProjectsProvider>
+    </PageHeaderProvider>
   </Dashboard>
   );
 }

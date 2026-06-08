@@ -1,56 +1,50 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
-import { open } from '@renderer/utils/folders';
 import { post } from '@renderer/utils/requests';
 import { onConnected, onProjectReady } from '@renderer/utils/vame';
+import { formatDatetime } from '@renderer/utils/date';
 
 import { useProjects } from '@renderer/context/Projects';
 
 import Tabs from '@renderer/components/Tabs';
-import Header from '@renderer/components/Header';
-import { Container, HeaderButton, HeaderButtonContainer, ProjectHeader, ProjectInformation, ProjectInformationCapsule } from './styles';
+import PageHeading from '@renderer/components/PageHeading';
+import { usePageHeader } from '@renderer/context/PageHeader';
+import { Container } from './styles';
 
-import ProjectConfiguration from './Tabs/ProjectConfiguration';
-import Organize from './Tabs/Organize';
-import Model from './Tabs/Model';
-import Segmentation from './Tabs/Segmentation';
-import MotifVideos from './Tabs/MotifVideos';
-import { CommunityAnalysis } from './Tabs/CommunityAnalysis';
-import CommunityVideos from './Tabs/CommunityVideos';
-import UMAPVisualization from './Tabs/UMAPVisualization';
+import Preprocessing from './Tabs/Preprocessing';
+import ModelTrainingAccordion from './Tabs/ModelTrainingAccordion';
+import PoseSegmentationAccordion from './Tabs/PoseSegmentationAccordion';
+import CommunityAnalysisAccordion from './Tabs/CommunityAnalysisAccordion';
 import { MainContainer } from '@renderer/components/Container';
-import { useSettings } from '@renderer/context/Settings';
+import RawDataTab from './Tabs/RawDataTab';
+import Report from './Tabs/Report';
 
 const Project: React.FC = () => {
 
   const [searchParams] = useSearchParams();
   const projectPath = searchParams.get("path")
   const {
-    getProject,
     refresh,
-    configureProject,
-    align,
-    createTrainset,
-    train,
-    evaluate,
-    segment,
-    communityAnalysis,
-    createCommunityVideos,
-    createMotifVideos,
-    createUMAPVisualization,
+    runPreprocessing,
   } = useProjects()
 
-  const {
-    tabsLock
-  } = useSettings()
-
-  const [project, setProject] = useState<Project | undefined>()
+  const [project, setProject] = useState<ProjectType | undefined>()
   const [blockSubmit, setBlockSubmit] = useState(true);
-  const [selectedTab, setSelectedTab] = useState<string>("project-configuration");
+  const [selectedTab, setSelectedTab] = useState<string>("input-data");
 
-  const navigate = useNavigate()
+  // Load this project directly so it resolves a freshly-opened external project
+  // (which /load registers and symlinks), independent of the global list timing.
+  const loadProject = useCallback(async () => {
+    if (!projectPath) return
+    const res = await post<ProjectType>('load', { project: projectPath })
+    const data = res.success ? (res.data as any) : null
+    if (data && !data.error) {
+      setProject({ ...data, creation_datetime: data.config?.creation_datetime })
+    }
+  }, [projectPath])
 
+  // Function to handle tab submission
   const submitTab = useCallback(async (
     callback: () => Promise<void>,
     tab?: string
@@ -58,42 +52,61 @@ const Project: React.FC = () => {
     try {
       setBlockSubmit(true)
       await callback()
-      await refresh()
 
       if (tab) {
-        const localItem = `selected-tab-${project?.config.Project}`
+        const localItem = `selected-tab-${project?.config.project_name}`
         localStorage.setItem(localItem, tab)
         setSelectedTab(tab)
       }
+
+      await loadProject()
+      await refresh()
     } catch (e) {
-      console.log
+      console.error("Error in submitTab:", e);
     } finally {
-      setBlockSubmit(false)
+      setBlockSubmit(false);
     }
-  }, [project])
+  }, [project, loadProject])
 
 
   useEffect(() => {
     if (projectPath) {
-      onConnected(async () => {
-        post('project/register', { project: projectPath }).then(res => {
-          if (res.success)
-            setProject(getProject(projectPath))
-        })
+      onConnected(() => { loadProject() })
+
+      onProjectReady(projectPath, () => {
+        setBlockSubmit(false);
       })
-
-      onProjectReady(projectPath, () => setBlockSubmit(false))
     }
-  }, [projectPath])
+  }, [projectPath, loadProject])
 
-  useEffect(()=>{
-    if(project){
-      const loadedTab = localStorage.getItem(`selected-tab-${project?.config.Project}`)
-      if(loadedTab){
+  useEffect(() => {
+    if (project) {
+      const loadedTab = localStorage.getItem(`selected-tab-${project?.config.project_name}`)
+      if (loadedTab) {
         setSelectedTab(loadedTab)
       }
     }
-  },[project])
+  }, [project])
+
+  // Publish the project name + facts into the navbar header slot.
+  usePageHeader(
+    project ? (
+      <PageHeading
+        title={project.config.project_name || project.config.project_path}
+        meta={[
+          {
+            label: 'Created',
+            value: project.config.creation_datetime ? formatDatetime(project.config.creation_datetime) : '',
+          },
+          { label: 'Location', value: project.config.project_path || '' },
+          { label: 'VAME', value: project.config.vame_version || '' },
+        ]}
+      />
+    ) : (
+      <PageHeading title="Loading project…" />
+    ),
+    [project]
+  )
 
   if (!project) {
     return (
@@ -107,230 +120,170 @@ const Project: React.FC = () => {
     );
   }
 
-  const {
-    egocentric_alignment,
-    create_trainset,
-    evaluate_model,
-    train_model,
-    pose_segmentation,
-    motif_videos,
-    community,
-    community_videos,
-    visualization,
-  } = project.states
+  // Check if states exist and have expected properties
+  const preprocessingState = project.states?.preprocessing || {};
+  const preprocessingVisualizationState = project.states?.preprocessing_visualization || {};
+  const create_trainset = project.states?.create_trainset || {};
+  const train_model = project.states?.train_model || {};
+  const evaluate_model = project.states?.evaluate_model || {};
+  const segment_session = project.states?.segment_session || {};
+  const community = project.states?.community || {};
 
-  const organized = egocentric_alignment.execution_state==="success" && create_trainset.execution_state==="success"
+  const projectPreprocessed = preprocessingState.execution_state === "success" && preprocessingVisualizationState.execution_state === "success";
+  const trainsetCreated = create_trainset.execution_state === "success";
+  const modelCreated = train_model.execution_state === "success";
+  const modelEvaluated = evaluate_model.execution_state === "success";
+  const segmented = segment_session.execution_state === "success";
+  const report_session = project.states?.generate_reports || {};
+  const reportCompleted = report_session.execution_state === "success";
 
-  const modeled = evaluate_model.execution_state==="success" && train_model.execution_state==="success"
-
-  const segmented = pose_segmentation.execution_state==="success"
-
-  const motif_videos_created = motif_videos.execution_state==="success" && project.workflow.motif_videos_created
-
-  const community_videos_created = community_videos.execution_state==="success" && project.workflow.community_videos_created
-
-  const umaps_created = visualization.execution_state==="success" && project.workflow.umaps_created
-
+  // A step that died (failed/aborted) surfaces a ✕ on its tab so a broken
+  // stage is visible at a glance, not hidden behind an unchanged label.
+  const isFailed = (s: { execution_state?: string } = {}) =>
+    s.execution_state === "failed" || s.execution_state === "aborted";
 
   const tabs = [
     {
-      id: 'project-configuration',
-      label: '1. Project Configuration',
-      complete: organized,
-      content: <ProjectConfiguration
-        project={project}
-        blockSubmission={blockSubmit}
-        blockTooltip="Waiting VAME to be ready."
-        onFormSubmit={async (formData) => submitTab(async () => {
-          const { advanced_options, ...mainProperties } = formData as any
-
-          await configureProject(
-            {
-              config: { ...mainProperties, ...advanced_options }, project: project.config.project_path
-            }).catch(e => alert(e))
-
-        }, 'data-organization')}
-      />
+      id: 'input-data',
+      label: '1. Input Data',
+      complete: true,
+      content: (() => {
+        try {
+          return (
+            <RawDataTab
+              projectPath={project.config.project_path}
+              sessionNames={(project.config as any)?.session_names || []}
+            />
+          );
+        } catch (error) {
+          console.error("Error rendering ProjectConfiguration:", error);
+          return (
+            <div style={{ padding: 20, background: "var(--color-surface-sunken)" }}>
+              <h3>Project Configuration Content (Fallback)</h3>
+              <p>Error rendering the ProjectConfiguration component.</p>
+              <p><b>Error:</b> {String(error)}</p>
+              <p><b>Original props:</b></p>
+              <ul>
+                <li>project: {JSON.stringify(project.config?.Project)}</li>
+                <li>blockSubmission: {String(blockSubmit)}</li>
+              </ul>
+            </div>
+          );
+        }
+      })()
     },
     {
-      id: 'data-organization',
-      label: '2. Data Organization',
-      complete: organized,
-      content: <Organize
-        project={project}
-        blockSubmission={blockSubmit}
-        blockTooltip="Waiting VAME to be ready."
-        onFormSubmit={async (params) => submitTab(async () => {
-
-          const { pose_ref_index, advanced_options } = params as any
-
-          pose_ref_index.description = `${pose_ref_index.description}. `
-
-          await align({ project: project.config.project_path, pose_ref_index, ...advanced_options })
-
-          await createTrainset({ project: project.config.project_path, pose_ref_index })
-
-          // TODO: Allow users to inspect the quality of the trainset here
-
-        }, 'model-creation')}
-      />,
+      id: 'preprocessing',
+      label: '2. Preprocessing',
+      disabled: false,
+      complete: projectPreprocessed,
+      failed: isFailed(preprocessingState) || isFailed(preprocessingVisualizationState),
+      tooltip: "Finish project configuration first.",
+      content: (() => {
+        try {
+          return (
+            <Preprocessing
+              project={project}
+              blockSubmission={blockSubmit}
+              blockTooltip="Waiting VAME to be ready."
+              onFormSubmit={
+                async (params) => submitTab(
+                  async () => {
+                    await runPreprocessing({
+                      project: project.config.project_path,
+                      ...params
+                    });
+                  },
+                  'preprocessing'
+                )
+              }
+            />
+          );
+        } catch (error) {
+          console.error("Error rendering Preprocessing component:", error);
+          return (
+            <div style={{ padding: 20, background: "var(--color-surface-sunken)" }}>
+              <h3>Preprocessing Content (Fallback)</h3>
+              <p>Error rendering the Preprocessing component.</p>
+              <p><b>Error:</b> {String(error)}</p>
+              <p><b>Original props:</b></p>
+              <ul>
+                <li>project: {JSON.stringify((project.config as any).project_name || (project.config as any).Project)}</li>
+                <li>blockSubmission: {String(blockSubmit)}</li>
+              </ul>
+            </div>
+          );
+        }
+      })()
     },
     {
-      id: 'model-creation',
-      label: '3. Model Creation',
-      disabled: tabsLock && !organized,
-      complete: modeled,
+      id: 'model-training',
+      label: '3. Model Training',
+      disabled: !projectPreprocessed,
+      complete: trainsetCreated && modelCreated && modelEvaluated,
+      failed: isFailed(create_trainset) || isFailed(train_model) || isFailed(evaluate_model),
       tooltip: "Organize your project first.",
-      content: <Model
-        project={project}
-        blockSubmission={blockSubmit}
-        blockTooltip="Waiting VAME to be ready."
-        onFormSubmit={({ train: needTrain, evaluate: needEvaluate }: any) => {
-          const runAll = needTrain && needEvaluate
-          return submitTab(async () => {
-            const projectPath = project.config.project_path
-
-            if (needTrain) await train({ project: projectPath })
-            if (needEvaluate) await evaluate({ project: projectPath })
-
-          }, runAll ? 'segmentation' : 'model-creation')
-        }}
-      />
+      content: (
+        <ModelTrainingAccordion
+          project={project}
+          onFormSubmit={async () => submitTab(async () => { }, 'model-training')}
+          blockSubmit={blockSubmit}
+          setBlockSubmit={setBlockSubmit}
+        />
+      )
     },
     {
       id: 'segmentation',
       label: '4. Pose Segmentation',
-      disabled: tabsLock && !modeled,
+      disabled: !modelEvaluated,
       complete: segmented,
+      failed: isFailed(segment_session),
       tooltip: "Model your project first.",
-      content: <Segmentation
-        project={project}
-        blockSubmission={blockSubmit}
-        blockTooltip="Waiting VAME to be ready."
-        onFormSubmit={() => submitTab(async () => {
-          const projectPath = project.config.project_path
-          await segment({ project: projectPath })
-        }, 'segmentation')}
-      />
-    },
-    {
-      id: 'motifs-videos',
-      label: '5. Motif Videos',
-      disabled: tabsLock && !segmented,
-      complete: motif_videos_created,
-      tooltip: "Need Pose Segmentation.",
-      content: <MotifVideos
-        project={project}
-        blockSubmission={blockSubmit}
-        blockTooltip="Waiting VAME to be ready."
-        onFormSubmit={(data) => submitTab(async () => {
-          const projectPath = project.config.project_path
-          await createMotifVideos({
-            project: projectPath,
-            ...data,
-          })
-        }, "motifs-videos")}
-      />
+      content: (
+        <PoseSegmentationAccordion
+          project={project}
+          blockSubmit={blockSubmit}
+          setBlockSubmit={setBlockSubmit}
+          onFormSubmit={async () => submitTab(async () => { }, 'segmentation')}
+        />
+      )
     },
     {
       id: 'community-analysis',
-      label: '6a. Community Analysis',
-      disabled: tabsLock && !segmented,
+      label: '5. Community Analysis',
+      disabled: !segmented,
       complete: community?.execution_state === "success",
+      failed: isFailed(community),
       tooltip: "Need Pose Segmentation.",
-      content: <CommunityAnalysis
-        project={project}
-        blockSubmission={blockSubmit}
-        blockTooltip="Waiting VAME to be ready."
-        onFormSubmit={(data: any) => submitTab(async () => {
-          const projectPath = project.config.project_path
-
-          await communityAnalysis({
-            project: projectPath,
-            cohort: data.cohort,
-            cut_tree: data.cut_tree,
-            show_umap: data.show_umap,
-            parametrization: data.parametrization,
-          })
-        }, "community-videos")}
-      />
+      content: (
+        <CommunityAnalysisAccordion
+          project={project}
+          blockSubmit={blockSubmit}
+          setBlockSubmit={setBlockSubmit}
+          onFormSubmit={async () => submitTab(async () => { }, 'community-analysis')}
+        />
+      )
     },
     {
-      id: 'community-videos',
-      label: '6b. Community Videos',
-      disabled: tabsLock && (!!community.cohort || community?.execution_state !== "success"),
-      complete: community_videos_created,
-      tooltip: "Need community analysis with cohort false.",
-      content: <CommunityVideos
-        project={project}
-        blockSubmission={blockSubmit}
-        blockTooltip="Waiting VAME to be ready."
-        onFormSubmit={(data: any) => submitTab(async () => {
-          const projectPath = project.config.project_path
-          await createCommunityVideos({
-            project: projectPath,
-            parametrization: data.parametrization, 
-          })
-        }, "community-videos")}
-      />
-    },
-    {
-      id: 'umap-visualization',
-      label: '7. UMAP Visualization',
-      complete: umaps_created,
-      disabled: tabsLock && !segmented,
+      id: 'report',
+      label: '6. Report',
+      complete: reportCompleted,
+      failed: isFailed(report_session),
+      disabled: !segmented,
       tooltip: "Need segmentation.",
-      content: <UMAPVisualization
-        project={project}
-        blockSubmission={blockSubmit}
-        blockTooltip="Waiting VAME to be ready."
-        onFormSubmit={(data) => submitTab(async () => {
-          const projectPath = project.config.project_path
-          await createUMAPVisualization({
-            project: projectPath,
-            ...data
-          })
-        }, "umap-visualization")}
-      />
+      content: (
+        <Report
+          project={project}
+          blockSubmission={blockSubmit}
+          blockTooltip="Waiting VAME to be ready."
+          onFormSubmit={async () => submitTab(async () => { }, 'report')}
+        />
+      )
     },
-
-  ]
+  ];
 
   return (
     <Container>
-      <ProjectHeader>
-        <Header title={project.config.Project}>
-          <HeaderButtonContainer>
-            <HeaderButton onClick={() => {
-              open(project.config.project_path)
-
-            }}>Open in File Explorer</HeaderButton>
-            <HeaderButton onClick={() => {
-              navigate({
-                pathname: '/create',
-                search: `?project=${project.config.project_path}`
-              })
-            }}>Restart Project</HeaderButton>
-          </HeaderButtonContainer>
-        </Header>
-        <ProjectInformation>
-          <ProjectInformationCapsule>
-            <small>
-              <b>Creation Date</b>
-              <small>
-                {project.created_at}
-              </small>
-            </small></ProjectInformationCapsule>
-          <ProjectInformationCapsule>
-            <small>
-              <b>Project Location</b>
-              <small>
-                {project.config.project_path}
-              </small>
-            </small>
-          </ProjectInformationCapsule>
-        </ProjectInformation>
-      </ProjectHeader>
       <Tabs
         tabs={tabs}
         selected={selectedTab}

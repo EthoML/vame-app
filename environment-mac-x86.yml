@@ -1,0 +1,14 @@
+name: vame-app
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.12
+  - pytorch=2.2.2
+  - pip
+  - pip:
+      - -e .
+
+prefix: /opt/anaconda3/envs/vame-app

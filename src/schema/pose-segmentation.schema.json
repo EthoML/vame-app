@@ -1,0 +1,24 @@
+{
+    "title": "Pose Segmentation Parameters",
+    "description": "Parameters for pose segmentation algorithm.",
+    "type": "object",
+    "properties": {
+        "n_clusters": {
+            "type": "integer",
+            "title": "Number of Clusters",
+            "description": "The number of clusters to be used in the analysis",
+            "default": 15,
+            "minimum": 1
+        },
+        "overwrite": {
+            "type": "boolean",
+            "title": "Overwrite Existing Segmentation",
+            "description": "If true, overwrite any existing segmentation results",
+            "default": false
+        }
+    },
+    "required": [
+        "n_clusters",
+        "overwrite"
+    ]
+}

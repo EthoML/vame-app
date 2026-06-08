@@ -5,26 +5,46 @@ export const TabsContainer = styled.div`
   width: 100%;
   height: 100%;
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-columns: auto 1fr;
   overflow: hidden;
 `;
 
-export const TabList = styled.div`
+export const TabList = styled.nav`
   display: flex;
-  overflow-x: auto;
-  white-space: nowrap;
-  border-bottom: 1px solid #ccc;
-  -webkit-overflow-scrolling: touch;
+  flex-direction: column;
+  gap: 2px;
+  width: 232px;
+  flex-shrink: 0;
+  padding: var(--space-2) 0;
+  border-right: 1px solid var(--color-border);
+  background: var(--color-surface);
+  overflow-y: auto;
+
+  & > div {
+    width: 100%;
+  }
+
+  /* Tippy wraps the disabled button in a span — keep it full-width so the
+     button still fills the sidebar column. */
+  & > div > span {
+    display: block;
+    width: 100%;
+  }
 
   &::-webkit-scrollbar {
-    display: none; /* Hide scrollbar for webkit browsers */
+    width: 8px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-border-strong);
+    border-radius: 4px;
   }
 `;
 
 export const TabContent = styled.div`
   display: flex;
   position: relative;
-  overflow: auto;
+  overflow: hidden;
+  min-height: 0;
 `;
 
 interface TabPaneProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -35,57 +55,66 @@ export const TabPane = styled.div<TabPaneProps>`
   display: ${(props) => (props.$active ? 'block' : 'none')};
   width: 100%;
   height: 100%;
+  min-height: 0;
 `;
 
 interface TabButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   $active: boolean;
   $complete?: boolean;
+  $failed?: boolean;
 }
 
 export const TabButton = styled.button<TabButtonProps>`
-  padding: 10px 20px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
   cursor: pointer;
   border: none;
-  background: none;
-  font-size: 16px;
+  background: ${(props) => (props.$active ? 'var(--color-accent-soft)' : 'transparent')};
+  font-size: var(--text-sm);
   outline: none;
-  transition: background-color 0.3s;
-  border-bottom: ${(props) => (props.$active ? '2px solid #007bff' : 'none')};
-  font-weight: ${(props) => (props.$active ? 'bold' : 'normal')};
-  flex-shrink: 0;
-  flex-grow: 1;
-  color: #000;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+  border-left: 3px solid ${(props) => (props.$active ? 'var(--color-accent)' : 'transparent')};
+  font-weight: ${(props) => (props.$active ? '600' : 'normal')};
+  color: ${(props) => (props.$active ? 'var(--color-accent)' : 'var(--color-text)')};
 
   &:hover {
-    background-color: #f0f0f0;
+    background-color: ${(props) => (props.$active ? 'var(--color-accent-soft)' : 'var(--color-surface-sunken)')};
   }
 
   &:disabled {
     pointer-events: none;
+    color: var(--color-text-muted);
+    opacity: 0.6;
+    background-color: transparent;
   }
 
+  /* Status glyph sits flush against the sidebar's right edge. */
   ${(props) =>
-    props.$complete
+    props.$failed
       ? `&:after {
-    margin-left: 10px;
+    margin-left: auto;
+    padding-left: var(--space-2);
+    content: '✕';
+    color: var(--color-error);
+  }`
+      : props.$complete
+      ? `&:after {
+    margin-left: auto;
+    padding-left: var(--space-2);
     content: '✓';
-    color: #28a745;
+    color: var(--color-success);
   }`
       : ''}
 `;
 
 export const PaddedTab = styled.div`
   padding: 20px;
-`;
-
-export const GridTab = styled.div`
-  display: grid;
-  grid-template-rows: 1fr auto;
-  gap: 20px;
   height: 100%;
-`;
-
-export const PaddedBottomRow = styled.div`
-  padding: 20px;
-  padding-top: 0px;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 `;

@@ -1,26 +1,14 @@
 {
     "title": "Community Analysis",
     "properties": {
-        "cohort": {
-            "type": "boolean",
-            "title": "Cohort Analysis",
-            "description": "Flag indicating cohort analysis.",
-            "default": false
-        },
         "cut_tree": {
             "type": "integer",
             "title": "Cut Line for Tree",
-            "description": "Cut line for tree.",
+            "description": "Cut line for tree",
             "default": 2
-        },
-        "parametrization": {
-            "type": "string",
-            "enum": ["hmm", "kmeans"]
         }
     },
     "required": [
-        "parametrization",
-        "cohort",
         "cut_tree"
     ]
 }

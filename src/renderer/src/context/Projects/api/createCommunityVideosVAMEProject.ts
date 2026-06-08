@@ -7,7 +7,7 @@ type CreateCommunityVideosProps = {
 }
 
 export const createCommunityVideosVAMEProject = async (data: CreateCommunityVideosProps) => {
-  const result = await post<Project>('community_videos', { ...data })
+  const result = await post<ProjectType>('community-videos', { ...data })
 
   if (result.success) {
     return result.data

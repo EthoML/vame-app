@@ -1,44 +1,86 @@
 import Button from "@renderer/components/Button";
-import { ButtonContainer, List, ListItem } from "./styles";
+import { formatDatetime } from "@renderer/utils/date";
+import {
+  ButtonContainer,
+  MetaCell,
+  Muted,
+  NameCell,
+  Row,
+  Table,
+  Thead,
+  VersionCell,
+} from "./styles";
 
 interface Props {
-  projects: Project[],
-  onDelete: (project: Project) => void,
-  onEdit: (project: Project) => void
+  projects: ProjectType[],
+  onDelete: (project: ProjectType) => void,
+  onEdit: (project: ProjectType) => void
 }
 
 const ProjectsList: React.FC<Props> = ({
-    projects,
-    onDelete,
-    onEdit
+  projects,
+  onDelete,
+  onEdit
 }) => {
 
-    return (
-    <List>
-    {projects.map((project) => (
-      <ListItem key={project.config.project_path}>
-        <div>
-          <h3>{project.config.Project}</h3>
-          <small>{project.config.project_path}</small>
-        </div>
-        <ButtonContainer>
-          <Button onClick={() => {
-            onEdit(project)
-          }}>Edit</Button>
-          <Button onClick={() => {
+  // Most recently modified first; projects with no timestamp sink to the bottom.
+  const sortedProjects = [...projects].sort((a, b) => {
+    const ta = a.last_modified ? Date.parse(a.last_modified) : 0;
+    const tb = b.last_modified ? Date.parse(b.last_modified) : 0;
+    return tb - ta;
+  });
 
-            // Check to make sure user wants to delete the project
-            if (!window.confirm(`Are you sure you want to delete project "${project.config.Project}"?`)) return
+  return (
+    <Table>
+      <Thead>
+        <tr>
+          <th>Project</th>
+          <th>VAME version</th>
+          <th>Created</th>
+          <th>Modified</th>
+          <th>Actions</th>
+        </tr>
+      </Thead>
+      <tbody>
+        {sortedProjects.map((project) => {
+          const config = project.config;
+          const created = formatDatetime(config?.creation_datetime);
+          const modified = formatDatetime(project.last_modified ?? "");
 
-            onDelete(project)
-          }}>
-            Delete
-          </Button>
-        </ButtonContainer>
-      </ListItem>
-    ))}
-  </List>
-)
+          return (
+            <Row key={config?.project_path ?? config?.project_name}>
+              <NameCell>
+                <div>
+                  <strong>{config?.project_name ?? "Unknown project"}</strong>
+                  <small>{config?.project_path}</small>
+                </div>
+              </NameCell>
+              <VersionCell>{config?.vame_version ?? <Muted>—</Muted>}</VersionCell>
+              <MetaCell>{created || <Muted>—</Muted>}</MetaCell>
+              <MetaCell>{modified || <Muted>—</Muted>}</MetaCell>
+              <td>
+                <ButtonContainer>
+                  <Button variant="primary" onClick={() => onEdit(project)}>
+                    Open
+                  </Button>
+                  <Button
+                    variant="danger"
+                    onClick={() => {
+                      // Confirm before destroying a project on disk.
+                      if (!window.confirm(`Are you sure you want to delete project "${config?.project_name}"?`)) return
+                      onDelete(project)
+                    }}
+                  >
+                    Delete
+                  </Button>
+                </ButtonContainer>
+              </td>
+            </Row>
+          )
+        })}
+      </tbody>
+    </Table>
+  )
 }
 
 export default ProjectsList;

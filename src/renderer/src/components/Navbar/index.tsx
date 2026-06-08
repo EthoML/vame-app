@@ -1,51 +1,46 @@
-import React, { useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFileCirclePlus, faFileImport, faGear, faHome } from '@fortawesome/free-solid-svg-icons';
+import { faFileCirclePlus, faFileImport, faHome, faMicrochip } from '@fortawesome/free-solid-svg-icons';
 
 import Tippy from '@tippyjs/react';
-import { NavbarButton, NavbarContainer, NavbarHeader, NavbarSection } from './styles';
+import { NavbarButton, NavbarContainer, NavbarHeader, NavbarHeaderSlot, NavbarSection } from './styles';
+import { get } from '../../utils/requests';
+import { usePageHeaderSlot } from '../../context/PageHeader';
 
 const Navbar: React.FC = () => {
+    const [hasGpu, setHasGpu] = useState<boolean>(false);
+    const [gpuDevice, setGpuDevice] = useState<string | null>(null);
+    const pageHeader = usePageHeaderSlot();
 
-    const navigate = useNavigate()
-
-    const upload = useCallback(async () => {
-        const fileInput = document.createElement('input')
-        fileInput.type = 'file'
-        fileInput.webkitdirectory = true
-        fileInput.click()
-
-        const promise = new Promise((resolve, reject) => {
-            fileInput.onchange = async (ev) => {
-                // @ts-ignore
-                const files = Array.from(ev.target.files);
-                // @ts-ignore
-                const configPath = files.length > 0 ? files.find((file) => file.name === 'config.yaml')?.path : null
-                if (!configPath) {
-                    const mainError = "No config.yaml file found in the selected directory."
-                    window.alert(`${mainError} \n\nPlease select a valid VAME project.`)
-                    return reject(mainError)
+    useEffect(() => {
+        const checkGpuStatus = async () => {
+            try {
+                const response = await get<{ has_gpu: boolean; device: string | null }>('/gpu-check');
+                if (response.success) {
+                    setHasGpu(response.data.has_gpu);
+                    setGpuDevice(response.data.device);
+                } else {
+                    console.error('Failed to check GPU status:', response.error);
+                    setHasGpu(false);
+                    setGpuDevice(null);
                 }
-
-                resolve(configPath)
+            } catch (error) {
+                console.error('Failed to check GPU status:', error);
+                setHasGpu(false);
+                setGpuDevice(null);
             }
-        })
+        };
 
-        const project = await promise
-
-        navigate({
-            pathname: "/project",
-            search: `?path=${project}`
-        });
-    }, [])
+        checkGpuStatus();
+    }, []);
 
     return (
         <NavbarContainer>
-            <NavbarSection>
-                <NavbarHeader to="/">VAME Desktop</NavbarHeader>
-            </NavbarSection>
+            <NavbarHeaderSlot>
+                {pageHeader ?? <NavbarHeader to="/">VAME App</NavbarHeader>}
+            </NavbarHeaderSlot>
             <NavbarSection>
                 <Link to="/">
                     <Tippy content={<span>Home page</span>}>
@@ -65,27 +60,33 @@ const Navbar: React.FC = () => {
                         </span>
                     </Tippy>
                 </Link>
-                <Tippy content={<span>Load an external project</span>}>
-                    <span>
-                        <NavbarButton onClick={upload}>
-                            <FontAwesomeIcon icon={faFileImport} />
-                        </NavbarButton>
-                    </span>
-                </Tippy>
-                <Link to="/settings">
-                    <Tippy content={<span>Edit global settings</span>}>
+                <Link to="/load">
+                    <Tippy content={<span>Load an external project</span>}>
                         <span>
                             <NavbarButton>
-                                <FontAwesomeIcon icon={faGear} />
+                                <FontAwesomeIcon icon={faFileImport} />
                             </NavbarButton>
                         </span>
                     </Tippy>
                 </Link>
+                <Tippy content={<span>{hasGpu ? `GPU: ${gpuDevice}` : 'No GPU detected'}</span>}>
+                    <span>
+                        <NavbarButton
+                            as="span"
+                            style={{
+                                background: hasGpu ? 'var(--color-success)' : 'var(--color-error)',
+                                cursor: 'default',
+                                display: 'inline-flex',
+                                alignItems: 'center'
+                            }}
+                        >
+                            <FontAwesomeIcon icon={faMicrochip} />
+                        </NavbarButton>
+                    </span>
+                </Tippy>
             </NavbarSection>
         </NavbarContainer>
     );
 }
 
 export default Navbar;
-
-

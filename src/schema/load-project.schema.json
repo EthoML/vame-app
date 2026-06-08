@@ -1,0 +1,15 @@
+{
+    "title": "Load an External VAME Project",
+    "type": "object",
+    "properties": {
+        "project_folder": {
+            "type": "string",
+            "format": "folder",
+            "title": "Project Folder",
+            "description": "Select the VAME project directory (the folder that contains config.yaml)."
+        }
+    },
+    "required": [
+        "project_folder"
+    ]
+}

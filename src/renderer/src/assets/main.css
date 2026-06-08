@@ -1,16 +1,111 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  /* ============================================================
+     Design tokens — clinical / precise, light only
+     (see .impeccable.md). Cool-tinted neutrals + one petrol-teal
+     accent. Semantic colors are reserved for pipeline state only.
+     ============================================================ */
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* Neutrals — cool slate, tinted toward the accent hue */
+  --color-bg: #f4f6f9;
+  --color-surface: #ffffff;
+  --color-surface-sunken: #eceff4;
+  --color-border: #e0e4ea;
+  --color-border-strong: #c9d0da;
+  --color-text: #1a2230;
+  --color-text-secondary: #586273;
+  --color-text-muted: #6e7686; /* AA-contrast (~4.5:1) on light surfaces */
+
+  /* Accent — petrol teal: primary actions, interactive, in-progress */
+  --color-accent: #0f6e78;
+  --color-accent-hover: #0b5159;
+  --color-accent-active: #093f46;
+  --color-accent-soft: #e4f0f1;
+  --color-on-accent: #ffffff;
+
+  /* Dark neutral — terminal / log surfaces */
+  --color-ink: #181c24;
+
+  /* Semantic status — ONLY for pipeline state (never decoration) */
+  --color-success: #1f8a4c;
+  --color-success-soft: #e7f3ec;
+  --color-error: #c2392e;
+  --color-error-soft: #f8e8e6;
+  --color-warning: #b7791f;
+  --color-warning-soft: #f7eedc;
+
+  /* Focus ring */
+  --color-focus: #0f6e78;
+
+  /* ============================================================
+     Typography — IBM Plex (technical / scientific, not Inter).
+     Plex Sans carries the UI; Plex Mono carries data the user
+     reads precisely: filesystem paths, versions, session IDs.
+     ============================================================ */
+  --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+
+  /* Fixed rem scale (~1.2 ratio) — app UIs need predictable density,
+     not fluid sizing. Body stays at 1rem/16px for readability. */
+  --text-caption: 0.75rem;   /* 12px — metadata, hints */
+  --text-sm: 0.875rem;       /* 14px — secondary / dense UI */
+  --text-body: 1rem;         /* 16px — default body */
+  --text-lg: 1.125rem;       /* 18px — list titles */
+  --text-h3: 1.25rem;        /* 20px — subheadings */
+  --text-h2: 1.5rem;         /* 24px — page headings */
+  --text-h1: 1.875rem;       /* 30px — display (rare) */
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+
+  --leading-tight: 1.2;
+  --leading-normal: 1.5;
+
+  /* Spacing scale — 4px base, for consistent gaps/padding */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--leading-normal);
+  font-weight: var(--weight-regular);
+
+  color-scheme: light;
+  color: var(--color-text);
+  background-color: var(--color-bg);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings: one weight (semibold), tight leading, slight optical tightening.
+   Defined here so they win over Bootstrap's defaults (main.css loads last). */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+}
+h1 { font-size: var(--text-h1); }
+h2 { font-size: var(--text-h2); }
+h3 { font-size: var(--text-h3); }
+
+/* Form controls don't inherit font-family by default — make them. */
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: 100%;
+}
+
+/* Monospace for literal data the user reads character-by-character. */
+code, kbd, samp, pre {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
 }
 
 * {
@@ -25,6 +120,29 @@ html, body, #root {
   overflow: hidden;
 }
 
-input[type="checkbox"] {
+body {
+  color: var(--color-text);
+  background-color: var(--color-bg);
+}
+
+input[type="checkbox"],
+input[type="radio"] {
   width: min-content;
+  accent-color: var(--color-accent);
+}
+
+/* Visible keyboard focus (accessibility) */
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
+}
+
+/* Respect users who prefer reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -1,21 +1,93 @@
 import styled from "styled-components";
 import ButtonComponent from "@renderer/components/Button"
 
-// Accordion Component
-export const Accordion = styled.div`
-  background-color: #f1f1f1;
-  border-radius: 5px;
-  margin-bottom: 10px;
+// Styled input component with constrained width
+export const StyledInput = styled.input`
+  width: 350px;
+  max-width: 100%;
+  padding: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  box-sizing: border-box;
+  color: var(--color-text);
+  background-color: var(--color-surface);
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-accent);
+  }
 `;
 
-export const AccordionHeader = styled.div`
-  background-color: black;
-  color: white;
-  cursor: pointer;
-  padding: 10px;
+// Styled select component with constrained width
+export const StyledSelect = styled.select`
+  width: 350px;
+  max-width: 100%;
+  padding: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  box-sizing: border-box;
+  color: var(--color-text);
+  background-color: var(--color-surface);
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-accent);
+  }
+`;
+
+// --- Layout for the whole form ---
+export const FormLayout = styled.form`
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* for flexbox scrolling */
+`;
+
+/* --- Footer for the button --- */
+export const FormFooter = styled.div`
+  flex-shrink: 0;
+  padding: 16px 0 24px 0;
+  background: transparent;
+  display: flex;
+  align-items: flex-end;
+  bottom: 0;
+`;
+
+/* --- Scrollable content area above the button --- */
+export const FormScrollContent = styled.div`
+  height: calc(100% - 56px);
+  overflow-y: auto;
+  min-height: 0;
+`;
+
+// Accordion Component
+// flex-shrink: 0 keeps each accordion at its natural height inside the
+// flex-column tab body — otherwise an expanded panel would squeeze its
+// siblings instead of letting the tab scroll.
+export const Accordion = styled.div`
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+`;
+
+export const AccordionHeader = styled.div<{ $disabled?: boolean }>`
+  background-color: var(--color-surface-sunken);
+  color: var(--color-text);
+  font-weight: 600;
+  cursor: ${({ $disabled }) => ($disabled ? 'not-allowed' : 'pointer')};
+  opacity: ${({ $disabled }) => ($disabled ? 0.6 : 1)};
+  padding: 10px 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  user-select: none;
+  transition: background 0.15s, color 0.15s, opacity 0.15s;
+
+  &:hover {
+    background-color: var(--color-border);
+  }
 `;
 
 interface AccordionContentProps {
@@ -31,7 +103,8 @@ export const InputGroup = styled.div`
   display: flex;
   justify-content: space-between;
   flex-direction: column;
-  gap: 10px;
+  gap: 4px; /* Reduced gap between label and input */
+  margin-bottom: 20px; /* Increased spacing between form items */
 `;
 
 interface InputLabelProps {
@@ -40,43 +113,83 @@ interface InputLabelProps {
 }
 
 export const InputLabel = styled.label<InputLabelProps>`
+  display: flex;
+  align-items: flex-start;
 
   span {
     font-weight: bold;
   }
 
   small {
-    font-size: 12px;
-    color: #666;
+    font-size: var(--text-caption);
+    color: var(--color-text-secondary);
+    margin-left: 5px;
+    &:before {
+      content: '(';
+    }
+    &:after {
+      content: ')';
+    }
   }
 
   &[required] span:after {
     content: '*';
-    color: red;
+    color: var(--color-error);
     margin-left: 5px;
   }
 
   &[readOnly] span:after {
     content: 'read only';
-    color: gray;
+    color: var(--color-text-muted);
     margin-left: 5px;
   }
-
 `;
 
+// Primary form submit — sized to content (not a fixed 400px block),
+// matching the shared Button's primary variant.
 export const Button = styled.button`
-  padding: 10px;
-  background-color: #007bff;
-  width: 100%;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 160px;
+  padding: 10px 20px;
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+  border: 1px solid var(--color-accent);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  line-height: 1;
   cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+
+  &:hover:not([disabled]),
+  &:focus-visible {
+    background-color: var(--color-accent-hover);
+    border-color: var(--color-accent-hover);
+  }
 
   &[disabled] {
     pointer-events: none;
     opacity: 0.5;
+  }
+`;
+
+// Secondary action beside the submit — outlined/neutral (the Logs toggle).
+export const LogsButton = styled(Button)`
+  min-width: 0;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border-strong);
+  margin-left: 10px;
+
+  &:hover:not([disabled]),
+  &:focus-visible {
+    background-color: var(--color-surface-sunken);
+    color: var(--color-text);
+    border-color: var(--color-border-strong);
   }
 `;
 
@@ -103,17 +216,23 @@ export const ArrayButtons = styled.div`
 `;
 
 export const ArrayButton = styled.button`
-  color: black;
+  color: var(--color-text-secondary);
   background: none;
   border: none;
   cursor: pointer;
+
+  &:hover {
+    color: var(--color-text);
+  }
 `;
 
 export const AddButton = styled(ButtonComponent)`
-  background-color: #007bff;
-  color: white;
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
   width: 30px;
   height: 30px;
+  min-width: 0;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -128,8 +247,8 @@ export const FileSelectorBody = styled.div`
   }
 
   input[type="file"]::-webkit-file-upload-button {
-    background-color: black;
-    color: white;
+    background-color: var(--color-accent);
+    color: var(--color-on-accent);
     padding: 5px 20px;
     border-radius: 5px;
     border: none;
@@ -140,7 +259,8 @@ export const FileList = styled.ul`
   list-style-type: none;
   padding: 0;
   margin: 0;
-  font-size: 13px;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
 `;
 
 export const FileListItem = styled.li`

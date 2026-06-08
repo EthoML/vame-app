@@ -6,7 +6,7 @@ import React, {
 } from "react";
 import { createCustomContext } from "@renderer/utils/createContext";
 import { onConnected, onVAMEReady } from "@renderer/utils/vame";
-import { get, post } from "@renderer/utils/requests";
+import { API_BASE, get, post } from "@renderer/utils/requests";
 
 import {
   type IProjectContext,
@@ -15,13 +15,13 @@ import {
 import {
   createVAMEProject,
   deleteVAMEProject,
-  configureVAMEProject,
-  alignVAMEProject,
+  preprocessingVAMEProject,
+  preprocessingVisualization,
   createTrainsetVAMEProject,
   trainVAMEProject,
   evaluateVAMEProject,
   segmentVAMEProject,
-  createMotifVideosVAMEProject, createUMAPVisualizationVAMEProject,
+  createMotifVideosVAMEProject,
   communityAnalysisVAMEProject,
   createCommunityVideosVAMEProject,
 } from "./api";
@@ -36,30 +36,20 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
   const [loadingProjects, setLoadingProjects] = useState<boolean>(true);
   const [loadingPaths, setLoadingPaths] = useState<boolean>(true);
 
-  const [projects, setProjects] = useState<Project[]>([])
-  const [recentProjects, setRecentProjects] = useState<Project[]>([])
+  const [projects, setProjects] = useState<ProjectType[]>([])
 
   // deal with paths
   const [paths, setPaths] = useState<string[]>([]);
-  const [recentPaths, setRecentPaths] = useState<string[]>([]);
-
-  // deal with recent projects paths
 
   const loadProjectsPaths = useCallback(async () => {
     try {
       setLoadingPaths(true);
       const projectsPath = await get<string[]>('projects')
-      const recentProjectsPath = await get<string[]>('/projects/recent')
 
-      if (projectsPath.success && recentProjectsPath.success) {
+      if (projectsPath.success) {
         setPaths(projectsPath.data)
-        setRecentPaths(recentProjectsPath.data)
       } else {
-        if(!projectsPath.success){
-          throw new Error(projectsPath.error)
-        } else if (!recentProjectsPath.success){
-          throw new Error(recentProjectsPath.error)
-        }
+        throw new Error(projectsPath.error)
       }
     } catch (e) {
       if (e instanceof Error) {
@@ -71,52 +61,41 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
   }, [])
 
   const loadProjectsData = useCallback(async () => {
-    if (!paths || !recentPaths) {
+    if (!paths) {
       return
     }
 
     setLoadingProjects(true)
     const promisesProjects = paths.map(async (path) => {
-      return await post<Omit<Project, "created_at">>('load', { project: path })
+      return await post<Omit<ProjectType, "creation_datetime">>('load', { project: path })
     })
 
-    const promisesRecents = recentPaths.map(async (path) => {
-      return await post<Omit<Project, "created_at">>('load', { project: path })
-    })
     try {
       const data = await Promise.allSettled(promisesProjects)
-      const data2 = await Promise.allSettled(promisesRecents)
 
       setProjects(data.map(icpResponse => {
         if (icpResponse.status === "fulfilled") {
           if (icpResponse.value.success) {
-            const { Project, project_path } = icpResponse.value.data.config
-            const created_at = new Date(project_path.split(`${Project}-`)[1]).toLocaleDateString()
-            const project = { ...icpResponse.value.data, created_at }
-            return project
+            const projectData = icpResponse.value.data;
+            if (projectData.error) {
+              // Return a project object with error info
+              return { error: projectData.error };
+            }
+            // creation_datetime comes straight from config.yaml.
+            const creation_datetime = projectData.config.creation_datetime;
+            const project = { ...projectData, creation_datetime };
+            return project;
           }
         }
-        return
-      }).filter(p => !!p) as Project[])
-
-      setRecentProjects(data2.map(icpResponse => {
-        if (icpResponse.status === "fulfilled") {
-          if (icpResponse.value.success) {
-            const { Project, project_path } = icpResponse.value.data.config
-            const created_at = new Date(project_path.split(`${Project}-`)[1]).toLocaleDateString()
-            const project = { ...icpResponse.value.data, created_at }
-            return project
-          }
-        }
-        return
-      }).filter(p => !!p) as Project[])
+        return;
+      }).filter(p => !!p) as ProjectType[]);
 
     } catch (error) {
       window.alert("Something went wrong loading projects.")
     } finally {
       setLoadingProjects(false)
     }
-  }, [paths,recentPaths])
+  }, [paths])
 
   const refresh = useCallback(loadProjectsPaths, [])
 
@@ -136,18 +115,6 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
 
   const deleteProject = useCallback(async (data: string) => {
     const res = await deleteVAMEProject(data)
-    await refresh()
-    return res
-  }, [])
-
-  const configureProject = useCallback(async (data) => {
-    const res = await configureVAMEProject(data)
-    await refresh()
-    return res
-  }, [])
-
-  const align = useCallback(async (data) => {
-    const res = await alignVAMEProject(data)
     await refresh()
     return res
   }, [])
@@ -200,9 +167,14 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
     return res
   }, [])
 
-  const createUMAPVisualization = useCallback(async (data) => {
-    const res = await createUMAPVisualizationVAMEProject(data)
+  const runPreprocessing = useCallback(async (data) => {
+    const res = await preprocessingVAMEProject(data)
     await refresh()
+    return res
+  }, [])
+
+  const getPreprocessingVisualization = useCallback(async (data) => {
+    const res = await preprocessingVisualization(data)
     return res
   }, [])
 
@@ -222,39 +194,28 @@ export const ProjectsProvider: React.FC<{ children: ReactNode }> = ({
 
     const fullProjectDirectory = `${Project}${project_path.split(Project).slice(1).join(Project)}`
 
-    return new URL(`${basePath}/${fullProjectDirectory}/${asset}`, "http://localhost:8641").href
+    const path = encodeURI(`/${basePath}/${fullProjectDirectory}/${asset}`)
+    return `${API_BASE}${path}`
   }, [getProject])
 
 
   const value = {
     projects,
-    recentProjects,
     refresh,
     getProject,
     getAssetsPath,
-
     createProject,
     deleteProject,
-
-    configureProject,
-
-    align,
+    runPreprocessing,
+    getPreprocessingVisualization,
     createTrainset,
-
     train,
     evaluate,
-
     segment,
-
     createMotifVideos,
-
     communityAnalysis,
-
     createCommunityVideos,
-
     createMotifCommunityVideos,
-
-    createUMAPVisualization
   }
 
   return (
