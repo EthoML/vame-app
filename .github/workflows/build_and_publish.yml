@@ -1,4 +1,4 @@
-name: Build
+name: Build and Publish
 
 run-name: ${{ github.actor }} is building the VAME App wheel
 
@@ -7,6 +7,7 @@ on:
     branches:
       - main
   pull_request:
+  workflow_dispatch:
 
 jobs:
   build-wheel:
