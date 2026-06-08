@@ -6,15 +6,13 @@ on:
   push:
     branches:
       - main
-      - dev
-      - webapp
   pull_request:
-  release:
-    types: [published]
 
 jobs:
   build-wheel:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
     steps:
       - uses: actions/checkout@v4
 
@@ -34,16 +32,78 @@ jobs:
 
       - name: Build Python wheel (bundles the built frontend)
         run: |
-          python -m pip install --upgrade pip build
+          python -m pip install --upgrade pip build tomli
           python -m build --wheel
 
+      - name: Extract version from pyproject.toml
+        id: get_version
+        run: |
+          version=$(python -c "import tomli; print(tomli.load(open('pyproject.toml','rb'))['project']['version'])")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
       - uses: actions/upload-artifact@v4
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           name: vame-app-wheel
           path: dist/*.whl
 
-      - name: Publish wheel to the GitHub release
-        if: github.event_name == 'release'
+  publish:
+    needs: build-wheel
+    # Only on main: tag the version, cut a GitHub release, and push to PyPI.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download the built wheel
+        uses: actions/download-artifact@v4
+        with:
+          name: vame-app-wheel
+          path: dist
+
+      - name: Determine tag name
+        id: determine_tag
+        run: echo "tag_name=v${{ needs.build-wheel.outputs.version }}" >> "$GITHUB_OUTPUT"
+
+      - name: Check if tag already exists
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tagName = "${{ steps.determine_tag.outputs.tag_name }}";
+            const { data: tags } = await github.request('GET /repos/{owner}/{repo}/tags', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+            const exists = tags.some(tag => tag.name === tagName);
+            core.info(`TAG_EXISTS=${exists}`);
+            core.exportVariable('TAG_EXISTS', exists.toString());
+
+      - name: Tag exists — skip publish
+        if: env.TAG_EXISTS == 'true'
+        run: echo "Tag ${{ steps.determine_tag.outputs.tag_name }} already exists; bump the version in pyproject.toml to publish."
+
+      - name: Create GitHub release
+        if: env.TAG_EXISTS == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.determine_tag.outputs.tag_name }}
+          name: ${{ steps.determine_tag.outputs.tag_name }}
+          body: "Release for version ${{ steps.determine_tag.outputs.tag_name }}"
+          files: dist/*.whl
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "${{ github.event.release.tag_name }}" dist/*.whl
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        if: env.TAG_EXISTS == 'false'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Publish to PyPI
+        if: env.TAG_EXISTS == 'false'
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+        run: |
+          python -m pip install --upgrade twine
+          twine upload dist/*.whl
