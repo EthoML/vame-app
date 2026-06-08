@@ -81,13 +81,8 @@ def get_projects():
     VAME projects directory (including symlinks to external projects), folds
     them into the registry, and prunes entries whose ``config.yaml`` is gone.
     """
-    # Track projects by their entry *inside* the projects directory — do NOT
-    # resolve() symlinks. Resolving would replace a linked project's path with
-    # its external target, so deleting it would try to rmtree the real source
-    # data instead of just removing the link. (`is_dir()`/`config.yaml` checks
-    # still follow the symlink transparently, so linked projects are included.)
     discovered = [
-        str(project)
+        str(project.resolve())
         for project in VAME_PROJECTS_DIRECTORY.glob("*")
         if (project.is_dir() and (project / "config.yaml").exists())
     ]
@@ -172,33 +167,23 @@ def delete_project(project_path):
     else:
         path_obj = Path(project_path)
 
-    # Always drop it from the registry first so it never lingers, regardless of
-    # what we manage to remove on disk below.
     unregister_project(path_obj)
 
-    # A project's managed entry always lives directly under the projects dir,
-    # keyed by name. The caller may pass either that entry's path (a symlink for
-    # linked projects, or a real dir) OR a resolved external target the symlink
-    # points at — so resolve to the managed entry by name and operate on THAT.
-    # This guarantees we only ever touch things inside the projects dir and, for
-    # linked projects, remove just the link rather than the user's source data.
+    # Operate on the managed entry under the projects dir (keyed by name), so a
+    # linked project only loses its symlink, never the external source data.
     entry = VAME_PROJECTS_DIRECTORY / path_obj.name
 
-    # Remove the link itself for a linked project (covers broken symlinks too,
-    # which report exists() == False).
-    if entry.is_symlink():
+    if entry.is_symlink():  # also covers broken symlinks (exists() == False)
         entry.unlink()
         return dict(project=str(entry), deleted=True)
 
-    # Real directory living inside the projects dir: remove it and its contents.
     if entry.is_dir():
         import shutil
 
         shutil.rmtree(str(entry), ignore_errors=True)
         return dict(project=str(entry), deleted=True)
 
-    # No managed entry on disk (e.g. an external path with no link). Unregister
-    # only; never delete data outside the projects directory.
+    # No managed entry on disk: unregister only, never touch external data.
     return dict(project=str(path_obj), deleted=False, unregistered=True)
 
 
@@ -242,6 +227,15 @@ def load_project(project_path: Path):
         cache_key = str(path_obj.resolve())
         now = time.time()
         mtime = _get_project_mtime(path_obj)
+
+        # Ensure the projects-dir symlink for an external project before any cache
+        # early-return, so a cache hit can't leave it missing.
+        if path_obj.parent != VAME_PROJECTS_DIRECTORY:
+            symlink = VAME_PROJECTS_DIRECTORY / path_obj.name
+            if not symlink.exists() and not symlink.is_symlink():
+                VAME_PROJECTS_DIRECTORY.mkdir(parents=True, exist_ok=True)
+                symlink.symlink_to(str(path_obj))
+
         cache_entry = _PROJECT_CACHE.get(cache_key)
         if cache_entry:
             if cache_entry["mtime"] == mtime and (
@@ -253,12 +247,6 @@ def load_project(project_path: Path):
                 print(f"[CACHE] Invalidating cache for {cache_key}")
 
         config_path = path_obj / "config.yaml"
-
-        # Create a symlink to the project directory if it isn't in the VAME_PROJECTS_DIRECTORY
-        if path_obj.parent != VAME_PROJECTS_DIRECTORY:
-            symlink = VAME_PROJECTS_DIRECTORY / path_obj.name
-            if not symlink.exists():
-                symlink.symlink_to(str(path_obj))
 
         # Load the states.json file
         states_path = path_obj / "states" / "states.json"
@@ -282,6 +270,21 @@ def load_project(project_path: Path):
                 config = None
         else:
             config = None
+
+        # Heal a stale project_path (e.g. a project moved/renamed since creation)
+        # so it matches where it lives now — the frontend keys on it and VAME
+        # locates files through it. Persist via VAME's writer to keep the format.
+        if config is not None:
+            actual_project_path = str(path_obj)
+            if config.get("project_path") != actual_project_path:
+                config["project_path"] = actual_project_path
+                try:
+                    from vame.util.auxiliary import write_config
+
+                    write_config(str(config_path), config)
+                    mtime = _get_project_mtime(path_obj)
+                except Exception as e:
+                    print(f"Could not persist corrected project_path for {path_obj}: {e}")
 
         # Get all files in the original data directory
         videos_paths = [

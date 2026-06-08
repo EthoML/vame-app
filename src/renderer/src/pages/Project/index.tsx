@@ -25,7 +25,6 @@ const Project: React.FC = () => {
   const [searchParams] = useSearchParams();
   const projectPath = searchParams.get("path")
   const {
-    getProject,
     refresh,
     runPreprocessing,
   } = useProjects()
@@ -33,6 +32,17 @@ const Project: React.FC = () => {
   const [project, setProject] = useState<ProjectType | undefined>()
   const [blockSubmit, setBlockSubmit] = useState(true);
   const [selectedTab, setSelectedTab] = useState<string>("input-data");
+
+  // Load this project directly so it resolves a freshly-opened external project
+  // (which /load registers and symlinks), independent of the global list timing.
+  const loadProject = useCallback(async () => {
+    if (!projectPath) return
+    const res = await post<ProjectType>('load', { project: projectPath })
+    const data = res.success ? (res.data as any) : null
+    if (data && !data.error) {
+      setProject({ ...data, creation_datetime: data.config?.creation_datetime })
+    }
+  }, [projectPath])
 
   // Function to handle tab submission
   const submitTab = useCallback(async (
@@ -49,30 +59,25 @@ const Project: React.FC = () => {
         setSelectedTab(tab)
       }
 
+      await loadProject()
       await refresh()
     } catch (e) {
       console.error("Error in submitTab:", e);
     } finally {
       setBlockSubmit(false);
     }
-  }, [project])
+  }, [project, loadProject])
 
 
   useEffect(() => {
     if (projectPath) {
-      onConnected(async () => {
-        post('project/register', { project: projectPath }).then(res => {
-          if (res.success) {
-            setProject(getProject(projectPath) as ProjectType);
-          }
-        })
-      })
+      onConnected(() => { loadProject() })
 
       onProjectReady(projectPath, () => {
         setBlockSubmit(false);
       })
     }
-  }, [projectPath])
+  }, [projectPath, loadProject])
 
   useEffect(() => {
     if (project) {
