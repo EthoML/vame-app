@@ -139,17 +139,24 @@ class RawData(Resource):
     def get(self):
         project_path = request.args.get("project")
         session = request.args.get("session")
+        if not project_path or not session:
+            api.abort(400, "Missing 'project' or 'session'")
+        # Check the config exists up front so a stale/incomplete project path
+        # yields a clear 404 instead of an opaque read_config FileNotFoundError.
+        config_path = Path(project_path) / "config.yaml"
+        if not config_path.exists():
+            api.abort(404, f"Project config not found: '{config_path}'")
         try:
-            config = vame.read_config(str(Path(project_path) / "config.yaml"))
+            config = vame.read_config(str(config_path))
             session_names = config.get("session_names", [])
             if session not in session_names:
                 api.abort(400, f"Session '{session}' not found in project '{project_path}'")
             file_path = Path(project_path) / "data" / "raw" / f"{session}.nc"
+            if not file_path.exists():
+                api.abort(404, f"Raw data file not found: '{file_path}'")
             ds = xr.open_dataset(file_path)
             html = ds._repr_html_()
             return jsonify(html=html)
-        except FileNotFoundError:
-            api.abort(404, f"File not found: '{file_path}'")
         except Exception as exception:
             if not_bad_request_exception(exception):
                 api.abort(500, str(exception))

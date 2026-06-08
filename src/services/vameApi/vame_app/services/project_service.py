@@ -81,8 +81,13 @@ def get_projects():
     VAME projects directory (including symlinks to external projects), folds
     them into the registry, and prunes entries whose ``config.yaml`` is gone.
     """
+    # Track projects by their entry *inside* the projects directory — do NOT
+    # resolve() symlinks. Resolving would replace a linked project's path with
+    # its external target, so deleting it would try to rmtree the real source
+    # data instead of just removing the link. (`is_dir()`/`config.yaml` checks
+    # still follow the symlink transparently, so linked projects are included.)
     discovered = [
-        str(project.resolve())
+        str(project)
         for project in VAME_PROJECTS_DIRECTORY.glob("*")
         if (project.is_dir() and (project / "config.yaml").exists())
     ]
@@ -167,23 +172,34 @@ def delete_project(project_path):
     else:
         path_obj = Path(project_path)
 
-    if path_obj.exists():
+    # Always drop it from the registry first so it never lingers, regardless of
+    # what we manage to remove on disk below.
+    unregister_project(path_obj)
+
+    # A project's managed entry always lives directly under the projects dir,
+    # keyed by name. The caller may pass either that entry's path (a symlink for
+    # linked projects, or a real dir) OR a resolved external target the symlink
+    # points at — so resolve to the managed entry by name and operate on THAT.
+    # This guarantees we only ever touch things inside the projects dir and, for
+    # linked projects, remove just the link rather than the user's source data.
+    entry = VAME_PROJECTS_DIRECTORY / path_obj.name
+
+    # Remove the link itself for a linked project (covers broken symlinks too,
+    # which report exists() == False).
+    if entry.is_symlink():
+        entry.unlink()
+        return dict(project=str(entry), deleted=True)
+
+    # Real directory living inside the projects dir: remove it and its contents.
+    if entry.is_dir():
         import shutil
 
-        # Drop it from the registry first so a half-deleted project never lingers.
-        unregister_project(path_obj)
+        shutil.rmtree(str(entry), ignore_errors=True)
+        return dict(project=str(entry), deleted=True)
 
-        # Check if the path is a symlink
-        if path_obj.is_symlink():
-            # If it's a symlink, just remove the symlink itself
-            path_obj.unlink()
-            return dict(project=str(path_obj), deleted=True)
-        else:
-            # If it's a regular directory, remove it and its contents
-            shutil.rmtree(str(path_obj), ignore_errors=True)
-            return dict(project=str(path_obj), deleted=True)
-
-    return dict(project=str(path_obj), deleted=False)
+    # No managed entry on disk (e.g. an external path with no link). Unregister
+    # only; never delete data outside the projects directory.
+    return dict(project=str(path_obj), deleted=False, unregistered=True)
 
 
 def configure_project(data, project_path: Path):
