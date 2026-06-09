@@ -12,7 +12,7 @@ from flask import request, jsonify
 from flask_restx import Resource
 
 from . import api
-from vame_app.config import DATA_ROOT, VAME_PROJECTS_DIRECTORY, resolve_within
+from vame_app.config import get_data_root, VAME_PROJECTS_DIRECTORY, resolve_within
 from vame_app.utils.not_bad_request_exception import not_bad_request_exception
 
 
@@ -33,17 +33,18 @@ class FilesystemRoots(Resource):
     def get(self):
         """Entry points the browser can start from (confined to DATA_ROOT)."""
         try:
-            roots = [{"name": "Home / Data root", "path": str(DATA_ROOT)}]
+            data_root = get_data_root()
+            roots = [{"name": "Home / Data root", "path": str(data_root)}]
             # Surface the VAME projects directory too, when it is inside DATA_ROOT.
             try:
-                resolve_within(DATA_ROOT, VAME_PROJECTS_DIRECTORY)
+                resolve_within(data_root, VAME_PROJECTS_DIRECTORY)
                 if VAME_PROJECTS_DIRECTORY.exists():
                     roots.append(
                         {"name": "VAME projects", "path": str(VAME_PROJECTS_DIRECTORY)}
                     )
             except PermissionError:
                 pass
-            return jsonify({"roots": roots, "data_root": str(DATA_ROOT)})
+            return jsonify({"roots": roots, "data_root": str(data_root)})
         except Exception as exception:
             if not_bad_request_exception(exception):
                 api.abort(500, str(exception))
@@ -63,13 +64,14 @@ class FilesystemList(Resource):
                       Directories are always returned so the user can navigate.
           - ``show_hidden``: ``true`` to include dotfiles (default: false).
         """
-        raw_path = request.args.get("path") or str(DATA_ROOT)
+        data_root = get_data_root()
+        raw_path = request.args.get("path") or str(data_root)
         exts_param = request.args.get("exts", "")
         show_hidden = request.args.get("show_hidden", "false").lower() == "true"
         exts = {e.strip().lower() for e in exts_param.split(",") if e.strip()}
 
         try:
-            target = resolve_within(DATA_ROOT, raw_path)
+            target = resolve_within(data_root, raw_path)
         except PermissionError as exception:
             api.abort(400, str(exception))
 
@@ -95,14 +97,14 @@ class FilesystemList(Resource):
                     files.append(_entry(child))
 
             parent = None
-            if target != DATA_ROOT and DATA_ROOT in target.parents:
+            if target != data_root and data_root in target.parents:
                 parent = str(target.parent)
 
             return jsonify(
                 {
                     "path": str(target),
                     "parent": parent,
-                    "is_root": target == DATA_ROOT,
+                    "is_root": target == data_root,
                     "entries": dirs + files,
                 }
             )

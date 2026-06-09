@@ -158,10 +158,6 @@ def main(argv=None):
     else:
         data_root = _read_app_settings().get("data_root")
 
-    # IMPORTANT: set env before importing the app, because config values
-    # (DATA_ROOT, host, port) are read from the environment at import time.
-    if data_root:
-        os.environ["VAME_DATA_ROOT"] = data_root
     os.environ["VAME_HOST"] = args.host
     os.environ.setdefault("PYTHONUNBUFFERED", "1")
 
@@ -172,8 +168,12 @@ def main(argv=None):
     port = _pick_port(host, args.port)
     os.environ["VAME_PORT"] = str(port)
 
+
+    from vame_app.config import set_data_root, get_data_root
+
+    set_data_root(data_root or str(Path.home()))
+
     from vame_app import create_app
-    from vame_app.config import DATA_ROOT
 
     app = create_app()
 
@@ -183,7 +183,7 @@ def main(argv=None):
     print("=" * 60)
     print("  VAME App")
     print(f"  URL:        {url}")
-    print(f"  Data root:  {DATA_ROOT}")
+    print(f"  Data root:  {get_data_root()}")
     print("  Press Ctrl+C to stop.")
     print("=" * 60)
     sys.stdout.flush()
