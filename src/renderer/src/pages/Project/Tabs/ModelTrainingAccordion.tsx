@@ -62,7 +62,11 @@ const ModelTrainingAccordion = ({
     const evaluate_model = project.states.evaluate_model || {};
 
     const trainsetCreated = create_trainset.execution_state === "success";
-    const modelCreated = train_model.execution_state === "success";
+    // Aborted (user-stopped) runs still save a usable model, so the Evaluate
+    // step unblocks just like a completed run.
+    const modelCreated =
+        train_model.execution_state === "success" ||
+        train_model.execution_state === "aborted";
     const modelEvaluated = evaluate_model.execution_state === "success";
 
     // Poll train_model state after training starts
