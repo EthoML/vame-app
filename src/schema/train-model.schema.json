@@ -12,7 +12,7 @@
             "type": "integer",
             "title": "Max Epochs",
             "description": "Maximum number of training epochs.",
-            "default": 500
+            "default": 20
         }
     },
     "required": [

@@ -9,6 +9,7 @@ import vame
 from . import api
 from vame_app.utils.resolve_request_util import resolve_request_data
 from vame_app.utils.not_bad_request_exception import not_bad_request_exception
+from vame_app.services.training_metrics import build_training_figures
 
 
 @api.route("/create-trainset", methods=["POST"])
@@ -104,6 +105,28 @@ class EvaluateModel(Resource):
         except Exception as exception:
             if not_bad_request_exception(exception):
                 api.abort(500, str(exception))
+
+
+@api.route("/train-metrics", methods=["POST"])
+class TrainMetrics(Resource):
+    @api.doc(
+        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
+    )
+    def post(self):
+        """Live training-loss figures (Plotly specs) from TensorBoard logs.
+
+        Body: ``{"project": "<path>", "model_name"?: "<name>"}``. Returns
+        ``{"epoch_train", "epoch_test", "batch", "has_data", "model_name"}``;
+        safe to poll during training and before any events exist.
+        """
+        try:
+            data, project_path = resolve_request_data(request)
+            config = vame.read_config(str(Path(project_path) / "config.yaml"))
+            model_name = data.get("model_name") or config["model_name"]
+            return jsonify(build_training_figures(project_path, model_name))
+        except Exception as exception:
+            # Clean JSON error (flask-restx's api.abort 500s with flask-cors here).
+            return {"message": str(exception)}, 500
 
 
 @api.route("/model-images", methods=["POST"])

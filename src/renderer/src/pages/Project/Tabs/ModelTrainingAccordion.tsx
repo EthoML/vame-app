@@ -16,6 +16,7 @@ import createTrainsetSchema from '../../../../../schema/create-trainset.schema.j
 import trainModelSchema from '../../../../../schema/train-model.schema.json';
 import evaluateModelSchema from '../../../../../schema/evaluate-model.schema.json';
 import ModelVisualizationSection from "./ModelVisualizationSection";
+import TrainingMetricsCharts from "./TrainingMetricsCharts";
 import { StepBadge, StepStateLine, ErrorNote, SuccessNote } from "@renderer/components/StepStatus";
 
 type ModelTrainingAccordionProps = {
@@ -32,7 +33,7 @@ const ModelTrainingAccordion = ({
     blockSubmit,
 }: ModelTrainingAccordionProps) => {
     // Independent open/close state for each accordion
-    const [openSteps, setOpenSteps] = useState([false, false, false, false]);
+    const [openSteps, setOpenSteps] = useState([false, false, false]);
 
     // Create Trainset form state
     const [createTrainsetLoading, setCreateTrainsetLoading] = useState(false);
@@ -82,7 +83,7 @@ const ModelTrainingAccordion = ({
                             console.error("Error calling onFormSubmit:", e);
                         }
                         setBlockSubmit(false);
-                        setOpenSteps([false, false, false, false]);
+                        setOpenSteps([false, false, false]);
                     }
                 } catch (err) {
                     console.error("Error during polling:", err);
@@ -224,6 +225,11 @@ const ModelTrainingAccordion = ({
                         />
                         {trainError && <ErrorNote>{trainError}</ErrorNote>}
                         <StepStateLine state={trainModelState} polling={isPolling} noun="Training" />
+                        <TrainingMetricsCharts
+                            projectPath={project.config.project_path}
+                            live={isPolling}
+                            enabled={openSteps[1]}
+                        />
                     </div>
                 </AccordionContent>
             </Accordion>
@@ -252,23 +258,10 @@ const ModelTrainingAccordion = ({
                         />
                         {evaluateError && <ErrorNote>{evaluateError}</ErrorNote>}
                         {modelEvaluated && <SuccessNote>Model evaluated successfully.</SuccessNote>}
+                        {modelEvaluated && (
+                            <ModelVisualizationSection project={project} enabled={openSteps[2]} />
+                        )}
                     </div>
-                </AccordionContent>
-            </Accordion>
-            {/* Accordion 4: Visualize Model Results */}
-            <Accordion>
-                <AccordionHeader
-                    $disabled={!modelEvaluated}
-                    onClick={() => handleToggle(3, modelEvaluated)}
-                >
-                    3.4 Visualize Model Results
-                    <StepBadge state={evaluate_model.execution_state} />
-                    <span style={{ marginLeft: "auto" }}>
-                        <FontAwesomeIcon icon={openSteps[3] ? faChevronUp : faChevronDown} />
-                    </span>
-                </AccordionHeader>
-                <AccordionContent $isOpen={openSteps[3]}>
-                    <ModelVisualizationSection project={project} enabled={modelEvaluated} />
                 </AccordionContent>
             </Accordion>
         </PaddedTab>

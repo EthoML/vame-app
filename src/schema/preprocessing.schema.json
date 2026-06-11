@@ -41,7 +41,7 @@
             "type": "boolean",
             "title": "Run Rescaling",
             "description": "Perform rescaling during preprocessing.",
-            "default": false
+            "default": true
         }
     },
     "required": [
