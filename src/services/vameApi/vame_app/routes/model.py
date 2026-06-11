@@ -46,13 +46,23 @@ class TrainModel(Resource):
                 config_path=str(Path(project_path) / "config.yaml"),
                 config=config,
             )
-            vame.train_model(config=config, save_logs=True)
-            vame.visualization.plot_loss(
-                config=config,
-                model_name=config["model_name"],
-                save_to_file=True,
-                show_figure=False,
-            )
+            try:
+                vame.train_model(config=config, save_logs=True)
+            except KeyboardInterrupt:
+                # User requested a stop; VAME already recorded "aborted" and saved
+                # the current weights. Fall through to plot whatever completed.
+                pass
+            # Generate the loss figure from the epochs that ran (works for both
+            # completed and aborted runs); never let it mask the training result.
+            try:
+                vame.visualization.plot_loss(
+                    config=config,
+                    model_name=config["model_name"],
+                    save_to_file=True,
+                    show_figure=False,
+                )
+            except Exception:
+                pass
 
         try:
             data, project_path = resolve_request_data(request)
@@ -66,6 +76,28 @@ class TrainModel(Resource):
         except Exception as exception:
             if not_bad_request_exception(exception):
                 api.abort(500, str(exception))
+
+
+@api.route("/train/stop", methods=["POST"])
+class StopTrainModel(Resource):
+    @api.doc(
+        responses={200: "Success", 400: "Bad Request", 500: "Internal server error"}
+    )
+    def post(self):
+        """Request a graceful stop of an in-progress training.
+
+        Writes VAME's stop sentinel via ``vame.stop_training``; the training loop
+        notices it at the next epoch boundary, saves the current model, and
+        records the ``aborted`` state (which the UI polls for).
+        """
+        try:
+            data, project_path = resolve_request_data(request)
+            config = vame.read_config(str(Path(project_path) / "config.yaml"))
+            was_running = vame.stop_training(config=config)
+            return {"status": "stop_requested", "was_running": bool(was_running)}
+        except Exception as exception:
+            # Clean JSON error (flask-restx's api.abort 500s with flask-cors here).
+            return {"message": str(exception)}, 500
 
 
 @api.route("/evaluate", methods=["POST"])

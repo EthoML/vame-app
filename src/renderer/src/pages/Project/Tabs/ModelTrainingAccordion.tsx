@@ -10,7 +10,9 @@ import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import DynamicForm from "@renderer/components/DynamicForm";
 import { createTrainsetVAMEProject } from "../../../context/Projects/api/createTrainsetVAMEProject";
 import { trainVAMEProject } from "../../../context/Projects/api/trainVAMEProject";
+import { stopTrainVAMEProject } from "../../../context/Projects/api/stopTrainVAMEProject";
 import { getProjectStateVAMEProject } from "../../../context/Projects/api/getProjectStateVAMEProject";
+import Button from "@renderer/components/Button";
 import { evaluateVAMEProject } from "../../../context/Projects/api/evaluateVAMEProject";
 import createTrainsetSchema from '../../../../../schema/create-trainset.schema.json';
 import trainModelSchema from '../../../../../schema/train-model.schema.json';
@@ -47,6 +49,10 @@ const ModelTrainingAccordion = ({
     const [trainModelState, setTrainModelState] = useState<string | null>(null);
     const [isPolling, setIsPolling] = useState(false);
 
+    // Stop-training state
+    const [stopping, setStopping] = useState(false);
+    const [stopError, setStopError] = useState<string | null>(null);
+
     // Evaluate Model form state
     const [evaluateError, setEvaluateError] = useState<string | null>(null);
 
@@ -77,6 +83,7 @@ const ModelTrainingAccordion = ({
                         state === "not_found"
                     ) {
                         setIsPolling(false);
+                        setStopping(false);
                         try {
                             await onFormSubmit();
                         } catch (e) {
@@ -135,6 +142,20 @@ const ModelTrainingAccordion = ({
             setBlockSubmit(false);
         } finally {
             setTrainLoading(false);
+        }
+    };
+
+    // Handler for stopping a running training. Writes VAME's stop sentinel; the
+    // existing poll above flips to "aborted" once training stops at the next
+    // epoch boundary (and the current model is saved).
+    const handleStopTraining = async () => {
+        setStopping(true);
+        setStopError(null);
+        try {
+            await stopTrainVAMEProject({ project: project.config.project_path });
+        } catch (err: any) {
+            setStopError(err.message || "Failed to request training stop.");
+            setStopping(false);
         }
     };
 
@@ -225,6 +246,22 @@ const ModelTrainingAccordion = ({
                         />
                         {trainError && <ErrorNote>{trainError}</ErrorNote>}
                         <StepStateLine state={trainModelState} polling={isPolling} noun="Training" />
+                        {isPolling && (
+                            <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 10 }}>
+                                <Button
+                                    variant="danger"
+                                    type="button"
+                                    onClick={handleStopTraining}
+                                    disabled={stopping}
+                                >
+                                    {stopping ? "Stopping…" : "Stop training"}
+                                </Button>
+                                <span style={{ color: "var(--color-text-muted)", fontSize: "var(--text-sm)" }}>
+                                    Stops after the current epoch and saves the current model.
+                                </span>
+                            </div>
+                        )}
+                        {stopError && <ErrorNote>{stopError}</ErrorNote>}
                         <TrainingMetricsCharts
                             projectPath={project.config.project_path}
                             live={isPolling}
