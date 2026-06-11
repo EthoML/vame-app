@@ -13,6 +13,12 @@
             "title": "Max Epochs",
             "description": "Maximum number of training epochs.",
             "default": 20
+        },
+        "continue_training": {
+            "type": "boolean",
+            "title": "Continue training from previous model",
+            "description": "Resume training from the last checkpoint.",
+            "default": true
         }
     },
     "required": [

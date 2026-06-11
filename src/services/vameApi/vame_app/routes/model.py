@@ -42,6 +42,15 @@ class TrainModel(Resource):
         def background_task(data, project_path, config):
             config["batch_size"] = data["batch_size"]
             config["max_epochs"] = data["max_epochs"]
+            # Continue from the previously trained model (load saved weights) when
+            # requested; otherwise train from scratch. VAME loads weights only if
+            # pretrained_weights is true and pretrained_model names the saved model
+            # (best_model is "{model_name}_{project}.pkl").
+            if data.get("continue_training"):
+                config["pretrained_weights"] = True
+                config["pretrained_model"] = config["model_name"]
+            else:
+                config["pretrained_weights"] = False
             vame.write_config(
                 config_path=str(Path(project_path) / "config.yaml"),
                 config=config,
