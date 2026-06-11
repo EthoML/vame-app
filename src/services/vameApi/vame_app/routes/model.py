@@ -42,6 +42,10 @@ class TrainModel(Resource):
         def background_task(data, project_path, config):
             config["batch_size"] = data["batch_size"]
             config["max_epochs"] = data["max_epochs"]
+            # Cap batches per epoch (decouples epoch length from dataset size);
+            # blank/0 => use the whole dataset each epoch (VAME default).
+            steps = data.get("steps_per_epoch")
+            config["steps_per_epoch"] = int(steps) if steps else None
             # Continue from the previously trained model (load saved weights) when
             # requested; otherwise train from scratch. VAME loads weights only if
             # pretrained_weights is true and pretrained_model names the saved model

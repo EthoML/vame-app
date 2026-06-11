@@ -14,6 +14,12 @@
             "description": "Maximum number of training epochs.",
             "default": 20
         },
+        "steps_per_epoch": {
+            "type": "integer",
+            "title": "Batches per epoch (optional)",
+            "description": "Number of batches to train per epoch. Leave empty to use the whole dataset; set a smaller value to make epochs shorter on large datasets.",
+            "minimum": 1
+        },
         "continue_training": {
             "type": "boolean",
             "title": "Continue training from previous model",
