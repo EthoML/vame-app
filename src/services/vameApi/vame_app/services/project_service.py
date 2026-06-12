@@ -130,9 +130,15 @@ def create_project(data):
     project_path = get_project_path(project_name, str(VAME_PROJECTS_DIRECTORY))
     created = not project_path.exists()
 
+    # Reproducibility seed: init_new_project takes it via config_kwargs, not as a
+    # direct kwarg. Omit when missing so VAME's default applies.
+    seed = data.pop("project_random_state", None)
+    config_kwargs = {"project_random_state": int(seed)} if seed is not None else None
+
     config_path, config_dict = vame.init_new_project(
         project_name=project_name,
         working_directory=str(VAME_PROJECTS_DIRECTORY),
+        config_kwargs=config_kwargs,
         **data,
     )
 

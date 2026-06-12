@@ -116,6 +116,7 @@ const ModelTrainingAccordion = ({
                 project: project.config.project_path,
                 test_fraction: formData.test_fraction,
                 split_mode: formData.split_mode,
+                project_random_state: formData.project_random_state,
             });
         } catch (err: any) {
             setCreateTrainsetError(err.message || "Failed to create training set.");
@@ -213,6 +214,7 @@ const ModelTrainingAccordion = ({
                     <div>
                         <DynamicForm
                             schema={createTrainsetSchema as Schema}
+                            initialValues={{ project_random_state: project.config.project_random_state ?? 42 }}
                             blockSubmission={blockSubmit}
                             submitText={createTrainsetLoading ? "Creating..." : "Create Training Set"}
                             onFormSubmit={handleCreateTrainset}
@@ -241,6 +243,7 @@ const ModelTrainingAccordion = ({
                     <div>
                         <DynamicForm
                             schema={trainModelSchema as Schema}
+                            initialValues={{ project_random_state: project.config.project_random_state ?? 42 }}
                             blockSubmission={blockSubmit}
                             submitText={trainLoading ? "Training..." : "Train Model"}
                             onFormSubmit={handleTrainModel}

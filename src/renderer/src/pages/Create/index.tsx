@@ -30,6 +30,9 @@ const Create: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
+  // A fresh reproducibility seed suggested per project (user can override).
+  const suggestedSeed = useMemo(() => Math.floor(Math.random() * 1_000_000), [])
+
   useEffect(() => {
     onVAMEReady(() => setBlockSubmission(false))
   }, [])
@@ -131,6 +134,7 @@ const Create: React.FC = () => {
     <PaddedContainer>
       <DynamicForm
         schema={createSchema as unknown as Schema}
+        initialValues={{ project_random_state: suggestedSeed }}
         onFormSubmit={handleFormSubmit}
         blockSubmission={blockSubmission || isSubmitting}
         submitText='Create Project'

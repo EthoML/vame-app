@@ -21,6 +21,14 @@ class CreateTrainset(Resource):
         try:
             data, project_path = resolve_request_data(request)
             config = vame.read_config(str(Path(project_path) / "config.yaml"))
+            # Optional per-split seed override; persist so it becomes the project seed.
+            seed = data.get("project_random_state")
+            if seed is not None:
+                config["project_random_state"] = int(seed)
+                vame.write_config(
+                    config_path=str(Path(project_path) / "config.yaml"),
+                    config=config,
+                )
             result = vame.create_trainset(
                 config=config,
                 test_fraction=data["test_fraction"],
@@ -46,6 +54,10 @@ class TrainModel(Resource):
             # blank/0 => use the whole dataset each epoch (VAME default).
             steps = data.get("steps_per_epoch")
             config["steps_per_epoch"] = int(steps) if steps else None
+            # Optional per-run seed override; persisted with the config below.
+            seed = data.get("project_random_state")
+            if seed is not None:
+                config["project_random_state"] = int(seed)
             # Continue from the previously trained model (load saved weights) when
             # requested; otherwise train from scratch. VAME loads weights only if
             # pretrained_weights is true and pretrained_model names the saved model

@@ -7,6 +7,8 @@ export interface CreateProps {
   // Only used for NWB sources; surfaced by the create form when .nwb is picked.
   processing_module_key?: string
   pose_estimation_key?: string
+  // Reproducibility seed (config.project_random_state); the create form suggests one.
+  project_random_state?: number
 }
 
 export interface CreateResponse {
@@ -35,6 +37,7 @@ export const createVAMEProject = async ({
   pes_paths,
   processing_module_key,
   pose_estimation_key,
+  project_random_state,
 }: CreateProps) => {
   const source_software = inferSourceSoftware(pes_paths)
 
@@ -43,6 +46,8 @@ export const createVAMEProject = async ({
     source_software,
     videos: videos,
     poses_estimations: pes_paths,
+    // Omit when blank/NaN so the backend falls back to VAME's default seed.
+    ...(Number.isFinite(project_random_state) ? { project_random_state } : {}),
     // The NWB pose-location keys only matter for NWB sources.
     ...(source_software === "NWB"
       ? { processing_module_key, pose_estimation_key }
