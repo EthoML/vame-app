@@ -104,8 +104,7 @@ declare global {
       prediction_steps: number;
       pretrained_model: string;
       pretrained_weights: boolean;
-      random_state: number;
-      random_state_kmeans: number;
+      project_random_state: number;
       robust: boolean;
       savgol_filter: boolean;
       savgol_length: number;

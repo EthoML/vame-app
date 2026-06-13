@@ -87,7 +87,7 @@ const Preprocessing = ({
       run_egocentric_alignment: true,
       run_outlier_cleaning: true,
       run_savgol_filtering: true,
-      run_rescaling: false
+      run_rescaling: true
     }
 
     const [terminal, setTerminal] = useState(false)
@@ -103,7 +103,7 @@ const Preprocessing = ({
           run_egocentric_alignment: formData?.run_egocentric_alignment !== undefined ? formData.run_egocentric_alignment : true,
           run_outlier_cleaning: formData?.run_outlier_cleaning !== undefined ? formData.run_outlier_cleaning : true,
           run_savgol_filtering: formData?.run_savgol_filtering !== undefined ? formData.run_savgol_filtering : true,
-          run_rescaling: formData?.run_rescaling !== undefined ? formData.run_rescaling : false
+          run_rescaling: formData?.run_rescaling !== undefined ? formData.run_rescaling : true
         }
         // Call the original onFormSubmit with the converted data
         onFormSubmit(compatibleData)
@@ -117,7 +117,7 @@ const Preprocessing = ({
           run_egocentric_alignment: true,
           run_outlier_cleaning: true,
           run_savgol_filtering: true,
-          run_rescaling: false
+          run_rescaling: true
         })
       }
     }
